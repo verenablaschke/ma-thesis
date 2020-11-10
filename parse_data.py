@@ -1,6 +1,6 @@
 import os
 
-PHON = False
+PHON = True
 MIN_WORDS_PER_UTTERANCE = 3
 
 DATA_DIR = './data/'
@@ -124,4 +124,4 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
 								if len(utterance) < MIN_WORDS_PER_UTTERANCE:
 										continue
 								utterance = ' '.join(utterance).strip()
-								out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + utterance + '\n')
+								out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + file + '\t' + utterance + '\n')
