@@ -4,7 +4,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import model_selection, svm
 from sklearn.metrics import accuracy_score, f1_score
-# from lime.lime_text import LimeTextExplainer
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import re
 
@@ -12,7 +11,10 @@ import re
 np.random.seed(42)
 
 
-FILE = 'data/phon_parsed.tsv'
+FILE = 'data/phon_cleaned.tsv'
+
+# U0329, U030D are the combining lines for marking syllabic consonants
+char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
 
 
 def preprocess(utterance):
@@ -46,25 +48,27 @@ def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=Fa
             ngram = '#'.join(words[i:i + word_n])
             if unk in ngram:
                 continue
-            ngrams.append(ngram)
+            ngrams.append('##' + ngram + '##')  # Padding to distinguish these from char n-grams
     for char_n in char_ns:
         for word in words:
             word_len = len(word)
             if word_len == 0:
                 continue
+
+            chars = list(pattern.findall(' styççe i kɽassn̩ '))
                 
-            pfx = word[:char_n - 1]
+            pfx = chars[:char_n - 1]
             if '?' in pfx:
                 break
             ngrams.append('#' + pfx)
             
-            for i in range(len(word) + 1 - char_n):
-                ngram = word[i:i + char_n]
+            for i in range(len(chars) + 1 - char_n):
+                ngram = chars[i:i + char_n]
                 if unk in ngram:
                     continue
                 ngrams.append(ngram)
 
-            sfx = word[word_len + 1 - char_n:]
+            sfx = chars[word_len + 1 - char_n:]
             if '?' in sfx:
                 break
             ngrams.append(sfx + '#')
@@ -108,7 +112,7 @@ def parse_file(filename, test_size=0.2, max_features=5000):
     train_x = vectorizer.fit_transform(train_x_raw)
     test_x = vectorizer.transform(test_x_raw)
 
-    return train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer
+    return train_x, test_x, list(train_x_raw), list(test_x_raw), train_y, test_y, label_encoder, vectorizer
 
 
 def preprocess_and_vectorize(utterance, vectorizer):
@@ -165,87 +169,103 @@ def score(pred, test_y):
     print('F1 macro', f1_score(pred, test_y, average='macro'))
 
 
+def support_vectors(model, label_encoder, train_x, train_x_raw,
+                    labels=[0, 1, 2, 3]):
+    for label in labels:
+        print(label_encoder.inverse_transform([label])[0])
+        print('==========================\n')
+        dec_fn = model.decision_function(train_x)[:, label]
+        # support vectors and vectors 'in the middle of the street'
+        support_vector_indices_pos = np.where(np.logical_and(dec_fn > 0, dec_fn <= 1))[0]
+        print('positive side')
+        for idx in support_vector_indices_pos:
+            print('-', train_x_raw[idx])
+        support_vector_indices_neg = np.where(np.logical_and(dec_fn <= 0, dec_fn >= -1))[0]
+        print()
+        print('negative side')
+        for idx in support_vector_indices_pos:
+            print('-', train_x_raw[idx])
+        print('\n\n')
+
+
+def instances_far_from_decision_boundary(model, label_encoder, train_x,
+                                         train_x_raw, labels=[0, 1, 2, 3]):
+    for label in labels:
+        print(label_encoder.inverse_transform([label])[0])
+        print('==========================\n')
+        dec_fn = model.decision_function(train_x)[:, label]
+        # vectors far away from the decision boundary
+        support_vector_indices_pos = np.where(dec_fn > 3)[0]
+        print('positive side')
+        for idx in support_vector_indices_pos:
+            print(dec_fn[idx].round(3), train_x_raw[idx])
+    #     support_vector_indices_neg = np.where(dec_fn < -3)[0]
+    #     print()
+    #     print('negative side')
+    #     for idx in support_vector_indices_pos:
+    #         print('-', train_x_raw[idx])
+        print('\n\n')
+
+
 train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE)
 model = train(train_x, train_y)
 # pred = predict(model, test_x)
 # score(pred, test_y)
+# support_vectors(model, label_encoder, train_x, train_x_raw)
+# instances_far_from_decision_boundary(model, label_encoder, train_x, train_x_raw)
 
 
-# test_utterance = 'ska me sjå kå de me ska disskutere hær ra'
-test_utterance = 'da jere nesst\'n ittje eg heller'
-print(predict_instance(model, test_utterance, label_encoder, vectorizer))
-# print(predict_instance(model, 'ska me sjå kå de me ska disskutere hær ra', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'ska me sjå kå de me ska disskutere hær', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'me sjå kå de me ska disskutere hær ra', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'ska me sjå kå de me ska disskutere her ra', label_encoder, vectorizer)[3].round(2))
-# print()
-# print(predict_instance(model, 'da jere nesst\'n ittje eg heller', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'da jere nesst\'n ikke eg heller', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'da jere nesst\'n eg heller', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'da jere nesst\'n ittje heller', label_encoder, vectorizer)[3].round(2))
-# print(predict_instance(model, 'da nesst\'n ittje eg heller', label_encoder, vectorizer)[3].round(2))
 
 explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
-                              split_expression='\s+', random_state=42)
+                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
+                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
+                              recalculate_ngrams=False)
 labels = [0, 1, 2, 3]
-exp = explainer.explain_instance(test_utterance,
-                                 lambda z: predict_proba(model, z, vectorizer),
-                                 num_features=10, labels=labels)
-
-for label in labels:
-    print(label_encoder.inverse_transform([label])[0])
-    print('\n'.join(map(str, exp.as_list(label=label))))
-    print()
-    
-# exp.show_in_notebook(text=False)
-# exp.show_in_notebook(text=test_utterance, labels=(0,))
-# exp.show_in_notebook(text=test_utterance, labels=(1,))
-# exp.show_in_notebook(text=test_utterance, labels=(2,))
-# exp.show_in_notebook(text=test_utterance, labels=(3,))
-
-
-c = 0
-for _, utterance in test_x_raw.items():
-    label = test_y[c]
-    interesting_labels = [label]
-    pred = predict_instance(model, utterance, label_encoder, vectorizer)
-    if pred[0] not in interesting_labels:
-        interesting_labels.append(pred[0])
+explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
+                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
+                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
+                              recalculate_ngrams=False)
+labels = [0, 1, 2, 3]
+# lime_results = {0: dict(), 1: dict(), 2: dict(), 3: dict()}
+explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
+                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
+                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
+                              recalculate_ngrams=False)
+labels = [0, 1, 2, 3]
+# lime_results = {0: dict(), 1: dict(), 2: dict(), 3: dict()}
+results_0 = []
+results_1 = []
+results_2 = []
+results_3 = []
+for i, utterance in enumerate(test_x_raw):
+    label = test_y[i]
     exp = explainer.explain_instance(utterance,
                                      lambda z: predict_proba(model, z, vectorizer),
-                                     num_features=5, labels=interesting_labels)
-    
-    print('"' + utterance + '""')
-    print('ACTUAL', label_encoder.inverse_transform([label])[0])
-    print('PREDICTED', pred[1])
-    for l in interesting_labels:
-        exp.show_in_notebook(text=utterance, labels=(l,))
+                                     num_features=10,
+                                     labels=labels 
+                                     # labels=interesting_labels
+                                     )
+            
+    results_0 += exp.as_list(label=0)
+    results_1 += exp.as_list(label=1)
+    results_2 += exp.as_list(label=2)
+    results_3 += exp.as_list(label=3)
 
-    c += 1
-    if c > 9:
-        break
-        
-    print('\n')
+    if i % 50 == 0:
+        interesting_labels = [label]
+        pred = predict_instance(model, utterance, label_encoder, vectorizer)
+        print(i)
+        print('"' + utterance + '""')
+        print('ACTUAL', label_encoder.inverse_transform([label])[0])
+        print('PREDICTED', pred[1])
+        if pred[0] not in interesting_labels:
+            interesting_labels.append(pred[0])
+#         for l in interesting_labels:
+#             exp.show_in_notebook(text=utterance, labels=(l,))
+        print('\n')
+    i += 1
 
-
-test_utterance = 'eg#vil#ittje'
-
-explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
-                              split_expression='\s+', random_state=42, bow=False, mask_string='UNK',
-                             remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams)
-labels = [0, 1, 2, 3]
-exp = explainer.explain_instance(test_utterance,
-                                 lambda z: predict_proba(model, z, vectorizer),
-                                 num_features=10, labels=labels, num_samples=5000)
-
-for label in labels:
-    print(label_encoder.inverse_transform([label])[0])
-    print('\n'.join(map(str, exp.as_list(label=label))))
-    print()
-    
-# exp.show_in_notebook(text=False)
-# exp.show_in_notebook(text=test_utterance, labels=(0,))
-# exp.show_in_notebook(text=test_utterance, labels=(1,))
-# exp.show_in_notebook(text=test_utterance, labels=(2,))
-# exp.show_in_notebook(text=test_utterance, labels=(3,))
-
+for i, res in enumerate([results_0, results_1, results_2, results_3]):
+    with open('results_{}.txt'.format(i), 'w', encoding='utf8') as f:
+        for feature, score in res:
+            f.write('{}\t{:.10f}\n'.format(feature, score))
