@@ -1,7 +1,8 @@
 import numpy as np
 
-IN_FILE = 'results/results_3.txt'
-OUT_FILE = 'results/results_3_sorted.tsv'
+nr = 2
+IN_FILE = 'results/results_{}.txt'.format(nr)
+OUT_FILE = 'results/results_{}_sorted.tsv'.format(nr)
 
 
 scores = {}

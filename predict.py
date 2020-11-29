@@ -17,61 +17,69 @@ FILE = 'data/phon_cleaned.tsv'
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
 
 
-def preprocess(utterance):
-    # TODO works for the dialect data but likely not other input
-    return utterance.replace(' ', '#')
+def preprocess(utterance, tweet_cleanup=False):
+    # # TODO works for the dialect data but likely not other input
+    # return utterance.replace(' ', '#')
+
+    if tweet_cleanup:
+        # Twitter usernames
+        utterance = utterance.replace('(?<=\W)@[a-zA-Z0-9_]+', 'USERNAME')
+        # URLs: of the form abc.de; start with http(s):// or www or contain a /
+        utterance = utterance.replace('\b((https?://|www\d{0,3}\.)[a-zA-Z0-9.\-]+\.[a-z]{2,}|[a-zA-Z0-9.\-]+\.[a-z]{2,}/)([a-zA-Z0-9/\?%\+#~\.\-@\*!\(\)\[\]=:;,&$/\']*)?', 'URL')
+
+    return utterance
 
 
-def remove_ngrams(utterance, ngrams, remove_indices):
-    cleaned_utterances = []
-    for idx in remove_indices:
-        ngram = ngrams[idx]
-        # TODO works for the dialect data but likely not other input
-        placeholder = '?' * len(ngram)
-        cleaned_utterances.append(utterance.replace(ngram, placeholder))
-    combined_utterance = list(utterance)
-    for i in range(len(utterance)):
-        for utt in cleaned_utterances:
-            if utt[i] == '?':
-                combined_utterance[i] = '?'
-                break
-    return re.sub('\?+', '?', ''.join(combined_utterance))
+# def remove_ngrams(utterance, ngrams, remove_indices):
+#     cleaned_utterances = []
+#     for idx in remove_indices:
+#         ngram = ngrams[idx]
+#         # TODO works for the dialect data but likely not other input
+#         placeholder = '?' * len(ngram)
+#         cleaned_utterances.append(utterance.replace(ngram, placeholder))
+#     combined_utterance = list(utterance)
+#     for i in range(len(utterance)):
+#         for utt in cleaned_utterances:
+#             if utt[i] == '?':
+#                 combined_utterance[i] = '?'
+#                 break
+#     return re.sub('\?+', '?', ''.join(combined_utterance))
     
 # def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[1, 2, 3, 4, 5], verbose=False):
 def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=False):
     ngrams = []
 #     unk = 'UNK'  # none of the (uppercase!) letters appear in the data
-    unk = '?' # TODO works for the dialect data but likely not other input
-    words = utterance.split('#')
+    # unk = '?' # TODO works for the dialect data but likely not other input
+    # words = utterance.split('#')
+    sep = '<SEP>'
+    words = utterance.split()
     for word_n in word_ns:
         for i in range(len(words) + 1 - word_n):
-            ngram = '#'.join(words[i:i + word_n])
-            if unk in ngram:
-                continue
-            ngrams.append('##' + ngram + '##')  # Padding to distinguish these from char n-grams
+            ngram = sep.join(words[i:i + word_n])
+            # if unk in ngram:
+            #     continue
+            ngrams.append('<SOS>' + ngram + '<EOS>')  # Padding to distinguish these from char n-grams
     for char_n in char_ns:
         for word in words:
             word_len = len(word)
             if word_len == 0:
                 continue
-
-            chars = list(pattern.findall(' styççe i kɽassn̩ '))
                 
             pfx = chars[:char_n - 1]
-            if '?' in pfx:
-                break
-            ngrams.append('#' + pfx)
+            # if unk in pfx:
+            #     break
+            ngrams.append(sep + pfx)
             
             for i in range(len(chars) + 1 - char_n):
                 ngram = chars[i:i + char_n]
-                if unk in ngram:
-                    continue
+                # if unk in ngram:
+                #     continue
                 ngrams.append(ngram)
 
             sfx = chars[word_len + 1 - char_n:]
-            if '?' in sfx:
-                break
-            ngrams.append(sfx + '#')
+            # if unk in sfx:
+            #     break
+            ngrams.append(sfx + sep)
     if verbose:
         print(utterance, ngrams)
     return ngrams
