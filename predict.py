@@ -4,14 +4,15 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import model_selection, svm
 from sklearn.metrics import accuracy_score, f1_score
-from ngram_lime.lime.lime_text import LimeTextExplainer
+# from ngram_lime.lime.lime_text import LimeTextExplainer
 import re
 
 
 np.random.seed(42)
 
 
-FILE = 'data/phon_cleaned.tsv'
+# FILE = 'data/phon_cleaned.tsv'
+FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
 
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
@@ -61,25 +62,26 @@ def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=Fa
             ngrams.append('<SOS>' + ngram + '<EOS>')  # Padding to distinguish these from char n-grams
     for char_n in char_ns:
         for word in words:
-            word_len = len(word)
+            chars = list(char_pattern.findall(word))
+            word_len = len(chars)
             if word_len == 0:
                 continue
                 
             pfx = chars[:char_n - 1]
             # if unk in pfx:
             #     break
-            ngrams.append(sep + pfx)
+            ngrams.append(sep + ''.join(pfx))
             
             for i in range(len(chars) + 1 - char_n):
                 ngram = chars[i:i + char_n]
                 # if unk in ngram:
                 #     continue
-                ngrams.append(ngram)
+                ngrams.append(''.join(ngram))
 
             sfx = chars[word_len + 1 - char_n:]
             # if unk in sfx:
             #     break
-            ngrams.append(sfx + sep)
+            ngrams.append(''.join(sfx) + sep)
     if verbose:
         print(utterance, ngrams)
     return ngrams
@@ -213,6 +215,9 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
     #     for idx in support_vector_indices_pos:
     #         print('-', train_x_raw[idx])
         print('\n\n')
+
+
+
 
 
 train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE)
