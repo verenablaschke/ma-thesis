@@ -1,7 +1,7 @@
 import re
 
 with open ('data/corpus_SexistContent_tweets.csv', 'r', encoding='utf8') as f_in:
-    with open ('data/tweets_cleaned.csv', 'w', encoding='utf8') as f_out:
+    with open ('data/tweets_cleaned.tsv', 'w', encoding='utf8') as f_out:
         prev_tweet = ''
         for line in f_in:
             line = line.strip()

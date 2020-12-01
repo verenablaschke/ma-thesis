@@ -4,32 +4,22 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import model_selection, svm
 from sklearn.metrics import accuracy_score, f1_score
-# from ngram_lime.lime.lime_text import LimeTextExplainer
+from ngram_lime.lime.lime_text import LimeTextExplainer
 import re
-
 
 np.random.seed(42)
 
-
-# FILE = 'data/phon_cleaned.tsv'
-FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
+DIALECTS = True
+if DIALECTS:
+    # FILE = 'data/phon_cleaned.tsv'
+    FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
+else:
+    FILE = 'gdrive/My Drive/colab_projects/tweets_cleaned.tsv'    
 
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
 
-
-def preprocess(utterance, tweet_cleanup=False):
-    # # TODO works for the dialect data but likely not other input
-    # return utterance.replace(' ', '#')
-
-    if tweet_cleanup:
-        # Twitter usernames
-        utterance = utterance.replace('(?<=\W)@[a-zA-Z0-9_]+', 'USERNAME')
-        # URLs: of the form abc.de; start with http(s):// or www or contain a /
-        utterance = utterance.replace('\b((https?://|www\d{0,3}\.)[a-zA-Z0-9.\-]+\.[a-z]{2,}|[a-zA-Z0-9.\-]+\.[a-z]{2,}/)([a-zA-Z0-9/\?%\+#~\.\-@\*!\(\)\[\]=:;,&$/\']*)?', 'URL')
-
-    return utterance
-
+GET_NGRAMS = True
 
 # def remove_ngrams(utterance, ngrams, remove_indices):
 #     cleaned_utterances = []
@@ -48,12 +38,16 @@ def preprocess(utterance, tweet_cleanup=False):
     
 # def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[1, 2, 3, 4, 5], verbose=False):
 def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=False):
+    words = utterance.split()
+    if not GET_NGRAMS:
+        # print('WORDS', words)
+        return words
+
     ngrams = []
 #     unk = 'UNK'  # none of the (uppercase!) letters appear in the data
     # unk = '?' # TODO works for the dialect data but likely not other input
     # words = utterance.split('#')
     sep = '<SEP>'
-    words = utterance.split()
     for word_n in word_ns:
         for i in range(len(words) + 1 - word_n):
             ngram = sep.join(words[i:i + word_n])
@@ -84,6 +78,7 @@ def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=Fa
             ngrams.append(''.join(sfx) + sep)
     if verbose:
         print(utterance, ngrams)
+    # print('NGRAMS', ngrams)
     return ngrams
 
 
@@ -126,7 +121,8 @@ def parse_file(filename, test_size=0.2, max_features=5000):
 
 
 def preprocess_and_vectorize(utterance, vectorizer):
-    return vectorizer.transform([preprocess(utterance)])
+    return vectorizer.transform([utterance])
+    # return vectorizer.transform([preprocess(utterance)])
 
 
 def train(train_x, train_y):
@@ -140,7 +136,8 @@ def predict(model, test_x):
 
 
 def predict_instance(model, utterance, label_encoder, vectorizer):
-    x = vectorizer.transform([preprocess(utterance)])
+    # x = vectorizer.transform([preprocess(utterance)])
+    x = vectorizer.transform([utterance])
     pred = model.predict(x)
     margins = model.decision_function(x)
     exp = np.exp(margins)
@@ -149,10 +146,10 @@ def predict_instance(model, utterance, label_encoder, vectorizer):
     return pred[0], label_encoder.inverse_transform(pred)[0], margins, softmax
 
 
-def predict_proba(model, data, vectorizer):
+def predict_proba(model, data, vectorizer, n_labels=4):
     if isinstance(data, str):
         data = [data]
-    probs = np.zeros((len(data), 4))
+    probs = np.zeros((len(data), n_labels))
     for i, utterance in enumerate(data):
         x = preprocess_and_vectorize(utterance, vectorizer)
         pred = model.predict(x)
@@ -162,15 +159,26 @@ def predict_proba(model, data, vectorizer):
     return probs
 
 
-def predict_proba2(model, data, vectorizer):
-    print('data', data)
-    probs = np.zeros((len(data), 4))
+def predict_proba2(model, data, vectorizer, n_labels=4, split=True):
+    global GET_NGRAMS
+    # print('data', data)
+    probs = np.zeros((len(data), n_labels))
+    GET_NGRAMS = False
     for i, utterance in enumerate(data):
-        x = vectorizer.transform(utterance)
+        # utterance = [utterance.split()]
+        # print(utterance)
+        x = vectorizer.transform([utterance])
         pred = model.predict(x)
         margins = model.decision_function(x)
         exp = np.exp(margins)
         probs[i] = exp / np.sum(exp)  # softmax
+        # print('-' + str(i))
+        # print(pred)
+        # print(probs[i])
+        # print(margins)
+        # print(utterance)
+        # # print(x)
+    GET_NGRAMS = True
     return probs
 
 
@@ -216,33 +224,21 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
     #         print('-', train_x_raw[idx])
         print('\n\n')
 
-
-
-
-
 train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE)
 model = train(train_x, train_y)
-# pred = predict(model, test_x)
-# score(pred, test_y)
+pred = predict(model, test_x)
+score(pred, test_y)
 # support_vectors(model, label_encoder, train_x, train_x_raw)
 # instances_far_from_decision_boundary(model, label_encoder, train_x, train_x_raw)
 
 
 
 explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
-                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
-                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
-                              recalculate_ngrams=False)
-labels = [0, 1, 2, 3]
-explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
-                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
-                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
-                              recalculate_ngrams=False)
-labels = [0, 1, 2, 3]
-# lime_results = {0: dict(), 1: dict(), 2: dict(), 3: dict()}
-explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
-                              split_expression='\s+', random_state=42, bow=False, mask_string='?',
-                              remove_ngrams=remove_ngrams, utterance2ngrams=utterance2ngrams,
+                              split_expression='\s+', random_state=42, bow=True, 
+                            #   mask_string='?',
+                            #   remove_ngrams=remove_ngrams, 
+                              utterance2ngrams=utterance2ngrams,
+                              ngram_lvl=True,
                               recalculate_ngrams=False)
 labels = [0, 1, 2, 3]
 # lime_results = {0: dict(), 1: dict(), 2: dict(), 3: dict()}
@@ -253,10 +249,11 @@ results_3 = []
 for i, utterance in enumerate(test_x_raw):
     label = test_y[i]
     exp = explainer.explain_instance(utterance,
-                                     lambda z: predict_proba(model, z, vectorizer),
+                                     lambda z: predict_proba2(model, z, vectorizer),
                                      num_features=10,
-                                     labels=labels 
+                                     labels=labels,
                                      # labels=interesting_labels
+                                    #  num_samples=5000
                                      )
             
     results_0 += exp.as_list(label=0)
@@ -273,12 +270,14 @@ for i, utterance in enumerate(test_x_raw):
         print('PREDICTED', pred[1])
         if pred[0] not in interesting_labels:
             interesting_labels.append(pred[0])
-#         for l in interesting_labels:
-#             exp.show_in_notebook(text=utterance, labels=(l,))
+        # for l in interesting_labels:
+        #     exp.show_in_notebook(text=utterance, labels=(l,))
         print('\n')
     i += 1
+    
 
+filename = 'results_dialects_{}.txt' if DIALECTS else 'results_tweets_{}.txt'
 for i, res in enumerate([results_0, results_1, results_2, results_3]):
-    with open('results_{}.txt'.format(i), 'w', encoding='utf8') as f:
+    with open(filename.format(i), 'w', encoding='utf8') as f:
         for feature, score in res:
             f.write('{}\t{:.10f}\n'.format(feature, score))
