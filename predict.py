@@ -19,6 +19,9 @@ else:
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
 
+LINEAR_SVC = DIALECTS
+
+
 GET_NGRAMS = True
 
 # def remove_ngrams(utterance, ngrams, remove_indices):
@@ -82,9 +85,9 @@ def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=Fa
     return ngrams
 
 
-def parse_file(filename, test_size=0.2, max_features=5000):
+def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col=4):
     data = pd.read_csv(filename, encoding='utf8', delimiter='\t',
-                       usecols=[0, 4], names=['labels', 'utterances'])
+                       usecols=[label_col, data_col], names=['labels', 'utterances'])
     print(len(data))
     print(data['labels'].value_counts())
 #     data['utterances'] = data['utterances'].map(preprocess)
@@ -125,8 +128,12 @@ def preprocess_and_vectorize(utterance, vectorizer):
     # return vectorizer.transform([preprocess(utterance)])
 
 
-def train(train_x, train_y):
-    model = svm.LinearSVC(C=1.0)
+def train(train_x, train_y, linear_svc=LINEAR_SVC):
+    if linear_svc:
+        model = svm.LinearSVC(C=1.0)
+    else:
+        # Binary cases
+        model = svm.SVC(C=1.0, probability=True)
     model.fit(train_x, train_y)
     return model
 
@@ -135,31 +142,33 @@ def predict(model, test_x):
     return model.predict(test_x)
 
 
-def predict_instance(model, utterance, label_encoder, vectorizer):
+def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc=LINEAR_SVC):
     # x = vectorizer.transform([preprocess(utterance)])
     x = vectorizer.transform([utterance])
     pred = model.predict(x)
     margins = model.decision_function(x)
-    exp = np.exp(margins)
-    softmax = exp / np.sum(exp)
-#     print("{}: {}".format(utterance, softmax.round(3)))
-    return pred[0], label_encoder.inverse_transform(pred)[0], margins, softmax
-
-
-def predict_proba(model, data, vectorizer, n_labels=4):
-    if isinstance(data, str):
-        data = [data]
-    probs = np.zeros((len(data), n_labels))
-    for i, utterance in enumerate(data):
-        x = preprocess_and_vectorize(utterance, vectorizer)
-        pred = model.predict(x)
-        margins = model.decision_function(x)
+    if linear_svc:
         exp = np.exp(margins)
-        probs[i] = exp / np.sum(exp)  # softmax
-    return probs
+        softmax = exp / np.sum(exp)
+    #     print("{}: {}".format(utterance, softmax.round(3)))
+        return pred[0], label_encoder.inverse_transform(pred)[0], margins, softmax
+    return pred[0], label_encoder.inverse_transform(pred)[0], margins, model.predict_proba(x)
 
 
-def predict_proba2(model, data, vectorizer, n_labels=4, split=True):
+# def predict_proba(model, data, vectorizer, n_labels=4):
+#     if isinstance(data, str):
+#         data = [data]
+#     probs = np.zeros((len(data), n_labels))
+#     for i, utterance in enumerate(data):
+#         x = preprocess_and_vectorize(utterance, vectorizer)
+#         pred = model.predict(x)
+#         margins = model.decision_function(x)
+#         exp = np.exp(margins)
+#         probs[i] = exp / np.sum(exp)  # softmax
+#     return probs
+
+
+def predict_proba2(model, data, vectorizer, n_labels=4, linear_svc=LINEAR_SVC):
     global GET_NGRAMS
     # print('data', data)
     probs = np.zeros((len(data), n_labels))
@@ -168,10 +177,13 @@ def predict_proba2(model, data, vectorizer, n_labels=4, split=True):
         # utterance = [utterance.split()]
         # print(utterance)
         x = vectorizer.transform([utterance])
-        pred = model.predict(x)
-        margins = model.decision_function(x)
-        exp = np.exp(margins)
-        probs[i] = exp / np.sum(exp)  # softmax
+        if linear_svc:
+            pred = model.predict(x)
+            margins = model.decision_function(x)
+            exp = np.exp(margins)
+            probs[i] = exp / np.sum(exp)  # softmax
+        else:
+            probs[i] = model.predict_proba(x)
         # print('-' + str(i))
         # print(pred)
         # print(probs[i])
