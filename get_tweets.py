@@ -12,14 +12,14 @@ n_skipped = 0
 n_sexist = 0
 
 with open("data/corpus_SexistContent.csv", "r", encoding="utf8") as in_file:
-    with open("data/corpus_SexistContent_tweets.csv", "w", encoding="utf8") as out_file:
-        with open("data/corpus_SexistContent_skipped.csv", "w", encoding="utf8") as skipped_file:
+    with open("data/tweets.csv", "w", encoding="utf8") as out_file:
+        with open("data/skipped.csv", "w", encoding="utf8") as skipped_file:
             for line in in_file:
                 line = line.strip()
                 cells = line.split('\t')  # ID, label
                 msg = ""
                 try:
-                    msg = api.get_status(cells[0]).text
+                    msg = api.get_status(cells[0], tweet_mode='extended').full_text
                     out_file.write(line + '\t' + msg + '\n')
                     if cells[1] == "1":
                         n_sexist += 1

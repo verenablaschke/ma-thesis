@@ -6,6 +6,8 @@ nr = 1
 IN_FILE = 'results/results_tweets_{}.txt'.format(nr)
 OUT_FILE = 'results/results_tweets_{}_sorted.tsv'.format(nr)
 
+THRESHOLD = 10
+
 
 scores = {}
 with open(IN_FILE, 'r', encoding='utf8') as in_file:
@@ -20,15 +22,16 @@ with open(IN_FILE, 'r', encoding='utf8') as in_file:
             print(i, feature)
 
 print("sorting")
-# means = [(feature, np.mean(scores[feature])) for feature in scores]
-# means = sorted(means, key=lambda x: x[1], reverse=True)
-sums = [(feature, np.sum(scores[feature])) for feature in scores]
-sums = sorted(sums, key=lambda x: x[1], reverse=True)
+means = [(feature, np.mean(scores[feature]), len(scores[feature])) for feature in scores]
+means = sorted(means, key=lambda x: x[1] if x[2] >= THRESHOLD else -1, reverse=True)
+# sums = [(feature, np.sum(scores[feature])) for feature in scores]
+# sums = sorted(sums, key=lambda x: x[1], reverse=True)
 print("sorted")
 
 with open(OUT_FILE, 'w', encoding='utf8') as out_file:
-    for (feature, score_sum) in sums:
-        out_file.write('{}\t{:.10f}\t'.format(feature, score_sum))
+    for (feature, mean, num) in means:
+        out_file.write('{}\t{:.10f}\t'.format(feature, mean))
         entries = scores[feature]
-        out_file.write('{:.10f}\t'.format(np.mean(entries)))
-        out_file.write('{}\n'.format(len(entries)))
+        out_file.write('{:.10f}\t'.format(np.sum(entries)))
+        # out_file.write('{}\n'.format(len(entries)))
+        out_file.write('{}\n'.format(num))

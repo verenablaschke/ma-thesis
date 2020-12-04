@@ -3,13 +3,13 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import model_selection, svm
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import re
 
 np.random.seed(42)
 
-DIALECTS = True
+DIALECTS = False
 if DIALECTS:
     # FILE = 'data/phon_cleaned.tsv'
     FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
@@ -41,24 +41,39 @@ GET_NGRAMS = True
     
 # def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[1, 2, 3, 4, 5], verbose=False):
 def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=False):
-    words = utterance.split()
+    if DIALECTS:
+        words = utterance.split()
+    else:
+        # utterance = utterance.lower()
+        utterance = utterance.replace(',', '')
+        utterance = utterance.replace(';', '')
+        utterance = utterance.replace('.', '')
+        utterance = utterance.replace('’', "'")
+        words = utterance.split()
+
     if not GET_NGRAMS:
         # print('WORDS', words)
         return words
 
     ngrams = []
+    escape_toks = ['URL', 'USERNAME']
 #     unk = 'UNK'  # none of the (uppercase!) letters appear in the data
     # unk = '?' # TODO works for the dialect data but likely not other input
     # words = utterance.split('#')
     sep = '<SEP>'
     for word_n in word_ns:
         for i in range(len(words) + 1 - word_n):
-            ngram = sep.join(words[i:i + word_n])
+            tokens = words[i:i + word_n]
+            if not DIALECTS:
+                tokens = [tok if tok in escape_toks else tok.lower() for tok in tokens]
+            ngram = sep.join(tokens)
             # if unk in ngram:
             #     continue
             ngrams.append('<SOS>' + ngram + '<EOS>')  # Padding to distinguish these from char n-grams
     for char_n in char_ns:
         for word in words:
+            if word in escape_toks:
+                continue
             chars = list(char_pattern.findall(word))
             word_len = len(chars)
             if word_len == 0:
@@ -85,7 +100,8 @@ def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=Fa
     return ngrams
 
 
-def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col=4):
+def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col=4,
+               analyzer=utterance2ngrams):
     data = pd.read_csv(filename, encoding='utf8', delimiter='\t',
                        usecols=[label_col, data_col], names=['labels', 'utterances'])
     print(len(data))
@@ -109,7 +125,7 @@ def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col
 #                                  token_pattern=r"\b[\w']+\b"  # ' marks syllabic consonants
 #                                  )
     vectorizer = TfidfVectorizer(max_features=max_features,
-                                 analyzer=utterance2ngrams
+                                 analyzer=analyzer
                                  )
 #     vectorizer = TfidfVectorizer(max_features=max_features,
 #                                  ngram_range=(1,5),
@@ -128,12 +144,12 @@ def preprocess_and_vectorize(utterance, vectorizer):
     # return vectorizer.transform([preprocess(utterance)])
 
 
-def train(train_x, train_y, linear_svc=LINEAR_SVC):
+def train(train_x, train_y, linear_svc=LINEAR_SVC, class_weight=None):
     if linear_svc:
-        model = svm.LinearSVC(C=1.0)
+        model = svm.LinearSVC(C=1.0, class_weight=class_weight)
     else:
         # Binary cases
-        model = svm.SVC(C=1.0, probability=True)
+        model = svm.SVC(C=1.0, probability=True, class_weight=class_weight)
     model.fit(train_x, train_y)
     return model
 
@@ -195,8 +211,10 @@ def predict_proba2(model, data, vectorizer, n_labels=4, linear_svc=LINEAR_SVC):
 
 
 def score(pred, test_y):
-    print('Accuracy', accuracy_score(pred, test_y))
-    print('F1 macro', f1_score(pred, test_y, average='macro'))
+    print('Accuracy', accuracy_score(test_y, pred))
+    print('F1 macro', f1_score(test_y, pred, average='macro'))
+    print('Confusion matrix')
+    print(confusion_matrix(test_y, pred))
 
 
 def support_vectors(model, label_encoder, train_x, train_x_raw,
@@ -235,6 +253,7 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
     #     for idx in support_vector_indices_pos:
     #         print('-', train_x_raw[idx])
         print('\n\n')
+
 
 train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE)
 model = train(train_x, train_y)
