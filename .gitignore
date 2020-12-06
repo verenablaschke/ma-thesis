@@ -1,0 +1,8 @@
+/data/
+notes.txt
+*.ipynb
+/ipynb-checkpoints/
+keys.py
+/results/
+/notes/
+/__pycache__/

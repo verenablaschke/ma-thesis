@@ -6,15 +6,30 @@ from sklearn import model_selection, svm
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import re
+import sys
+
+
+if len(sys.argv) == 1:
+    print("Expected one argument: 'dialect' or 'tweet'")
+    sys.exit()
+if sys.argv[1] == 'dialect':
+    DIALECTS = True
+elif sys.argv[1] == 'tweet':
+    DIALECTS = False
+else:
+    print("Expected one argument: 'dialect' or 'tweet'")
+    sys.exit()
+
 
 np.random.seed(42)
 
-DIALECTS = False
+
 if DIALECTS:
-    # FILE = 'data/phon_cleaned.tsv'
-    FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
+    FILE = 'data/phon_cleaned.tsv'
+    # FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
 else:
-    FILE = 'gdrive/My Drive/colab_projects/tweets_cleaned.tsv'    
+    FILE = 'data/tweets_cleaned.tsv'
+    # FILE = 'gdrive/My Drive/colab_projects/tweets_cleaned.tsv'    
 
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
@@ -255,23 +270,35 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
         print('\n\n')
 
 
-train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE)
-model = train(train_x, train_y)
+label_col = 0 if DIALECTS else 1
+data_col = 4 if DIALECTS else 2
+train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE, label_col=label_col, data_col=data_col)
+# model = train(train_x, train_y)
+# model = train(train_x, train_y, class_weight='balanced')
+class_weight = None if DIALECTS else {0: 1, 1: 2}
+model = train(train_x, train_y, class_weight=class_weight)
 pred = predict(model, test_x)
 score(pred, test_y)
+
+# # Roughly the baseline in the An Annotated Corpus... paper
+# train_x_bs, test_x_bs, train_x_raw_bs, test_x_raw_bs, train_y_bs, test_y_bs, label_encoder_bs, vectorizer_bs = parse_file(FILE, label_col=1, data_col=2,
+#     analyzer=lambda x: utterance2ngrams(x, word_ns=[1], char_ns=[], verbose=False))
+# model_bs = train(train_x_bs, train_y_bs, class_weight={0: 1, 1: 2})
+# pred_bs = predict(model_bs, test_x_bs)
+# score(pred_bs, test_y_bs)
 # support_vectors(model, label_encoder, train_x, train_x_raw)
 # instances_far_from_decision_boundary(model, label_encoder, train_x, train_x_raw)
 
 
-
-explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform([0, 1, 2, 3]),
+labels = [0, 1, 2, 3] if DIALECTS else [0, 1]
+explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
                               split_expression='\s+', random_state=42, bow=True, 
                             #   mask_string='?',
                             #   remove_ngrams=remove_ngrams, 
                               utterance2ngrams=utterance2ngrams,
                               ngram_lvl=True,
                               recalculate_ngrams=False)
-labels = [0, 1, 2, 3]
+labels = [0, 1, 2, 3] if DIALECTS else [0, 1]
 # lime_results = {0: dict(), 1: dict(), 2: dict(), 3: dict()}
 results_0 = []
 results_1 = []
@@ -280,7 +307,7 @@ results_3 = []
 for i, utterance in enumerate(test_x_raw):
     label = test_y[i]
     exp = explainer.explain_instance(utterance,
-                                     lambda z: predict_proba2(model, z, vectorizer),
+                                     lambda z: predict_proba2(model, z, vectorizer, n_labels=len(labels)),
                                      num_features=10,
                                      labels=labels,
                                      # labels=interesting_labels
@@ -289,8 +316,9 @@ for i, utterance in enumerate(test_x_raw):
             
     results_0 += exp.as_list(label=0)
     results_1 += exp.as_list(label=1)
-    results_2 += exp.as_list(label=2)
-    results_3 += exp.as_list(label=3)
+    if DIALECTS:
+        results_2 += exp.as_list(label=2)
+        results_3 += exp.as_list(label=3)
 
     if i % 50 == 0:
         interesting_labels = [label]
@@ -307,8 +335,12 @@ for i, utterance in enumerate(test_x_raw):
     i += 1
     
 
+res = [results_0, results_1]
+if DIALECTS:
+    res += [results_2, results_3]
+
 filename = 'results_dialects_{}.txt' if DIALECTS else 'results_tweets_{}.txt'
-for i, res in enumerate([results_0, results_1, results_2, results_3]):
+for i, res in enumerate([res]):
     with open(filename.format(i), 'w', encoding='utf8') as f:
         for feature, score in res:
             f.write('{}\t{:.10f}\n'.format(feature, score))
