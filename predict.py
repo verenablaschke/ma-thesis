@@ -35,6 +35,19 @@ if args.load_model and not args.model:
     sys.exit()
 
 
+mode = 'a' if args.load_model else 'w'
+with open(args.model + '/log.txt', mode, encoding='utf8') as f:
+    print("Type:", args.type)
+    f.write("Type: " + args.type + '\n')
+    print("Model location:", args.model)
+    f.write("Model location: " + args.model + '\n')
+    print("Load trained model:", args.load_model)
+    f.write("Load trained model: " + str(args.load_model) + '\n')
+    print("Start index:", args.start_idx)
+    f.write("Start index:" + str(args.start_idx) + '\n')
+    print("Stop index:", args.stop_idx)
+    f.write("Stop index:" + str(args.stop_idx) + '\n')
+
 np.random.seed(42)
 SAVE_LOC = args.model
 
@@ -286,7 +299,9 @@ if args.load_model:
         for line in f:
             test_x_raw.append(line.strip())
     test_y = np.load(SAVE_LOC + '/test_y.npy')
-    assert len(test_x_raw) == len(test_y)
+    if len(test_x_raw) != len(test_y):
+        print("Expected test_x_raw (length " + len(test_x_raw) + ") and test_y (length " + length(test_y) + ") to be of the same length.")
+        sys.exit()
     label_encoder = LabelEncoder()
     label_encoder.classes_ = np.load(SAVE_LOC + '/label_encoder_classes.npy')
     with open(SAVE_LOC + '/vectorizer.pickle', 'rb') as f:
@@ -371,14 +386,14 @@ results_0 = []
 results_1 = []
 results_2 = []
 results_3 = []
-for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx]):
+for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx], start=args.start_idx):
     label = test_y[i]
     exp = explainer.explain_instance(utterance,
                                      lambda z: predict_proba2(classifier, z, vectorizer, LINEAR_SVC, n_labels=len(labels)),
-                                     num_features=10,
+                                     num_features=20,
                                      labels=labels,
                                      # labels=interesting_labels
-                                    #  num_samples=5000
+                                     num_samples=1000
                                      )
             
     results_0 += exp.as_list(label=0)
@@ -400,6 +415,16 @@ for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx]):
         #     exp.show_in_notebook(text=utterance, labels=(l,))
         print('\n')
         save_to_file(filename, results_0, results_1, results_2, results_3)
+        with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
+            f.write(str(i) + '  --  "' + utterance + '""\n')
+            f.write('ACTUAL: ' + label_encoder.inverse_transform([label])[0] + '\n')
+            f.write('PREDICTED: ' + pred[1] + '\n')
+            f.write('Class 0: ' + exp.as_list(label=0)[:5] + '\n')
+            f.write('Class 1: ' + exp.as_list(label=1)[:5] + '\n')
+            if DIALECTS:
+                f.write('Class 2: ' + exp.as_list(label=2)[:5] + '\n')
+                f.write('Class 3: ' + exp.as_list(label=3)[:5] + '\n')
+            f.write('\n')
         results_0 = []
         results_1 = []
         results_2 = []
