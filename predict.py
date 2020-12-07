@@ -336,6 +336,18 @@ else:
 # instances_far_from_decision_boundary(classifier, label_encoder, train_x, train_x_raw)
 
 
+filename = 'results/results_dialects_{}.txt' if DIALECTS else 'results/results_tweets_{}.txt'
+
+if args.start_idx == 0:
+    # Initialize the files in case there were previous runs with a different set-up.
+    res = [0, 1]
+    if DIALECTS:
+        res += [2, 3]
+    for i in res:
+        with open(filename.format(i), 'w', encoding='utf8') as f:
+            f.write('')
+
+
 def save_to_file(filename, results_0, results_1, results_2, results_3):
     res = [results_0, results_1]
     if DIALECTS:
@@ -359,7 +371,6 @@ results_0 = []
 results_1 = []
 results_2 = []
 results_3 = []
-filename = 'results/results_dialects_{}.txt' if DIALECTS else 'results/results_tweets_{}.txt'
 for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx]):
     label = test_y[i]
     exp = explainer.explain_instance(utterance,
