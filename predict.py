@@ -282,7 +282,7 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 if args.load_model:
     print("Loading the model.")
     test_x_raw = []
-    with open(SAVE_LOC + '/vectorizer.pickle', 'r', encoding='utf8') as f:
+    with open(SAVE_LOC + '/test_x_raw.txt', 'r', encoding='utf8') as f:
         for line in f:
             test_x_raw.append(line.strip())
     test_y = np.load(SAVE_LOC + '/test_y.npy')
@@ -314,7 +314,7 @@ else:
     score(pred, test_y)
 
     print("Saving the model.")
-    with open(SAVE_LOC + '/vectorizer.pickle', 'w', encoding='utf8') as f:
+    with open(SAVE_LOC + '/test_x_raw.txt', 'w', encoding='utf8') as f:
         for x in test_x_raw:
             f.write(x + '\n')
     np.save(SAVE_LOC + '/test_y.npy', test_y)
