@@ -1,18 +1,22 @@
 import numpy as np
+import sys
 
-nr = 1
-# IN_FILE = 'results/results_{}.txt'.format(nr)
-# OUT_FILE = 'results/results_{}_sorted.tsv'.format(nr)
-IN_FILE = 'results/results_tweets_{}.txt'.format(nr)
-OUT_FILE = 'results/results_tweets_{}_sorted.tsv'.format(nr)
+if len(sys.argv) != 3:
+    print("Usage: parse_results.py TYPE CLASS_NR")
+    print("Usage: parse_results.py dialects/tweets 0/1/2/3")
+    sys.exit()
+
+inf_type = sys.argv[1]
+nr = sys.argv[2]
+IN_FILE = 'results/results_{}_{}.txt'.format(inf_type, nr)
+OUT_FILE = 'results/results_{}_{}_sorted.tsv'.format(inf_type, nr)
 
 THRESHOLD = 10
-
 
 scores = {}
 with open(IN_FILE, 'r', encoding='utf8') as in_file:
     for i, line in enumerate(in_file):
-        feature, score = line.strip().split('\t')
+        _, feature, score = line.strip().split('\t')
         try:
             prev = scores[feature]
         except KeyError:

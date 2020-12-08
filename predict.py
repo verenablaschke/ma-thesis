@@ -9,6 +9,7 @@ import re
 import sys
 import argparse
 import pickle
+import datetime
 
 
 parser = argparse.ArgumentParser()
@@ -75,7 +76,7 @@ GET_NGRAMS = True
     
 # def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[1, 2, 3, 4, 5], verbose=False):
 def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=False):
-    utterance = utterance.strip()
+    utterance = utterance.strip().replace('\n', ' ')
     if DIALECTS:
         words = utterance.split()
     else:
@@ -246,10 +247,7 @@ def predict_proba2(model, data, vectorizer, linear_svc, n_labels=4):
 
 
 def score(pred, test_y):
-    print('Accuracy', accuracy_score(test_y, pred))
-    print('F1 macro', f1_score(test_y, pred, average='macro'))
-    print('Confusion matrix')
-    print(confusion_matrix(test_y, pred))
+    return accuracy_score(test_y, pred), f1_score(test_y, pred, average='macro'), confusion_matrix(test_y, pred)
 
 
 def support_vectors(model, label_encoder, train_x, train_x_raw,
@@ -300,7 +298,7 @@ if args.load_model:
             test_x_raw.append(line.strip())
     test_y = np.load(SAVE_LOC + '/test_y.npy')
     if len(test_x_raw) != len(test_y):
-        print("Expected test_x_raw (length " + len(test_x_raw) + ") and test_y (length " + length(test_y) + ") to be of the same length.")
+        print("Expected test_x_raw (length " + str(len(test_x_raw)) + ") and test_y (length " + str(len(test_y)) + ") to be of the same length.")
         sys.exit()
     label_encoder = LabelEncoder()
     label_encoder.classes_ = np.load(SAVE_LOC + '/label_encoder_classes.npy')
@@ -326,12 +324,24 @@ else:
     classifier = train(train_x, train_y, linear_svc=LINEAR_SVC, class_weight=class_weight)
     print("Scoring the model")
     pred = predict(classifier, test_x)
-    score(pred, test_y)
-
+    (acc, f1, conf) = score(pred, test_y)
+    print('Accuracy', acc)
+    print('F1 macro', f1)
+    print('Confusion matrix')
+    print(conf)
+    with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
+        f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
+            train_x.shape, len(train_x_raw), len(train_y),
+            test_x.shape, len(test_x_raw), len(test_y)))
+        f.write('Accuracy\t{:.4f}\n'.format(acc))
+        f.write('F1 macro\t{:.4f}\n'.format(f1))
+        f.write('Confusion matrix\n')
+        f.write(str(conf) + '\n')
+            
     print("Saving the model.")
     with open(SAVE_LOC + '/test_x_raw.txt', 'w', encoding='utf8') as f:
         for x in test_x_raw:
-            f.write(x + '\n')
+            f.write(x.replace('\n', ' ') + '\n')
     np.save(SAVE_LOC + '/test_y.npy', test_y)
     np.save(SAVE_LOC + '/label_encoder_classes.npy', label_encoder.classes_)
     with open(SAVE_LOC + '/vectorizer.pickle', 'wb') as f:
@@ -363,14 +373,14 @@ if args.start_idx == 0:
             f.write('')
 
 
-def save_to_file(filename, results_0, results_1, results_2, results_3):
+def save_to_file(filename, nr, results_0, results_1, results_2, results_3):
     res = [results_0, results_1]
     if DIALECTS:
         res += [results_2, results_3]
     for i, r in enumerate(res):
         with open(filename.format(i), 'a', encoding='utf8') as f:
             for feature, score in r:
-                f.write('{}\t{:.10f}\n'.format(feature, score))
+                f.write('{}\t{}\t{:.10f}\n'.format(nr, feature, score))
 
 
 labels = [0, 1, 2, 3] if DIALECTS else [0, 1]
@@ -405,7 +415,9 @@ for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx], start=ar
     if i % 50 == 0:
         interesting_labels = [label]
         pred = predict_instance(classifier, utterance, label_encoder, vectorizer, LINEAR_SVC)
+        now = datetime.datetime.now()
         print(i)
+        print(now)
         print('"' + utterance + '""')
         print('ACTUAL', label_encoder.inverse_transform([label])[0])
         print('PREDICTED', pred[1])
@@ -414,21 +426,23 @@ for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx], start=ar
         # for l in interesting_labels:
         #     exp.show_in_notebook(text=utterance, labels=(l,))
         print('\n')
-        save_to_file(filename, results_0, results_1, results_2, results_3)
+        save_to_file(filename, i, results_0, results_1, results_2, results_3)
         with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
-            f.write(str(i) + '  --  "' + utterance + '""\n')
-            f.write('ACTUAL: ' + label_encoder.inverse_transform([label])[0] + '\n')
-            f.write('PREDICTED: ' + pred[1] + '\n')
-            f.write('Class 0: ' + exp.as_list(label=0)[:5] + '\n')
-            f.write('Class 1: ' + exp.as_list(label=1)[:5] + '\n')
+            f.write(str(i) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
+            f.write('ACTUAL: ' + str(label_encoder.inverse_transform([label])[0]) + '\n')
+            f.write('PREDICTED: ' + str(pred[1]) + '\n')
+            f.write('Class 0: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=0)[:5]]) + '\n')
+            f.write('Class 1: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=1)[:5]]) + '\n')
             if DIALECTS:
-                f.write('Class 2: ' + exp.as_list(label=2)[:5] + '\n')
-                f.write('Class 3: ' + exp.as_list(label=3)[:5] + '\n')
+                f.write('Class 2: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=2)[:5]]) + '\n')
+                f.write('Class 3: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=3)[:5]]) + '\n')
             f.write('\n')
         results_0 = []
         results_1 = []
         results_2 = []
         results_3 = []
     i += 1
-    
-save_to_file(filename, results_0, results_1, results_2, results_3)
+
+i -= 1
+if i % 50 != 0:
+    save_to_file(filename, i, results_0, results_1, results_2, results_3)
