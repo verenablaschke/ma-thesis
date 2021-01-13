@@ -19,6 +19,8 @@ parser.add_argument('model')
 parser.add_argument('--start', dest='start_idx', default=0, type=int)
 parser.add_argument('--stop', dest='stop_idx', default=-1, type=int)
 parser.add_argument('--load', dest='load_model', type=bool, default=False)
+parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
+parser.add_argument('--char', dest='char_ngrams', default='[1,2,3,4,5]', type=str)
 args = parser.parse_args()
 
 
@@ -31,10 +33,27 @@ else:
     sys.exit()
 LINEAR_SVC = DIALECTS
 
-if args.load_model and not args.model:
-    print("You need to provide a path to the model to load it")
+if not args.model:
+    print("You need to provide a path to the model to save or load it")
     sys.exit()
 
+
+if args.word_ngrams[0] != '[' or args.word_ngrams[-1] != ']' or args.char_ngrams[0] != '[' or args.char_ngrams[-1] != ']' :
+    print("The list of n-gram levels needs to be enclosed by square brackets, e.g. [1,2,3] or []")
+    sys.exit()
+WORD_NS = args.word_ngrams[1:-1]
+if len(WORD_NS) == 0:
+    WORD_NS = []
+else:
+    WORD_NS = [int(i) for i in WORD_NS.split(',\\s*')]
+CHAR_NS = args.char_ngrams[1:-1]
+if len(CHAR_NS) == 0:
+    CHAR_NS = []
+else:
+    CHAR_NS = [int(i) for i in CHAR_NS.split(',\\s*')]
+if not args.load_model:
+    print("Word-level n-grams used: " + str(WORD_NS))
+    print("Char-level n-grams used: " + str(CHAR_NS))
 
 mode = 'a' if args.load_model else 'w'
 with open(args.model + '/log.txt', mode, encoding='utf8') as f:
@@ -74,8 +93,7 @@ GET_NGRAMS = True
 #                 break
 #     return re.sub('\?+', '?', ''.join(combined_utterance))
     
-# def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[1, 2, 3, 4, 5], verbose=False):
-def utterance2ngrams(utterance, word_ns=[1, 2], char_ns=[2, 3, 4, 5], verbose=False):
+def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False):
     utterance = utterance.strip().replace('\n', ' ')
     if DIALECTS:
         words = utterance.split()
