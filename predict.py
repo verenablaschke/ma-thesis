@@ -1,3 +1,5 @@
+ # coding: utf-8
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -45,17 +47,17 @@ WORD_NS = args.word_ngrams[1:-1]
 if len(WORD_NS) == 0:
     WORD_NS = []
 else:
-    WORD_NS = [int(i) for i in WORD_NS.split(',\\s*')]
+    WORD_NS = [int(i) for i in WORD_NS.split(',')]
 CHAR_NS = args.char_ngrams[1:-1]
 if len(CHAR_NS) == 0:
     CHAR_NS = []
 else:
-    CHAR_NS = [int(i) for i in CHAR_NS.split(',\\s*')]
+    CHAR_NS = [int(i) for i in CHAR_NS.split(',')]
 if not args.load_model:
     print("Word-level n-grams used: " + str(WORD_NS))
     print("Char-level n-grams used: " + str(CHAR_NS))
 
-mode = 'a' if args.load_model else 'w'
+mode = 'a+' if args.load_model else 'w+'
 with open(args.model + '/log.txt', mode, encoding='utf8') as f:
     print("Type:", args.type)
     f.write("Type: " + args.type + '\n')
@@ -154,8 +156,8 @@ def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False)
     return ngrams
 
 
-def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col=4,
-               analyzer=utterance2ngrams):
+def parse_file(filename, test_size=0.2, max_features=5000, label_col=0,
+               data_col=4, analyzer=utterance2ngrams, test_features_file=False):
     data = pd.read_csv(filename, encoding='utf8', delimiter='\t',
                        usecols=[label_col, data_col], names=['labels', 'utterances'])
     print(len(data))
@@ -165,9 +167,20 @@ def parse_file(filename, test_size=0.2, max_features=5000, label_col=0, data_col
 #     print(len(data))
 #     print(data['labels'].value_counts())
 
-    train_x_raw, test_x_raw, train_y, test_y = model_selection.train_test_split(
-        data['utterances'], data['labels'], test_size=test_size,
+    train_x_raw, test_x_raw, train_y, test_y, train_idx, test_idx = model_selection.train_test_split(
+        data['utterances'], data['labels'], np.arange(len(data)), 
+        test_size=test_size,
         random_state=42)
+
+    if test_features_file:
+        print('Saving the test features.')
+        with open(test_features_file, 'w+', encoding='utf8') as f:
+            for idx, utterance in zip(test_idx, test_x_raw):
+                f.write(str(idx))
+                for ngram in utterance2ngrams(utterance):
+                    f.write('\t' + ngram)
+                f.write('\n')
+
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(train_y)
     test_y = label_encoder.transform(test_y)
@@ -306,8 +319,6 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
         print('\n\n')
 
 
-
-
 if args.load_model:
     print("Loading the model.")
     test_x_raw = []
@@ -336,7 +347,9 @@ else:
     print("Preparing the data")
     label_col = 0 if DIALECTS else 1
     data_col = 4 if DIALECTS else 2
-    train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(FILE, label_col=label_col, data_col=data_col)
+    train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(
+        FILE, label_col=label_col, data_col=data_col,
+        test_features_file=SAVE_LOC + '/features.txt')
     print("Training the model")
     class_weight = None if DIALECTS else {0: 1, 1: 2}
     classifier = train(train_x, train_y, linear_svc=LINEAR_SVC, class_weight=class_weight)
@@ -347,7 +360,7 @@ else:
     print('F1 macro', f1)
     print('Confusion matrix')
     print(conf)
-    with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
+    with open(SAVE_LOC + '/log.txt', 'a', encoding='utf8') as f:
         f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
             train_x.shape, len(train_x_raw), len(train_y),
             test_x.shape, len(test_x_raw), len(test_y)))
@@ -379,7 +392,8 @@ else:
 # instances_far_from_decision_boundary(classifier, label_encoder, train_x, train_x_raw)
 
 
-filename = 'results/results_dialects_{}.txt' if DIALECTS else 'results/results_tweets_{}.txt'
+# filename = 'results/results_dialects_{}.txt' if DIALECTS else 'results/results_tweets_{}.txt'
+filename = SAVE_LOC + '/results.txt'
 
 if args.start_idx == 0:
     # Initialize the files in case there were previous runs with a different set-up.
