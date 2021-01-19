@@ -170,7 +170,7 @@ def parse_file(filename, test_size=0.2, max_features=5000, label_col=0,
     train_x_raw, test_x_raw, train_y, test_y, train_idx, test_idx = model_selection.train_test_split(
         data['utterances'], data['labels'], np.arange(len(data)), 
         test_size=test_size,
-        random_state=42)
+        random_state=42) # The random state needs to be identical across models!
 
     if test_features_file:
         print('Saving the test features.')
