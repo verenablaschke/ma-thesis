@@ -1,21 +1,29 @@
 import os
 import re
 
-PHON = True
+# 'PHON', 'ORTHO', 'BOTH'
+MODE = 'BOTH'
 MIN_WORDS_PER_UTTERANCE = 3
 
 DATA_DIR = './data/'
-if PHON:
+if MODE == 'PHON':
     INPUT_DIR = DATA_DIR + 'ndc_phon_with_informant_codes/files/'
     OUT_FILE = DATA_DIR + 'phon_parsed.tsv'
     LOG_FILE = DATA_DIR + 'phon_log.txt'
-else:
+elif MODE == 'ORTHO':
     INPUT_DIR = DATA_DIR + 'ndc_with_informant_codes/files/'
     OUT_FILE = DATA_DIR + 'bokmaal_parsed.tsv'
     LOG_FILE = DATA_DIR + 'bokmaal_log.txt'
+else:
+    # INPUT_DIR = DATA_DIR + 'manually_fixed/ndc_phon_with_informant_codes/files/'
+    # INPUT_DIR_ORTHO = DATA_DIR + 'manually_fixed/ndc_with_informant_codes/files/'
+    INPUT_DIR = DATA_DIR + 'ndc_phon_with_informant_codes/files/'
+    INPUT_DIR_ORTHO = DATA_DIR + 'ndc_with_informant_codes/files/'
+    OUT_FILE = DATA_DIR + 'bokmaal+phon_parsed.tsv'
+    LOG_FILE = DATA_DIR + 'bokmaal+phon_log.txt'
 
 
-# pre-reform counties
+# Counties in the dataset (pre-reform)
 
 nord_norge = {'finnmark': ['hammerfest', 'kautokeino', 'kirkenes',
                              'kjoellefjord', 'lakselv', 'tana', 'vardoe'],
@@ -76,21 +84,44 @@ for dialect_area in norwegian:
             place2county[place] = county
 
 
-
 skip_tokens = ['#', '##',  # pauses
                  '*',  # overlapping utterances
                  'e',  # TODO: 'e' only in bokmål version
-                 '?', '!', '"', '...', '…',
+                 '?', '!', '"', '...', '…', '"',
                  # "Interjeksjonar vi ikkje endrar stavemåten på"
                  'ee', 'eh', 'ehe', 'em', 'heh', 'hm', 'm', 'm-m', 'mhm', 'mm'
                 ]
-# TODO what about ja, nei, og
+if MODE == 'ORTHO' or MODE == 'BOTH':
+    skip_tokens.append('e')
+
+
+class Line_Iter(object):
+
+    def __init__(self, in_file):
+        self.iterator = iter(in_file)
+        self.saved = []
+
+    def __iter__(self):
+        return self.iterator
+
+    def next(self):
+        if self.saved:
+            return self.saved.pop(0)
+        return next(self.iterator)
+
+    def next_iter_only(self):
+        return next(self.iterator)
+
+    def save_line(self, line):
+        self.saved.append(line)
+
 
 def is_named_entity(string):
     # Names: F1 (F2, F3, ...), M1, E1
     # Other NEs: N1
     # Names of interview participants use the participant code, which contains a number.
     return bool(re.search(r'\d', string))
+
 
 places = set()
 informants = set()
@@ -101,32 +132,109 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
         if place not in norwegian_places:
             continue
         places.add(place)
+        if MODE == 'BOTH':
+            try:
+                in_file_ortho = open(INPUT_DIR_ORTHO + file, 'r', encoding='utf8')
+                line_iter_ortho = Line_Iter(in_file_ortho)
+            except FileNotFoundError:
+                print('The file \'' + file + '\' does not have an orthography-based counterpart. (Skipping file.)')
+                continue
         with open(INPUT_DIR + file, 'r', encoding='utf8') as in_file:
-            for line in in_file:
-                line = line.strip()
-                tokens = line.split(' ')
-                speaker = tokens[0]
-                if not speaker.startswith(place):
-                    # Interviewer, not informant
-                    # TODO check if there is information on where the interviewers are from
-                    continue
-                informants.add(speaker)
-                utterance = []
-                for token in tokens[1:]:
-                    if token.endswith('-'):
+            line_iter = Line_Iter(in_file)
+            try:
+                while True:
+                    line = line_iter.next()
+                    if MODE == 'BOTH':
+                        # Some lines are empty except for the informant code.
+                        # Remove these lines to make sure the phonetic and orthographic
+                        # versions are still lined up properly.
+                        tokens_phon = line.strip().split()
+                        while len(tokens_phon) <= 1:
+                            tokens_phon = line_iter.next().strip().split()
+                        speaker = tokens_phon[0]
+                        tokens_ortho = []
+                        try:
+                            while len(tokens_ortho) <= 1:
+                                line_ortho = line_iter_ortho.next().replace('"', '')
+                                tokens_ortho = line_ortho.strip().split()
+                        except StopIteration:
+                            # Sometimes, the ortho file is missing the last line(s).
+                            break
+                        # Sometimes, a longer utterance / sequence of utterances is
+                        # encoded as a single utterance in the ortho file, but as a
+                        # sequence of utterances by the same speaker in the phono
+                        # file. -> Split the ortho utterance into shorter parts.
+                        n_toks_total = len(tokens_phon)
+                        if len(tokens_ortho) > n_toks_total:
+                            cur_tokens_ortho = tokens_ortho[:n_toks_total]
+                            n_toks_ortho = len(tokens_ortho) 
+                            while n_toks_ortho > n_toks_total:
+                                next_line = line_iter.next_iter_only().strip()
+                                line_iter.save_line(next_line)
+                                toks = next_line.split()
+                                # Skip speaker code (token 0)
+                                n_toks = len(toks[1:])
+                                next_line_ortho = ' '.join(tokens_ortho[n_toks_total:n_toks_total + n_toks])
+                                line_iter_ortho.save_line(speaker + ' ' + next_line_ortho)
+                                n_toks_total += n_toks
+                            if n_toks_ortho != n_toks_total:
+                                print("DIFF LENGTHS", n_toks_ortho, n_toks_total)
+                            tokens_ortho = cur_tokens_ortho
+
+                    else:
+                        tokens = line.strip().split()
+                        speaker = tokens[0]
+
+                    if not speaker.startswith(place):
+                        # Interviewer, not informant
+                        # TODO check if there is information on where the interviewers are from
                         continue
-                    if token in skip_tokens:
+                    informants.add(speaker)
+                    utterance = []
+
+                    if MODE == 'BOTH':
+                        if len(tokens_phon[1:]) != len(tokens_ortho[1:]):
+                            print('DIFFERENT UTTERANCE LENGTHS', file)
+                            print(tokens_phon[1:])
+                            print(tokens_ortho[1:])
+                        for tok_phon, tok_ortho in zip(tokens_phon[1:], tokens_ortho[1:]):
+                            if tok_phon.endswith('-'):
+                                continue
+                            if tok_ortho in skip_tokens:
+                                continue
+                            if is_named_entity(tok_phon):
+                                continue
+                            if '/' in tok_ortho or '/' in tok_phon:
+                                print('MAL-FORMED TOKEN?', tok_ortho, tok_phon)
+                                tok_ortho = tok_ortho.replace('/', '')
+                                tok_phon = tok_phon.replace('/', '')
+                            tok_phon = tok_phon.replace('_', '')
+                            tok_ortho = tok_ortho.replace('_', '')
+                            if len(tok_phon) > 0 and tok_phon[0].islower():
+                                # Capitalization check to exclude place names
+                                utterance.append(tok_ortho + '/' + tok_phon)
+                    else:
+                        for token in tokens[1:]:
+                            if token.endswith('-'):
+                                continue
+                            if token in skip_tokens:
+                                continue
+                            if is_named_entity(token):
+                                continue
+                            token = token.replace('_', '')
+                            if len(token) > 0 and token[0].islower():
+                                # Capitalization check to exclude place names
+                                utterance.append(token)
+                    if len(utterance) < MIN_WORDS_PER_UTTERANCE:
                         continue
-                    if is_named_entity(token):
-                        continue
-                    token = token.replace('_', '')
-                    if len(token) > 0 and token[0].islower():
-                        # Capitalization check to exclude place names
-                        utterance.append(token)
-                if len(utterance) < MIN_WORDS_PER_UTTERANCE:
-                    continue
-                utterance = ' '.join(utterance).strip()
-                out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + file + '\t' + utterance + '\n')
+                    utterance = ' '.join(utterance).strip()
+                    out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + file + '\t' + utterance + '\n')
+            except StopIteration:
+                pass
+
+        if MODE == 'BOTH':
+            in_file_ortho.close()
+
 
 with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     log_file.write('No. of places: ' + str(len(places)))
