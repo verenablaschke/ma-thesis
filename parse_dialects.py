@@ -2,7 +2,7 @@ import os
 import re
 
 # 'PHON', 'ORTHO', 'BOTH'
-MODE = 'PHON'
+MODE = 'BOTH'
 MIN_WORDS_PER_UTTERANCE = 3
 
 DATA_DIR = './data/'

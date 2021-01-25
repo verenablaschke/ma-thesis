@@ -93,43 +93,54 @@ GET_NGRAMS = True
 
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
+
+phase = ''
     
 def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False):
     utterance = utterance.strip().replace('\n', ' ')
     if DIALECTS:
-        words = utterance.split()
+        words = utterance.split(' ')
+        words_wordlvl = []
+        words_charlvl = []
+        for word in words:
+            wordlvl, charlvl = word.split('/')
+            words_wordlvl.append(wordlvl)
+            words_charlvl.append(charlvl)
+        if not GET_NGRAMS:
+            return words_wordlvl + words_charlvl
     else:
         # utterance = utterance.lower()
         utterance = utterance.replace(',', '')
         utterance = utterance.replace(';', '')
         utterance = utterance.replace('.', '')
         utterance = utterance.replace('’', "'")
-        words = utterance.split()
-
-    if not GET_NGRAMS:
-        # print('WORDS', words)
-        return words
+        words_wordlvl = utterance.split()
+        words_charlvl = words_wordlvl
+        if not GET_NGRAMS:
+            words_wordlvl
 
     ngrams = []
-    escape_toks = ['URL', 'USERNAME']
-#     unk = 'UNK'  # none of the (uppercase!) letters appear in the data
-    # unk = '?' # TODO works for the dialect data but likely not other input
-    # words = utterance.split('#')
+    escape_toks = ['<URL>', '<USERNAME>']
     sep = '<SEP>'
     for word_n in word_ns:
-        for i in range(len(words) + 1 - word_n):
-            tokens = words[i:i + word_n]
+        cur_ngrams = []
+        for i in range(len(words_wordlvl) + 1 - word_n):
+            tokens = words_wordlvl[i:i + word_n]
             if not DIALECTS:
                 tokens = [tok if tok in escape_toks else tok.lower() for tok in tokens]
             ngram = sep.join(tokens)
             # if unk in ngram:
             #     continue
-            ngrams.append('<SOS>' + ngram + '<EOS>')  # Padding to distinguish these from char n-grams
+            # Padding to distinguish these from char n-grams
+            ngram = '<SOS>' + ngram + '<EOS>'
+            cur_ngrams.append(ngram)
+        ngrams.append(cur_ngrams)
     for char_n in char_ns:
-        for word in words:
+        cur_ngrams = []
+        for word in words_charlvl:
             if word in escape_toks:
                 continue
-            chars = list(char_pattern.findall(word)) # 
+            chars = list(char_pattern.findall(word))
             word_len = len(chars)
             if word_len == 0:
                 continue
@@ -137,26 +148,34 @@ def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False)
             pfx = chars[:char_n - 1]
             # if unk in pfx:
             #     break
-            ngrams.append(sep + ''.join(pfx))
+            cur_ngrams.append(sep + ''.join(pfx))
             
             for i in range(len(chars) + 1 - char_n):
                 ngram = chars[i:i + char_n]
                 # if unk in ngram:
                 #     continue
-                ngrams.append(''.join(ngram))
+                cur_ngrams.append(''.join(ngram))
 
             sfx = chars[word_len + 1 - char_n:]
             # if unk in sfx:
             #     break
-            ngrams.append(''.join(sfx) + sep)
+            cur_ngrams.append(''.join(sfx) + sep)
+        ngrams.append(cur_ngrams)
     if verbose:
         print(utterance, ngrams)
-    # print('NGRAMS', ngrams)
-    return ngrams
+    ngrams_flat = []
+    with open(SAVE_LOC + '/features-' + phase + '.txt', 'a', encoding='utf8') as f:
+        f.write(utterance + '\n')
+        for lvl_ngrams in ngrams:
+            ngrams_flat += lvl_ngrams
+            f.write('\t'.join(lvl_ngrams))
+            f.write('\n')
+        f.write('\n')
+    return ngrams_flat
 
 
 def parse_file(filename, test_size=0.2, max_features=5000, label_col=0,
-               data_col=4, analyzer=utterance2ngrams, test_features_file=False):
+               data_col=4, analyzer=utterance2ngrams):
     data = pd.read_csv(filename, encoding='utf8', delimiter='\t',
                        usecols=[label_col, data_col], names=['labels', 'utterances'])
     print(len(data))
@@ -170,15 +189,6 @@ def parse_file(filename, test_size=0.2, max_features=5000, label_col=0,
         data['utterances'], data['labels'], np.arange(len(data)), 
         test_size=test_size,
         random_state=42) # The random state needs to be identical across models!
-
-    if test_features_file:
-        print('Saving the test features.')
-        with open(test_features_file, 'w+', encoding='utf8') as f:
-            for idx, utterance in zip(test_idx, test_x_raw):
-                f.write(str(idx))
-                for ngram in utterance2ngrams(utterance):
-                    f.write('\t' + ngram)
-                f.write('\n')
 
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(train_y)
@@ -199,7 +209,16 @@ def parse_file(filename, test_size=0.2, max_features=5000, label_col=0,
 #                                  lowercase=False,  # Tjukk L -> uppercase L
 #                                  token_pattern=r"\b[\w']+\b"  # ' marks syllabic consonants
 #                                  )
+    global phase
+    phase = 'train'
+    with open(SAVE_LOC + '/features-' + phase + '.txt', 'w+', encoding='utf8') as f:
+        # Create empty file.
+        pass
     train_x = vectorizer.fit_transform(train_x_raw)
+    phase = 'test'
+    with open(SAVE_LOC + '/features-' + phase + '.txt', 'w+', encoding='utf8') as f:
+        # Create empty file.
+        pass
     test_x = vectorizer.transform(test_x_raw)
 
     return train_x, test_x, list(train_x_raw), list(test_x_raw), train_y, test_y, label_encoder, vectorizer
@@ -337,10 +356,7 @@ if args.load_model:
     print("Done.")
 else:
     if DIALECTS:
-        if len(WORD_NS) > 0:
-            FILE = 'data/bokmaal+phon_cleaned.tsv'    
-        else:
-            FILE = 'data/phon_cleaned.tsv'
+        FILE = 'data/bokmaal+phon_cleaned.tsv'    
     else:
         FILE = 'data/tweets_cleaned.tsv'
 
@@ -348,8 +364,7 @@ else:
     label_col = 0 if DIALECTS else 1
     data_col = 4 if DIALECTS else 2
     train_x, test_x, train_x_raw, test_x_raw, train_y, test_y, label_encoder, vectorizer = parse_file(
-        FILE, label_col=label_col, data_col=data_col,
-        test_features_file=SAVE_LOC + '/features.txt')
+        FILE, label_col=label_col, data_col=data_col)
     print("Training the model")
     class_weight = None if DIALECTS else {0: 1, 1: 2}
     classifier = train(train_x, train_y, linear_svc=LINEAR_SVC, class_weight=class_weight)
@@ -392,8 +407,8 @@ else:
 # instances_far_from_decision_boundary(classifier, label_encoder, train_x, train_x_raw)
 
 
-# filename = 'results/results_dialects_{}.txt' if DIALECTS else 'results/results_tweets_{}.txt'
-filename = SAVE_LOC + '/results.txt'
+importance_file = SAVE_LOC + '/importance_values.txt'
+predictions_file = SAVE_LOC + '/predictions.txt'
 
 if args.start_idx == 0:
     # Initialize the files in case there were previous runs with a different set-up.
@@ -401,7 +416,7 @@ if args.start_idx == 0:
     if DIALECTS:
         res += [2, 3]
     for i in res:
-        with open(filename.format(i), 'w', encoding='utf8') as f:
+        with open(importance_file.format(i), 'w', encoding='utf8') as f:
             f.write('')
 
 
@@ -428,53 +443,61 @@ results_0 = []
 results_1 = []
 results_2 = []
 results_3 = []
-for i, utterance in enumerate(test_x_raw[args.start_idx:args.stop_idx], start=args.start_idx):
-    label = test_y[i]
-    exp = explainer.explain_instance(utterance,
-                                     lambda z: predict_proba2(classifier, z, vectorizer, LINEAR_SVC, n_labels=len(labels)),
-                                     num_features=20,
-                                     labels=labels,
-                                     # labels=interesting_labels
-                                     num_samples=1000
-                                     )
-            
-    results_0 += exp.as_list(label=0)
-    results_1 += exp.as_list(label=1)
-    if DIALECTS:
-        results_2 += exp.as_list(label=2)
-        results_3 += exp.as_list(label=3)
+with open(predictions_file, 'w+', encoding='utf8') as f_out:
+    for i, (utterance, encoded) in enumerate(zip(test_x_raw[args.start_idx:args.stop_idx],
+                                                 test_x[args.start_idx:args.stop_idx]),
+                                             start=args.start_idx):
+        label = test_y[i]
+        exp = explainer.explain_instance(utterance,
+                                         lambda z: predict_proba2(classifier, z, vectorizer, LINEAR_SVC, n_labels=len(labels)),
+                                         num_features=20,
+                                         labels=labels,
+                                         # labels=interesting_labels
+                                         num_samples=1000
+                                         )
+                
+        results_0 += exp.as_list(label=0)
+        results_1 += exp.as_list(label=1)
+        if DIALECTS:
+            results_2 += exp.as_list(label=2)
+            results_3 += exp.as_list(label=3)
 
-    if i % 50 == 0:
-        interesting_labels = [label]
-        pred = predict_instance(classifier, utterance, label_encoder, vectorizer, LINEAR_SVC)
-        now = datetime.datetime.now()
-        print(i)
-        print(now)
-        print('"' + utterance + '""')
-        print('ACTUAL', label_encoder.inverse_transform([label])[0])
-        print('PREDICTED', pred[1])
-        if pred[0] not in interesting_labels:
-            interesting_labels.append(pred[0])
-        # for l in interesting_labels:
-        #     exp.show_in_notebook(text=utterance, labels=(l,))
-        print('\n')
-        save_to_file(filename, i, results_0, results_1, results_2, results_3)
-        with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
-            f.write(str(i) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
-            f.write('ACTUAL: ' + str(label_encoder.inverse_transform([label])[0]) + '\n')
-            f.write('PREDICTED: ' + str(pred[1]) + '\n')
-            f.write('Class 0: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=0)[:5]]) + '\n')
-            f.write('Class 1: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=1)[:5]]) + '\n')
-            if DIALECTS:
-                f.write('Class 2: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=2)[:5]]) + '\n')
-                f.write('Class 3: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=3)[:5]]) + '\n')
-            f.write('\n')
-        results_0 = []
-        results_1 = []
-        results_2 = []
-        results_3 = []
-    i += 1
+        pred = model.predict(encoded)
+        f_out.write(utterance + '\t')
+        f_out.write(label_encoder.inverse_transform([label])[0] + '\t')
+        f_out.write(label_encoder.inverse_transform([pred])[0] + '\n')
+
+        if i % 50 == 0:
+            interesting_labels = [label]
+            pred = predict_instance(classifier, utterance, label_encoder, vectorizer, LINEAR_SVC)
+            now = datetime.datetime.now()
+            print(i)
+            print(now)
+            print('"' + utterance + '""')
+            print('ACTUAL', label_encoder.inverse_transform([label])[0])
+            print('PREDICTED', pred[1])
+            if pred[0] not in interesting_labels:
+                interesting_labels.append(pred[0])
+            # for l in interesting_labels:
+            #     exp.show_in_notebook(text=utterance, labels=(l,))
+            print('\n')
+            save_to_file(importance_file, i, results_0, results_1, results_2, results_3)
+            with open(args.model + '/log.txt', 'a', encoding='utf8') as f:
+                f.write(str(i) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
+                f.write('ACTUAL: ' + str(label_encoder.inverse_transform([label])[0]) + '\n')
+                f.write('PREDICTED: ' + str(pred[1]) + '\n')
+                f.write('Class 0: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=0)[:5]]) + '\n')
+                f.write('Class 1: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=1)[:5]]) + '\n')
+                if DIALECTS:
+                    f.write('Class 2: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=2)[:5]]) + '\n')
+                    f.write('Class 3: ' + ', '.join(['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=3)[:5]]) + '\n')
+                f.write('\n')
+            results_0 = []
+            results_1 = []
+            results_2 = []
+            results_3 = []
+        i += 1
 
 i -= 1
 if i % 50 != 0:
-    save_to_file(filename, i, results_0, results_1, results_2, results_3)
+    save_to_file(importance_file, i, results_0, results_1, results_2, results_3)

@@ -19,6 +19,7 @@ with open("data/corpus_SexistContent.csv", "r", encoding="utf8") as in_file:
                 cells = line.split('\t')  # ID, label
                 msg = ""
                 try:
+                    # tweet_mode='extended' is crucial to get >140 chars
                     msg = api.get_status(cells[0], tweet_mode='extended').full_text
                     out_file.write(line + '\t' + msg + '\n')
                     if cells[1] == "1":
