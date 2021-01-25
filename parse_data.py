@@ -2,24 +2,22 @@ import os
 import re
 
 # 'PHON', 'ORTHO', 'BOTH'
-MODE = 'BOTH'
+MODE = 'PHON'
 MIN_WORDS_PER_UTTERANCE = 3
 
 DATA_DIR = './data/'
 if MODE == 'PHON':
     INPUT_DIR = DATA_DIR + 'ndc_phon_with_informant_codes/files/'
-    OUT_FILE = DATA_DIR + 'phon_parsed.tsv'
+    OUT_FILE = DATA_DIR + 'phon_cleaned.tsv'
     LOG_FILE = DATA_DIR + 'phon_log.txt'
 elif MODE == 'ORTHO':
     INPUT_DIR = DATA_DIR + 'ndc_with_informant_codes/files/'
-    OUT_FILE = DATA_DIR + 'bokmaal_parsed.tsv'
+    OUT_FILE = DATA_DIR + 'bokmaal_cleaned.tsv'
     LOG_FILE = DATA_DIR + 'bokmaal_log.txt'
 else:
-    # INPUT_DIR = DATA_DIR + 'manually_fixed/ndc_phon_with_informant_codes/files/'
-    # INPUT_DIR_ORTHO = DATA_DIR + 'manually_fixed/ndc_with_informant_codes/files/'
     INPUT_DIR = DATA_DIR + 'ndc_phon_with_informant_codes/files/'
     INPUT_DIR_ORTHO = DATA_DIR + 'ndc_with_informant_codes/files/'
-    OUT_FILE = DATA_DIR + 'bokmaal+phon_parsed.tsv'
+    OUT_FILE = DATA_DIR + 'bokmaal+phon_cleaned.tsv'
     LOG_FILE = DATA_DIR + 'bokmaal+phon_log.txt'
 
 
@@ -123,8 +121,26 @@ def is_named_entity(string):
     return bool(re.search(r'\d', string))
 
 
+phono_replace_first = {'nng': 'ŋŋ', 'ng': 'ŋ', 'kkj': 'çç',
+                       'ssj': 'ʂʂ', 'ttj':'tʧ'}
+phono_replace_next = {'\'ŋ': 'ŋ̍', '\'m': 'm̩', '\'n': 'n̩', '\'l': 'l̩',
+                      '\'r': 'r̩', '\'s': 's̩', '\'L': ' ̍ɽ', 'L': 'ɽ',
+                      'kj': 'ç', 'sj': 'ʂ', 'tj': 'ʧ',
+                      '\'i': '.i', '\'e': '.e', '\'u': '.u', '\'æ': '.æ',
+                      '\'o': '.o', '\'y': '.y', '\'a': '.a'}
+
+
+def clean_phono(utterance):
+    for k, v in phono_replace_first.items():
+        utterance = utterance.replace(k, v)
+    for k, v in phono_replace_next.items():
+        utterance = utterance.replace(k, v)
+    return utterance
+
+
 places = set()
 informants = set()
+skipped = []
 _, _, filenames = next(os.walk(INPUT_DIR))
 with open(OUT_FILE, 'w', encoding='utf8') as out_file:
     for file in filenames:
@@ -138,6 +154,7 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                 line_iter_ortho = Line_Iter(in_file_ortho)
             except FileNotFoundError:
                 print('The file \'' + file + '\' does not have an orthography-based counterpart. (Skipping file.)')
+                skipped.append(file)
                 continue
         with open(INPUT_DIR + file, 'r', encoding='utf8') as in_file:
             line_iter = Line_Iter(in_file)
@@ -212,7 +229,7 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                             tok_ortho = tok_ortho.replace('_', '')
                             if len(tok_phon) > 0 and tok_phon[0].islower():
                                 # Capitalization check to exclude place names
-                                utterance.append(tok_ortho + '/' + tok_phon)
+                                utterance.append(tok_ortho + '/' + clean_phono(tok_phon))
                     else:
                         for token in tokens[1:]:
                             if token.endswith('-'):
@@ -224,7 +241,7 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                             token = token.replace('_', '')
                             if len(token) > 0 and token[0].islower():
                                 # Capitalization check to exclude place names
-                                utterance.append(token)
+                                utterance.append(clean_phono(token))
                     if len(utterance) < MIN_WORDS_PER_UTTERANCE:
                         continue
                     utterance = ' '.join(utterance).strip()
@@ -237,13 +254,11 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
 
 
 with open(LOG_FILE, 'w', encoding='utf8') as log_file:
-    log_file.write('No. of places: ' + str(len(places)))
-    log_file.write('\n')
-    log_file.write(str(places))
-    log_file.write('\n\n')
-    log_file.write('No. of informants: ' + str(len(informants)))
-    log_file.write('\n')
-    log_file.write(str(informants))
-    log_file.write('\n')
-    
+    log_file.write('No. of places: ' + str(len(places)) + '\n')
+    log_file.write(str(places) + '\n\n')
+    log_file.write('No. of informants: ' + str(len(informants)) + '\n')
+    log_file.write(str(informants) + '\n\n')
+    if MODE == 'BOTH':
+        log_file.write('Skipped (no orthographic counterpart):\n')
+        log_file.write(str(skipped) + '\n\n')
     

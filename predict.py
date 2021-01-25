@@ -41,7 +41,7 @@ if not args.model:
 
 
 if args.word_ngrams[0] != '[' or args.word_ngrams[-1] != ']' or args.char_ngrams[0] != '[' or args.char_ngrams[-1] != ']' :
-    print("The list of n-gram levels needs to be enclosed by square brackets, e.g. [1,2,3] or []")
+    print("The list of n-gram levels needs to be enclosed in square brackets, e.g. [1,2,3] or []")
     sys.exit()
 WORD_NS = args.word_ngrams[1:-1]
 if len(WORD_NS) == 0:
@@ -73,11 +73,6 @@ with open(args.model + '/log.txt', mode, encoding='utf8') as f:
 np.random.seed(42)
 SAVE_LOC = args.model
 
-
-# U0329, U030D are the combining lines for marking syllabic consonants
-char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
-
-
 GET_NGRAMS = True
 
 # def remove_ngrams(utterance, ngrams, remove_indices):
@@ -94,6 +89,10 @@ GET_NGRAMS = True
 #                 combined_utterance[i] = '?'
 #                 break
 #     return re.sub('\?+', '?', ''.join(combined_utterance))
+
+
+# U0329, U030D are the combining lines for marking syllabic consonants
+char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
     
 def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False):
     utterance = utterance.strip().replace('\n', ' ')
@@ -130,7 +129,7 @@ def utterance2ngrams(utterance, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False)
         for word in words:
             if word in escape_toks:
                 continue
-            chars = list(char_pattern.findall(word))
+            chars = list(char_pattern.findall(word)) # 
             word_len = len(chars)
             if word_len == 0:
                 continue
@@ -338,11 +337,12 @@ if args.load_model:
     print("Done.")
 else:
     if DIALECTS:
-        FILE = 'data/phon_cleaned.tsv'
-        # FILE = 'gdrive/My Drive/colab_projects/phon_cleaned.tsv'
+        if len(WORD_NS) > 0:
+            FILE = 'data/bokmaal+phon_cleaned.tsv'    
+        else:
+            FILE = 'data/phon_cleaned.tsv'
     else:
         FILE = 'data/tweets_cleaned.tsv'
-        # FILE = 'gdrive/My Drive/colab_projects/tweets_cleaned.tsv'    
 
     print("Preparing the data")
     label_col = 0 if DIALECTS else 1
