@@ -1,6 +1,6 @@
 import re
 
-with open ('data/corpus_SexistContent_tweets.csv', 'r', encoding='utf8') as f_in:
+with open ('data/tweets.tsv', 'r', encoding='utf8') as f_in:
     with open ('data/tweets_cleaned.tsv', 'w', encoding='utf8') as f_out:
         prev_tweet = ''
         for line in f_in:
@@ -30,5 +30,5 @@ with open ('data/corpus_SexistContent_tweets.csv', 'r', encoding='utf8') as f_in
             else:
                 prev_tweet += ' ' + tweet
 
-
-        f_out.write(prev_tweet + '\n')
+        if len(prev_tweet) > 0:
+            f_out.write(prev_tweet + '\n')

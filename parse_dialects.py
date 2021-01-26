@@ -30,8 +30,9 @@ nord_norge = {'finnmark': ['hammerfest', 'kautokeino', 'kirkenes',
                              'steigen', 'soemna'],
                 'troms': ['botnhamn', 'karlsoey', 'kirkesdalen', 'kvaefjord',
                         'kvaenangen', 'kaafjord', 'lavangen', 'medby',
-                        'mefjordvaer', 'stonglandseidet','tromsoe']}
-# TODO check if any of these are in Indre Troms and should be moved to soernorsk
+                        'mefjordvaer', 'stonglandseidet', 'tromsoe']}
+# Indre Troms: kirkesdalen
+# Northern Sami: Kåfjord
 
 soerlandet = {'aust_agder': ['evje', 'landvik', 'valle', 'vegaarshei'],
                 'vest_agder': ['kristiansand', 'lyngdal', 'sirdal', 'vennesla',

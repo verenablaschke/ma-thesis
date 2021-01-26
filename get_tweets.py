@@ -12,8 +12,8 @@ n_skipped = 0
 n_sexist = 0
 
 with open("data/corpus_SexistContent.csv", "r", encoding="utf8") as in_file:
-    with open("data/tweets.csv", "w", encoding="utf8") as out_file:
-        with open("data/skipped.csv", "w", encoding="utf8") as skipped_file:
+    with open("data/tweets.tsv", "w", encoding="utf8") as out_file:
+        with open("data/skipped.tsv", "w", encoding="utf8") as skipped_file:
             for line in in_file:
                 line = line.strip()
                 cells = line.split('\t')  # ID, label
