@@ -137,7 +137,6 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
     labels = list(range(n_labels))
     explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
                                   split_expression=split_ngrams,
-                                  random_state=42,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
                                   recalculate_ngrams=False)

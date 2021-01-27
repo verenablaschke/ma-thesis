@@ -58,9 +58,9 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         words_charlvl = []
         for word in words:
             try:
-                wordlvl, charlvl = word.split('/')
-                words_wordlvl.append(wordlvl)
-                words_charlvl.append(charlvl)
+                words_wordlvl.append(word)
+                # Phonetic string only:
+                words_charlvl.append(word.split('/')[1])
             except ValueError:
                 print('Word does not contain \'/\':', word)
                 print('utterance:', utterance)
@@ -71,7 +71,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         utterance = utterance.replace(';', '')
         utterance = utterance.replace('.', '')
         utterance = utterance.replace('’', "'")
-        words_wordlvl = utterance.split()
+        words_wordlvl = utterance.split(' ')
         words_charlvl = words_wordlvl
 
     ngrams = []
@@ -120,7 +120,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         print(utterance, ngrams)
     ngrams_flat = []
     with open(outfile, 'a', encoding='utf8') as f:
-        f.write(utterance + '\t' + label)
+        f.write(utterance + '\t' + str(label))
         for lvl_ngrams in ngrams:
             ngrams_flat += lvl_ngrams
             f.write('\t')
@@ -136,7 +136,9 @@ label_col = 0 if DIALECTS else 1
 data_col = 4 if DIALECTS else 2
 data = pd.read_csv(infile, encoding='utf8', delimiter='\t',
                    usecols=[label_col, data_col],
-                   names=['labels', 'utterances'])
+                   names=['labels', 'utterances'],
+                   quoting=3  # "QUOTE_NONE"
+                   )
 print(len(data))
 print(data['labels'].value_counts())
 

@@ -2,14 +2,14 @@ import numpy as np
 import sys
 
 if len(sys.argv) != 3:
-    print("Usage: parse_results.py TYPE CLASS_NR")
-    print("Usage: parse_results.py dialects/tweets 0/1/2/3")
+    print("Usage: parse_results.py MODEL CLASS")
+    print("E.g.: parse_results.py dialects10/fold-0 nordnorsk")
     sys.exit()
 
-inf_type = sys.argv[1]
-nr = sys.argv[2]
-IN_FILE = 'results/results_{}_{}.txt'.format(inf_type, nr)
-OUT_FILE = 'results/results_{}_{}_sorted.tsv'.format(inf_type, nr)
+folder = sys.argv[1]
+label = sys.argv[2]
+IN_FILE = '{}/importance_values_{}.txt'.format(folder, label)
+OUT_FILE = '{}/importance_values_{}_sorted.tsv'.format(folder, label)
 
 THRESHOLD = 10
 
