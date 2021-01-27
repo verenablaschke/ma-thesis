@@ -1,38 +1,51 @@
 import math
+import argparse
 
-PATH = './models/tweets-'
-RUNS = ['w1', 'w2', 'c1', 'c2', 'c3', 'c4', 'c5']
-FILENAME = '/features.txt'
-MIN_COUNT = 10
-MIN_NPMI = 0.3
 
-run2feature2utt = dict()
-for run in RUNS:
-    feature2utt = dict()
-    n_utt = 0  # Identical across runs
-    with open(PATH + run + FILENAME, 'r', encoding='utf8') as f:
-        for line in f:
-            n_utt += 1
-            cells = line.strip().split('\t')
-            utterance_id = cells[0]
-            for feature in cells[1:]:
+parser = argparse.ArgumentParser()
+parser.add_argument('model')
+parser.add_argument('--c', dest='count', help='minimum count',
+                    default='10', type=int)
+parser.add_argument('--n', dest='npmi', help='minimum NPMI value',
+                    default='0.3', type=float)
+args = parser.parse_args()
+
+MIN_COUNT = args.count
+MIN_NPMI = args.npmi
+
+
+lvl2feature2utt = dict()
+with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:
+    # utterance   label   feature1   feature2   feature3   ...
+    header = next(f).strip()
+    feature_lvls = header.split('\t')[2:]
+    utt_idx = 0
+    for line in f:
+        cells = line.strip().split('\t')
+        for lvl, feature_pkg in zip(feature_lvls, cells[2:]):
+            try:
+                feature2utt = lvl2feature2utt[lvl]
+            except KeyError:
+                feature2utt = dict()
+            for feature in feature_pkg.split():
                 try:
-                    feature2utt[feature].add(utterance_id)
+                    feature2utt[feature].add(utt_idx)
                 except KeyError:
-                    feature2utt[feature] = {utterance_id}
-    run2feature2utt[run] = feature2utt
+                    feature2utt[feature] = {utt_idx}
+            lvl2feature2utt[lvl] = feature2utt
+        utt_idx += 1
+
+# print(lvl2feature2utt['word-1']['<SOS>on<EOS>'])
 
 
-# print(run2feature2utt['w1']['<SOS>on<EOS>'])
-
-
-
+n_utt = utt_idx - 1
+n_lvls = len(feature_lvls)
 feature_combo2npmi = dict()
-for i in range(len(RUNS) - 1):
-    for j in range(i + 1, len(RUNS)):
+for i in range(n_lvls - 1):
+    for j in range(i + 1, n_lvls):
         print(i, j)
-        feature2utt_i = run2feature2utt[RUNS[i]]
-        feature2utt_j = run2feature2utt[RUNS[j]]
+        feature2utt_i = lvl2feature2utt[feature_lvls[i]]
+        feature2utt_j = lvl2feature2utt[feature_lvls[j]]
         for f_i, utt_i in feature2utt_i.items():
             if len(utt_i) < MIN_COUNT:
                 continue
@@ -60,5 +73,6 @@ for i in range(len(RUNS) - 1):
 
 
 with open('results/features.tsv', 'w+', encoding='utf8') as f:
-    for (f_i, f_j), npmi in sorted(feature_combo2npmi.items(), key=lambda item: item[1], reverse=True):
+    for (f_i, f_j), npmi in sorted(feature_combo2npmi.items(),
+                                   key=lambda item: item[1], reverse=True):
         f.write('{}\t{}\t{:.2f}\n'.format(f_i, f_j, npmi))
