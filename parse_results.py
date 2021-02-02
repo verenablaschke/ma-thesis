@@ -6,21 +6,22 @@ parser.add_argument('model', help='path to the model')
 parser.add_argument('label', help='the class')
 parser.add_argument('mode', help='pos / truepos / falsepos / all')
 parser.add_argument('k', help='number of folds')
-parser.add_argument('--min', dest='min_count', default=10, type=int)
+parser.add_argument('--min', dest='min_count', help='min. count per fold',
+                    default=10, type=int)
 args = parser.parse_args()
 
-folder = args.model
+FOLDER = args.model
 CLASS = args.label
-THRESHOLD = args.min_count  # per fold
-OUT_FILE = '{}/importance_values_{}_{}_sorted.tsv'.format(folder, CLASS, mode)
-scores = {}
+THRESHOLD = args.min_count
 MODE = args.mode
 
 
+scores = {}
 for fold in range(args.k):
     if MODE != 'all':
         indices = []
-        with open('{}/fold-{}/predictions.txt'.format(folder, fold), 'r', encoding='utf8') as f:
+        with open('{}/fold-{}/predictions.txt'.format(FOLDER, fold), 'r',
+                  encoding='utf8') as f:
             for line in f:
                 idx, _, y, pred = line.strip().split('\t')
                 if MODE == 'pos' and pred == CLASS:
@@ -30,7 +31,7 @@ for fold in range(args.k):
                 elif MODE == 'falsepos' and pred == CLASS and y != pred:
                     indices.append(idx)
 
-    in_file = '{}/fold-{}/importance_values_{}.txt'.format(folder, fold, CLASS)
+    in_file = '{}/fold-{}/importance_values_{}.txt'.format(FOLDER, fold, CLASS)
     print(in_file)
     with open(in_file, 'r', encoding='utf8') as in_file:
         for i, line in enumerate(in_file):
@@ -47,11 +48,16 @@ for fold in range(args.k):
 
 
 print("sorting")
-means = [(feature, np.mean(scores[feature]), len(scores[feature])) for feature in scores]
-means = sorted(means, key=lambda x: x[1] if x[2] >= THRESHOLD else -1, reverse=True)
+means = [(feature,
+          np.mean(scores[feature]),
+          len(scores[feature])) for feature in scores]
+means = sorted(means, key=lambda x: x[1] if x[2] >= THRESHOLD else -1,
+               reverse=True)
 print("sorted")
 
-with open(OUT_FILE, 'w', encoding='utf8') as out_file:
+with open('{}/importance_values_{}_{}_sorted.tsv'.format(FOLDER, CLASS, MODE),
+          'w', encoding='utf8') as out_file:
+    out_file.write('FEATURE\tMEAN\tSUM\tCOUNT\n')
     for (feature, mean, num) in means:
         out_file.write('{}\t{:.10f}\t'.format(feature, mean))
         entries = scores[feature]
