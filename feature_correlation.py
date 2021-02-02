@@ -72,7 +72,7 @@ for i in range(n_lvls - 1):
             del feature2utt_j[key]    
 
 
-with open('results/features.tsv', 'w+', encoding='utf8') as f:
+with open(args.model + '/features-correlated.tsv', 'w+', encoding='utf8') as f:
     for (f_i, f_j), npmi in sorted(feature_combo2npmi.items(),
                                    key=lambda item: item[1], reverse=True):
         f.write('{}\t{}\t{:.2f}\n'.format(f_i, f_j, npmi))

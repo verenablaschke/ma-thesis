@@ -1,29 +1,31 @@
 import numpy as np
 import sys
 
-if len(sys.argv) != 3:
-    print("Usage: parse_results.py MODEL CLASS")
-    print("E.g.: parse_results.py dialects10/fold-0 nordnorsk")
+if len(sys.argv) != 4:
+    print("Usage: parse_results.py MODEL FOLD_COUNT CLASS")
+    print("E.g.: parse_results.py models/dialects10 10 nordnorsk")
     sys.exit()
 
 folder = sys.argv[1]
-label = sys.argv[2]
-IN_FILE = '{}/importance_values_{}.txt'.format(folder, label)
+label = sys.argv[3]
+THRESHOLD = 10  # per fold
 OUT_FILE = '{}/importance_values_{}_sorted.tsv'.format(folder, label)
-
-THRESHOLD = 10
-
 scores = {}
-with open(IN_FILE, 'r', encoding='utf8') as in_file:
-    for i, line in enumerate(in_file):
-        _, feature, score = line.strip().split('\t')
-        try:
-            prev = scores[feature]
-        except KeyError:
-            prev = []
-        scores[feature] = prev + [float(score)]
-        if i % 50000 == 0:
-            print(i, feature)
+
+
+for fold in range(int(sys.argv[2])):
+    in_file = '{}/fold-{}/importance_values_{}.txt'.format(folder, fold, label)
+    print(in_file)
+    with open(in_file, 'r', encoding='utf8') as in_file:
+        for i, line in enumerate(in_file):
+            _, feature, score = line.strip().split('\t')
+            try:
+                prev = scores[feature]
+            except KeyError:
+                prev = []
+            scores[feature] = prev + [float(score)]
+            if i % 50000 == 0:
+                print(i, feature)
 
 print("sorting")
 means = [(feature, np.mean(scores[feature]), len(scores[feature])) for feature in scores]

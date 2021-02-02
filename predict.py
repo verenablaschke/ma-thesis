@@ -124,12 +124,12 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
         print('\n\n')
 
 
-def save_to_file(filename, nr, label_encoder, lime_results):
-    for label, results in lime_results.items():
-        with open(filename.format(label_encoder.inverse_transform([label])[0]),
-                  'a+', encoding='utf8') as f:
-            for feature, score in results:
-                f.write('{}\t{}\t{:.10f}\n'.format(nr, feature, score))
+# def save_to_file(filename, nr, label_encoder, lime_results):
+    # for label, results in lime_results.items():
+    #     with open(filename.format(label_encoder.inverse_transform([label])[0]),
+    #               'a+', encoding='utf8') as f:
+    #         for feature, score in results:
+    #             f.write('{}\t{}\t{:.10f}\n'.format(nr, feature, score))
 
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
@@ -140,12 +140,16 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
                                   recalculate_ngrams=False)
-    lime_results = {i: [] for i in range(n_labels)}
-    with open(out_folder + 'predictions.tsv', 'w+', encoding='utf8') as f_out:
-        for i, (utterance, ngrams, encoded) in enumerate(zip(test_x_raw,
-                                                             test_x_ngrams,
-                                                             test_x)):
-            label = test_y[i]
+    # lime_results = {i: [] for i in range(n_labels)}
+    with open(out_folder + 'predictions.tsv', 'w+', encoding='utf8') as f_pred:
+        for idx, (utterance, ngrams, encoded, y) in enumerate(zip(test_x_raw,
+                                                                  test_x_ngrams,
+                                                                  test_x,
+                                                                  test_y)):
+            y_raw = label_encoder.inverse_transform([y])[0]
+            pred_enc = classifier.predict(encoded)[0]
+            pred_raw = label_encoder.inverse_transform([pred_enc])[0]
+
             exp = explainer.explain_instance(ngrams,
                                              lambda z: predict_proba2(classifier,
                                                                       z,
@@ -157,44 +161,50 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                              # labels=interesting_labels
                                              num_samples=1000
                                              )
+            # for lab in labels:
+            #     lime_results[lab] = lime_results[lab] + exp.as_list(label=lab)
+            
+
+            f_pred.write('{}\t{}\t{}\t{}\n'.format(idx, utterance,
+                                                   y_raw, pred_raw))
+
             for lab in labels:
-                lime_results[lab] = lime_results[lab] + exp.as_list(label=lab)
+                lime_results = exp.as_list(label=lab)
+                lab_raw = label_encoder.inverse_transform([lab])[0]
+                with open('{}/importance_values_{}.txt'.format(out_folder,
+                                                               lab_raw),
+                          'a+', encoding='utf8') as f:
+                    for feature, score in lime_results:
+                        f.write('{}\t{}\t{:.10f}\n'.format(idx, feature, score))
 
-            pred = classifier.predict(encoded)
-            f_out.write(utterance + '\t')
-            f_out.write(label_encoder.inverse_transform([label])[0] + '\t')
-            f_out.write(label_encoder.inverse_transform(pred)[0] + '\n')
-
-            if i % 50 == 0:
-                interesting_labels = [label]
-                pred = predict_instance(classifier, ngrams, label_encoder,
-                                        vectorizer, linear_svc)
+            if idx % 50 == 0:
+                # pred = predict_instance(classifier, ngrams, label_encoder,
+                #                         vectorizer, linear_svc)
                 now = datetime.datetime.now()
-                print(i)
+                print(idx)
                 print(now)
                 print('"' + utterance + '""')
-                print('ACTUAL', label_encoder.inverse_transform([label])[0])
-                print('PREDICTED', pred[1])
-                if pred[0] not in interesting_labels:
-                    interesting_labels.append(pred[0])
+                print('ACTUAL', y_raw)
+                print('PREDICTED', pred_raw)
+                print('\n')
+                # interesting_labels = [y]
+                # if pred[0] not in interesting_labels:
+                #     interesting_labels.append(pred[0])
                 # for l in interesting_labels:
                 #     exp.show_in_notebook(text=utterance, labels=(l,))
-                print('\n')
-                save_to_file(out_folder + '/importance_values_{}.txt', i,
-                             label_encoder, lime_results)
                 with open(out_folder + '/log.txt', 'a', encoding='utf8') as f:
-                    f.write(str(i) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
-                    f.write('ACTUAL: ' + str(label_encoder.inverse_transform([label])[0]) + '\n')
-                    f.write('PREDICTED: ' + str(pred[1]) + '\n')
+                    f.write(str(idx) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
+                    f.write('ACTUAL: ' + str(y_raw) + '\n')
+                    f.write('PREDICTED: ' + str(pred_raw) + '\n')
                     for label_nr in range(n_labels):
                         lab = label_encoder.inverse_transform([label_nr])[0]
                         f.write('Class ' + lab + ': ' + ', '.join(
-                            ['{}\t{:.5f}\n'.format(x[0], x[1]) for x in exp.as_list(label=0)[:5]]) + '\n')
+                            ['{}\t{:.5f}'.format(x[0], x[1]) for x in exp.as_list(label=label_nr)[:5]]) + '\n')
                     f.write('\n')
-                lime_results = {i: [] for i in range(n_labels)}
-            i += 1
+                # save_to_file(out_folder + '/importance_values_{}.txt', idx,
+                #              label_encoder, lime_results)
+                # lime_results = {i: [] for i in range(n_labels)}
 
-    i -= 1
-    if i % 50 != 0:
-        save_to_file(out_folder + '/importance_values_{}.txt', i, label_encoder,
-                     lime_results)
+    # if idx % 50 != 0:
+    #     save_to_file(out_folder + '/importance_values_{}.txt', idx,
+    #                  label_encoder, lime_results)
