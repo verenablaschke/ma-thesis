@@ -17,22 +17,12 @@ from pathlib import Path
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model')
-parser.add_argument('type')
-parser.add_argument('fold')
+parser.add_argument('model', help='path to the model')
+parser.add_argument('type', help='type of the data (dialects/tweets)')
+parser.add_argument('fold', help='fold number')
 args = parser.parse_args()
 
-if not args.model:
-    print("You need to provide a path to the model to save or load it.")
-    sys.exit()
 
-if not args.type:
-    print("You need to provide the type of the data (dialects/tweets)")
-    sys.exit()
-
-if not args.fold:
-    print("You need to provide a fold number.")
-    sys.exit()
 
 def get_features(filename):
     raw, ngrams, labels = [], [], []

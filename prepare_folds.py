@@ -17,19 +17,10 @@ from pathlib import Path
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('model')
+parser.add_argument('model', help='path to the model')
 parser.add_argument('k', help='k for k-fold cross-validation',
                     default='10', type=int)
 args = parser.parse_args()
-
-if not args.model:
-    print("You need to provide a path to the model to save or load it.")
-    sys.exit()
-
-if not args.k:
-    print("You need to provide the number of folds.")
-    sys.exit()
-
 
 instances = []
 with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:
