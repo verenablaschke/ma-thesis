@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import sys
 
@@ -5,7 +6,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('model', help='path to the model')
 parser.add_argument('label', help='the class')
 parser.add_argument('mode', help='pos / truepos / falsepos / all')
-parser.add_argument('k', help='number of folds')
+parser.add_argument('k', help='number of folds', type=int)
 parser.add_argument('--min', dest='min_count', help='min. count per fold',
                     default=10, type=int)
 args = parser.parse_args()
@@ -20,7 +21,7 @@ scores = {}
 for fold in range(args.k):
     if MODE != 'all':
         indices = []
-        with open('{}/fold-{}/predictions.txt'.format(FOLDER, fold), 'r',
+        with open('{}/fold-{}/predictions.tsv'.format(FOLDER, fold), 'r',
                   encoding='utf8') as f:
             for line in f:
                 idx, _, y, pred = line.strip().split('\t')
