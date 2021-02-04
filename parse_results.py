@@ -7,6 +7,8 @@ parser.add_argument('model', help='path to the model')
 parser.add_argument('label', help='the class')
 parser.add_argument('mode', help='pos / truepos / falsepos / all')
 parser.add_argument('k', help='number of folds', type=int)
+parser.add_argument('--s', dest='single_fold', help='single fold only',
+                    default=False, action='store_true')
 parser.add_argument('--min', dest='min_count', help='min. count per fold',
                     default=10, type=int)
 args = parser.parse_args()
@@ -17,8 +19,11 @@ THRESHOLD = args.min_count
 MODE = args.mode
 
 
+folds = [args.k] if args.single_fold else range(args.k)
+
+
 scores = {}
-for fold in range(args.k):
+for fold in folds:
     if MODE != 'all':
         indices = []
         with open('{}/fold-{}/predictions.tsv'.format(FOLDER, fold), 'r',
@@ -56,8 +61,13 @@ means = sorted(means, key=lambda x: x[1] if x[2] >= THRESHOLD else -1,
                reverse=True)
 print("sorted")
 
-with open('{}/importance_values_{}_{}_sorted.tsv'.format(FOLDER, CLASS, MODE),
-          'w', encoding='utf8') as out_file:
+
+out_file = '{}/importance_values_{}_{}_sorted.tsv'.format(FOLDER, CLASS, MODE)
+if args.single_fold:
+    out_file = '{}/fold-{}/importance_values_{}_{}_sorted.tsv'.format(FOLDER,
+        args.k, CLASS, MODE)    
+print(out_file)
+with open(out_file, 'w', encoding='utf8') as out_file:
     out_file.write('FEATURE\tMEAN\tSUM\tCOUNT\n')
     for (feature, mean, num) in means:
         out_file.write('{}\t{:.10f}\t'.format(feature, mean))

@@ -5,11 +5,18 @@ IN_FILE = 'data/bokmaal+phon_cleaned.tsv'
 OUT_FILE = 'data/dialect_features.txt'
 
 
-ikke = []
+ikke, noe, noen, mye = [], [], [], []
 jeg, hun, vi, dere, de = [], [], [], [], []
+hva, hvem, hvorfor, når, hvordan, åssen = [], [], [], [], [], []
 rs, sl = [], []
 
-# question_words = ['hva', 'hvordan', 'hvorfor', 'vem', '']
+
+word2list = {'ikke': ikke, 'noe': noe, 'noen': noen, 'mye': mye,
+             'jeg': jeg, 'hun': hun, 'vi': vi, 'dere': dere, 'de': de,
+             'hva': hva, 'hvem': hvem, 'hvorfor': hvorfor, 'når': når,
+             'hvordan': hvordan, 'åssen': åssen
+             }
+
 
 with open(IN_FILE, 'r', encoding='utf8') as f:
     for line in f:
@@ -17,18 +24,12 @@ with open(IN_FILE, 'r', encoding='utf8') as f:
         tokens = utterance.split(' ')
         for token in tokens:
             bokmaal, phon = token.split('/')
-            if bokmaal == 'ikke':
-                ikke.append(phon)
-            elif bokmaal == 'jeg':
-                jeg.append(phon)
-            elif bokmaal == 'hun':
-                hun.append(phon)
-            elif bokmaal == 'vi':
-                vi.append(phon)
-            elif bokmaal == 'dere':
-                dere.append(phon)
-            elif bokmaal == 'de':
-                de.append(phon)
+
+            try:
+                word2list[bokmaal].append(phon)
+            except KeyError:
+                pass
+
             else:
                 if 'rs' in bokmaal:
                     if 'rs' in phon and 'ʂ' not in phon:
@@ -43,15 +44,6 @@ with open(IN_FILE, 'r', encoding='utf8') as f:
 
 
 with open(OUT_FILE, 'w+', encoding='utf8') as f:
-    f.write('IKKE\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(ikke).most_common()]) + '\n\n')
-    f.write('JEG\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(jeg).most_common()]) + '\n\n')
-    f.write('HUN\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(hun).most_common()]) + '\n\n')
-    f.write('VI\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(vi).most_common()]) + '\n\n')
-    f.write('DE\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(de).most_common()]) + '\n\n')
-    f.write('DERE\n')
-    f.write(', '.join(['{} ({})'.format(*c) for c in Counter(dere).most_common()]) + '\n\n')
+    for word, variants in word2list.items():
+        f.write('{}\n'.format(word.upper()))
+        f.write(', '.join(['{} ({})'.format(*c) for c in Counter(variants).most_common()]) + '\n\n')
