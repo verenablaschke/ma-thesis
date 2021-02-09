@@ -31,32 +31,47 @@ for fold in range(args.k):
     #                 indices.append(idx)
     for label in labels:
         in_file = '{}/fold-{}/importance_values_{}_all_sorted.tsv'.format(args.model, fold, label)
-        print(in_file)
+        # print(in_file)
         with open(in_file, 'r', encoding='utf8') as in_file:
             next(in_file)  # Skip header
             for i, line in enumerate(in_file):
                 feature, score, _, _ = line.strip().split('\t')
                 # if MODE != 'all' and idx not in indices:
                 #     continue
+                score = float(score)
                 try:
-                    prev = scores[feature]
+                    scores[feature][label][fold] = score
                 except KeyError:
-                    prev = []
-                scores[feature] = prev + [float(score)]
-                if i % 50000 == 0:
-                    print(i, feature)
+                    try:
+                        scores[feature][label] = {fold: score}
+                    except KeyError:
+                        scores[feature] = {label: {fold: score}}
 
 n_features = len(scores)
-print(n_features)
-array_len = len(scores[list(scores)[0]])
+n_labels = len(labels)
+print(n_features, 'features')
 
+example = list(scores)[0]
+print(example, scores[example])
 
-feature_list = []
-matrix = np.zeros((n_features, array_len))
-for idx, (feature, array) in enumerate(scores.items()):
-    print(feature, array)
-    feature_list.append(feature)
-    matrix[idx] = np.array(array)
+feature2idx = {}
+label2feature2score = {}
+matrix = np.zeros((n_features, n_labels * args.k))
+for idx_feat, (feature, label2fold) in enumerate(scores.items()):
+    feature2idx[feature] = idx_feat
+    for idx_lab, label in enumerate(labels):
+        total = 0
+        for idx_fold in range(args.k):
+            try:
+                score = label2fold[label][fold]
+                matrix[idx_feat, idx_lab * args.k + idx_fold] = score
+                total += score
+            except KeyError:
+                pass
+        try:
+            label2feature2score[label][feature] = score
+        except KeyError:
+            label2feature2score[label] = {feature: score}
 
 
 pca = PCA(n_components=2)
@@ -64,11 +79,29 @@ X = pca.fit_transform(matrix)
 print(pca.explained_variance_ratio_)
 
 fig, ax = plt.subplots()
-ax.scatter(X[:50, 0], X[:50, 1])
 
-for i, feature in enumerate(feature_list):
-    if i == 50:
-        break
-    ax.annotate(feature, X[i])
+top_features = set()
+
+for label, feature2score in label2feature2score.items():
+    top_features.update(f for (f, _) in sorted(feature2score.items(),
+        key=lambda x: x[1], reverse=True)[:50])
+
+print(len(top_features), top_features)
+
+# TODO make more flexible
+colours = ['red', 'green', 'blue', 'purple']
+label2col = {lab: col for (lab, col) in zip(labels, colours)}
+
+for feature in top_features:
+    idx = feature2idx[feature]
+    top_label = ''
+    top_score = -1.0
+    for label in labels:
+        score_label = label2feature2score[label][feature]
+        if score_label > top_score:
+            top_label = label
+            top_score = score_label
+    ax.scatter(X[idx, 0], X[idx, 1], color=label2col[top_label])
+    ax.annotate(feature, X[idx])
 
 plt.show()
