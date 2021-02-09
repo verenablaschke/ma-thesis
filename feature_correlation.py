@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 MIN_COUNT = args.count
 MIN_NPMI = args.npmi
-
+args.mode = args.model.strip()
 
 lvl2feature2utt = dict()
 with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:

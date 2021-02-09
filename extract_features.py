@@ -30,8 +30,10 @@ if not args.model:
     sys.exit()
 
 
+args.word_ngrams = args.word_ngrams.strip()
+args.char_ngrams = args.char_ngrams.strip()
 if args.word_ngrams[0] != '[' or args.word_ngrams[-1] != ']' or args.char_ngrams[0] != '[' or args.char_ngrams[-1] != ']' :
-    print("The list of n-gram levels needs to be enclosed in square brackets, e.g. [1,2,3] or []")
+    print("The list of n-gram levels needs to be enclosed in square brackets, e.g. [1,2,3] or [].")
     sys.exit()
 WORD_NS = args.word_ngrams[1:-1]
 if len(WORD_NS) == 0:

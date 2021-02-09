@@ -84,11 +84,10 @@ for dialect_area in norwegian:
 
 
 skip_tokens = ['#', '##',  # pauses
-                 '*',  # overlapping utterances
-                 'e',  # TODO: 'e' only in bokmål version
-                 '?', '!', '"', '...', '…', '"',
-                 # "Interjeksjonar vi ikkje endrar stavemåten på"
-                 'ee', 'eh', 'ehe', 'em', 'heh', 'hm', 'm', 'm-m', 'mhm', 'mm'
+               '*',  # overlapping utterances
+               '?', '!', '"', '...', '…', '"',
+               # "Interjeksjonar vi ikkje endrar stavemåten på"
+               'ee', 'eh', 'ehe', 'em', 'heh', 'hm', 'm', 'm-m', 'mhm', 'mm'
                 ]
 if MODE == 'ORTHO' or MODE == 'BOTH':
     skip_tokens.append('e')
@@ -141,6 +140,7 @@ def clean_phono(utterance):
 
 places = set()
 informants = set()
+area2towns, area2files = {}, {}
 skipped = []
 _, _, filenames = next(os.walk(INPUT_DIR))
 with open(OUT_FILE, 'w', encoding='utf8') as out_file:
@@ -247,6 +247,14 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                         continue
                     utterance = ' '.join(utterance).strip()
                     out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + file + '\t' + utterance + '\n')
+                    try:
+                        area2towns[place2area[place]].add(place)
+                    except KeyError:
+                        area2towns[place2area[place]] = {place}
+                    try:
+                        area2files[place2area[place]].append(file)
+                    except KeyError:
+                        area2files[place2area[place]] = [file]
             except StopIteration:
                 pass
 
@@ -254,11 +262,38 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
             in_file_ortho.close()
 
 
+gk, uk, gm, um, other = [], [], [], [], []
+for informant in informants:
+    code = informant[-2:]
+    if code == 'gk':
+        gk.append(informant)
+    elif code == 'uk':
+        uk.append(informant)
+    elif code == 'gm':
+        gm.append(informant)
+    elif code == 'um':
+        um.append(informant)
+    else:
+        other.append(informant)
+
 with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     log_file.write('No. of places: ' + str(len(places)) + '\n')
     log_file.write(str(places) + '\n\n')
+    for area, towns in area2towns.items():
+        log_file.write(area + ': ' + str(len(towns)) + ' / ' + str(len(area2files[area])) + '\n')
+        log_file.write(str(towns) + '\n\n')
+        # log_file.write(str(area2files[area]) + '\n\n')
     log_file.write('No. of informants: ' + str(len(informants)) + '\n')
-    log_file.write(str(informants) + '\n\n')
+    log_file.write('GAMMEL KVINNE: ' + str(len(gk)) + '\n')
+    log_file.write(str(gk) + '\n\n')
+    log_file.write('UNG KVINNE: ' + str(len(uk)) + '\n')
+    log_file.write(str(uk) + '\n\n')
+    log_file.write('GAMMEL MANN: ' + str(len(gm)) + '\n')
+    log_file.write(str(gm) + '\n\n')
+    log_file.write('UNG MANN: ' + str(len(um)) + '\n')
+    log_file.write(str(um) + '\n\n')
+    log_file.write('OTHER: ' + str(len(other)) + '\n')
+    log_file.write(str(other) + '\n\n')
     if MODE == 'BOTH':
         log_file.write('Skipped (no orthographic counterpart):\n')
         log_file.write(str(skipped) + '\n\n')
