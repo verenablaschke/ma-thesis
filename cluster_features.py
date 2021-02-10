@@ -3,6 +3,13 @@ import argparse
 import numpy as np
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import random
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.metrics.pairwise import cosine_similarity
+
+import sys
+# avoid RecursionErrors when creating large dendrograms
+sys.setrecursionlimit(10000)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model')
@@ -74,26 +81,26 @@ for idx_feat, (feature, label2fold) in enumerate(scores.items()):
             label2feature2score[label] = {feature: score}
 
 
-pca = PCA(n_components=2)
-X = pca.fit_transform(matrix)
-print(pca.explained_variance_ratio_)
 
-fig, ax = plt.subplots()
-
-top_features = set()
-
-for label, feature2score in label2feature2score.items():
-    top_features.update(f for (f, _) in sorted(feature2score.items(),
-        key=lambda x: x[1], reverse=True)[:50])
-
-print(len(top_features), top_features)
+def get_select_features(n=50):
+    top_features = set()
+    random_features = set()
+    for label, feature2score in label2feature2score.items():
+        print(label)
+        top_features.update(f for (f, _) in sorted(feature2score.items(),
+            key=lambda x: x[1], reverse=True)[:n])
+        featurelist = list(feature2score.items())
+        random.shuffle(featurelist)
+        random_features.update(f for (f, _) in featurelist[:n])
+    print(len(top_features), len(random_features))
+    return top_features, random_features
 
 # TODO make more flexible
 colours = ['red', 'green', 'blue', 'purple']
 label2col = {lab: col for (lab, col) in zip(labels, colours)}
 
-for feature in top_features:
-    idx = feature2idx[feature]
+
+def get_colour(feature):
     top_label = ''
     top_score = -1.0
     for label in labels:
@@ -101,7 +108,51 @@ for feature in top_features:
         if score_label > top_score:
             top_label = label
             top_score = score_label
-    ax.scatter(X[idx, 0], X[idx, 1], color=label2col[top_label])
-    ax.annotate(feature, X[idx])
+    return label2col[top_label]
 
-plt.show()
+
+def scatter(X, features, add_labels=True):
+    fig, ax = plt.subplots()
+    for feature in features:
+        idx = feature2idx[feature]
+        ax.scatter(X[idx, 0], X[idx, 1], color=get_colour(feature))
+        if add_labels:
+            ax.annotate(feature, X[idx])
+    plt.show()
+
+
+def tree(matrix, features):
+    X_rand = np.zeros((len(features), n_labels * args.k))
+    features = list(features)
+    for idx, feat in enumerate(features):
+        X_rand[idx] = matrix[feature2idx[feat]]
+
+    dist = 1 - cosine_similarity(X_rand)
+    Z = linkage(dist, method='average')
+    fig, ax = plt.subplots()
+    dendrogram(
+        Z,
+        labels=features,
+        orientation='left',
+        leaf_font_size=2.
+        )
+    features = ax.get_ymajorticklabels()
+    for feat in features:
+        feat.set_color(get_colour(feat.get_text()))
+    plt.show()
+
+
+def create_figs(n, add_labels=True):
+    top_features, random_features = get_select_features(n)
+    pca = PCA(n_components=2)
+    X = pca.fit_transform(matrix)
+    print(pca.explained_variance_ratio_)
+    scatter(X, top_features, add_labels)
+    scatter(X, random_features, add_labels)
+    tree(matrix, top_features)
+    tree(matrix, random_features)
+
+
+# create_figs(50)
+create_figs(500, False)
+# create_figs(2000)
