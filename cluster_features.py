@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import random
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics.pairwise import cosine_similarity
+from matplotlib.patches import Patch
+from matplotlib.pyplot import cm
+from scipy.cluster import hierarchy
+import matplotlib as mpl
 
 import sys
 # avoid RecursionErrors when creating large dendrograms
@@ -15,8 +19,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('model')
 parser.add_argument('classes', help='separated by commas, e.g. nordnorsk,vestnorsk,oestnorsk,troendersk')
 parser.add_argument('k', help='number of folds', default='10', type=int)
+parser.add_argument('numfeatures', help='number of features per class', type=int)
 args = parser.parse_args()
 
+print(args)
 
 labels = args.classes.split(',')
 
@@ -108,37 +114,54 @@ def get_colour(feature):
         if score_label > top_score:
             top_label = label
             top_score = score_label
-    return label2col[top_label]
+    return label2col[top_label], top_label
 
 
 def scatter(X, features, add_labels=True):
     fig, ax = plt.subplots()
     for feature in features:
         idx = feature2idx[feature]
-        ax.scatter(X[idx, 0], X[idx, 1], color=get_colour(feature))
+        ax.scatter(X[idx, 0], X[idx, 1], color=get_colour(feature)[0])
         if add_labels:
             ax.annotate(feature, X[idx])
     plt.show()
 
 
-def tree(matrix, features):
+def n_to_fontsize(n):
+    if n < 20:
+        return 10
+    if n < 60:
+        return 5
+    return 2
+
+
+def n_to_threshold(n):
+    if n < 20:
+        return 0.7
+    return 0.4
+
+
+def tree(matrix, features, n, selection):
     X_rand = np.zeros((len(features), n_labels * args.k))
     features = list(features)
     for idx, feat in enumerate(features):
         X_rand[idx] = matrix[feature2idx[feat]]
-
     dist = 1 - cosine_similarity(X_rand)
     Z = linkage(dist, method='average')
+    hierarchy.set_link_color_palette([mpl.colors.rgb2hex(rgb[:3]) for rgb in cm.rainbow(np.linspace(0, 1, 10))])
     fig, ax = plt.subplots()
-    dendrogram(
-        Z,
-        labels=features,
-        orientation='left',
-        leaf_font_size=2.
-        )
+    tree = dendrogram(Z, labels=features, orientation='left',
+                      leaf_font_size=n_to_fontsize(n),
+                      color_threshold=n_to_threshold(n) * max(Z[:,2]))
+    with open(args.model + '/dendrogram-{}-{}.txt'.format(n, selection),
+              'w+', encoding='utf8') as f:
+        for feature, col in zip(tree['ivl'], tree['color_list']):
+            f.write("{}\t{}\t{}\n".format(col, feature, get_colour(feature)[1]))
     features = ax.get_ymajorticklabels()
     for feat in features:
-        feat.set_color(get_colour(feat.get_text()))
+        feat.set_color(get_colour(feat.get_text())[0])
+    ax.legend(handles=[Patch(color=col, label=lab) for lab, col in label2col.items()],
+              loc='upper left')
     plt.show()
 
 
@@ -147,12 +170,10 @@ def create_figs(n, add_labels=True):
     pca = PCA(n_components=2)
     X = pca.fit_transform(matrix)
     print(pca.explained_variance_ratio_)
-    scatter(X, top_features, add_labels)
-    scatter(X, random_features, add_labels)
-    tree(matrix, top_features)
-    tree(matrix, random_features)
+    # scatter(X, top_features, add_labels)
+    # scatter(X, random_features, add_labels)
+    tree(matrix, top_features, n, 'top')
+    # tree(matrix, random_features, n, 'random')
 
 
-# create_figs(50)
-create_figs(500, False)
-# create_figs(2000)
+create_figs(args.numfeatures)
