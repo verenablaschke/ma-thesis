@@ -10,6 +10,7 @@ from matplotlib.patches import Patch
 from matplotlib.pyplot import cm
 from scipy.cluster import hierarchy
 import matplotlib as mpl
+from pathlib import Path
 
 import sys
 # avoid RecursionErrors when creating large dendrograms
@@ -117,14 +118,19 @@ def get_colour(feature):
     return label2col[top_label], top_label
 
 
-def scatter(X, features, add_labels=True):
+def scatter(X, features, n, selection, add_labels=True):
     fig, ax = plt.subplots()
     for feature in features:
         idx = feature2idx[feature]
         ax.scatter(X[idx, 0], X[idx, 1], color=get_colour(feature)[0])
         if add_labels:
             ax.annotate(feature, X[idx])
-    plt.show()
+    # plt.show()
+    fig.set_size_inches(20, 15)
+    fig.savefig(args.model + '/figures/scatter-{}-{}.png'.format(n, selection),
+                # dpi=200
+                # bbox_inches='tight'
+                )
 
 
 def n_to_fontsize(n):
@@ -136,9 +142,9 @@ def n_to_fontsize(n):
 
 
 def n_to_threshold(n):
-    if n < 20:
-        return 0.7
-    return 0.4
+    # if n < 20:
+    #     return 0.7
+    return 0.5
 
 
 def tree(matrix, features, n, selection):
@@ -162,7 +168,12 @@ def tree(matrix, features, n, selection):
         feat.set_color(get_colour(feat.get_text())[0])
     ax.legend(handles=[Patch(color=col, label=lab) for lab, col in label2col.items()],
               loc='upper left')
-    plt.show()
+    # plt.show()
+    fig.set_size_inches(20, 15)
+    fig.savefig(args.model + '/figures/dendrogram-{}-{}.png'.format(n, selection),
+                # dpi=200
+                # bbox_inches='tight'
+                )
 
 
 def create_figs(n, add_labels=True):
@@ -170,10 +181,15 @@ def create_figs(n, add_labels=True):
     pca = PCA(n_components=2)
     X = pca.fit_transform(matrix)
     print(pca.explained_variance_ratio_)
-    # scatter(X, top_features, add_labels)
-    # scatter(X, random_features, add_labels)
+    Path(args.model + '/figures/').mkdir(parents=True, exist_ok=True)
+    print("Scatter (top)")
+    scatter(X, top_features, n, 'top', add_labels)
+    print("Scatter (random)")
+    scatter(X, random_features, n, 'random', add_labels)
+    print("Dendrogram (top)")
     tree(matrix, top_features, n, 'top')
-    # tree(matrix, random_features, n, 'random')
+    print("Dendrogram (random)")
+    tree(matrix, random_features, n, 'random')
 
 
 create_figs(args.numfeatures)

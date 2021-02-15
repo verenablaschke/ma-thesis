@@ -8,6 +8,7 @@ import sys
 import argparse
 import pickle
 import datetime
+from collections import Counter
 
 
 parser = argparse.ArgumentParser()
@@ -49,6 +50,24 @@ print("Word-level n-grams used: " + str(WORD_NS))
 print("Char-level n-grams used: " + str(CHAR_NS))
 
 
+featuremap = {}
+
+
+def add_ngram(featuremap, label, ngram, context):
+    try:
+        featuremap[label][ngram].append(context)
+    except KeyError:
+        try:
+            featuremap[label][ngram] = [context]
+        except KeyError:
+            featuremap[label] = {ngram: [context]}
+
+
+def update_featuremap(featuremap, label, ngram, context):
+    add_ngram(featuremap, label, ngram, context)
+    add_ngram(featuremap, 'all', ngram, context)
+
+
 # U0329, U030D are the combining lines for marking syllabic consonants
 char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
 
@@ -86,15 +105,13 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
             if not DIALECTS:
                 tokens = [tok if tok in escape_toks else tok.lower() for tok in tokens]
             ngram = sep.join(tokens)
-            # if unk in ngram:
-            #     continue
             # Padding to distinguish these from char n-grams
             ngram = '<SOS>' + ngram + '<EOS>'
             cur_ngrams.append(ngram)
         ngrams.append(cur_ngrams)
     for char_n in char_ns:
         cur_ngrams = []
-        for word in words_charlvl:
+        for word, context in zip(words_charlvl, words_wordlvl):
             if word in escape_toks:
                 continue
             chars = list(char_pattern.findall(word))
@@ -103,20 +120,19 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 continue
                 
             pfx = chars[:char_n - 1]
-            # if unk in pfx:
-            #     break
-            cur_ngrams.append(sep + ''.join(pfx))
+            ngram = sep + ''.join(pfx)
+            cur_ngrams.append(ngram)
+            update_featuremap(featuremap, label, ngram, context)
             
             for i in range(len(chars) + 1 - char_n):
-                ngram = chars[i:i + char_n]
-                # if unk in ngram:
-                #     continue
-                cur_ngrams.append(''.join(ngram))
+                ngram = ''.join(chars[i:i + char_n])
+                cur_ngrams.append(ngram)
+                update_featuremap(featuremap, label, ngram, context)
 
             sfx = chars[word_len + 1 - char_n:]
-            # if unk in sfx:
-            #     break
-            cur_ngrams.append(''.join(sfx) + sep)
+            ngram = ''.join(sfx) + sep
+            cur_ngrams.append(ngram)
+            update_featuremap(featuremap, label, ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
         print(utterance, ngrams)
@@ -129,8 +145,6 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
             f.write(' '.join(lvl_ngrams))
         f.write('\n')
     return ngrams_flat
-
-
 
 
 infile = 'data/bokmaal+phon_cleaned.tsv' if DIALECTS else 'data/tweets_cleaned.tsv'
@@ -155,3 +169,16 @@ with open(outfile, 'w+', encoding='utf8') as f:
     f.write('\n')
 for utterance, label in zip(data['utterances'], data['labels']):
     utterance2ngrams(utterance, label, outfile)
+
+
+threshold = 10
+for label, feature2context in featuremap.items():
+    with open(args.model + '/featuremap-' + label + '.tsv', 'w+',
+              encoding='utf8') as f:
+        for feature, context in feature2context.items():
+            f.write(feature)
+            filtered_context = ['{}({})'.format(cont, count) for cont, count in Counter(context).most_common() if count >= threshold]
+            if filtered_context:
+                f.write('\t')
+                f.write('\t'.join(filtered_context))
+            f.write('\n')
