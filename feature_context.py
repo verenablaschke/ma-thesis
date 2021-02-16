@@ -29,10 +29,6 @@ with open('{}/features-correlated.tsv'.format(args.model),
         if corr < args.min_corr_info:
             # The file is sorted by correlation scores (descending order)
             break
-        if feature1 == '<SEP>nu' and feature2 == 'nu<SEP>':
-            print(line)
-        if feature1 == 'nu<SEP>' and feature2 == '<SEP>nu':
-            print(line)
         if feature1 == feature2:
             continue
         if corr < args.min_corr_merge:
@@ -53,11 +49,6 @@ with open('{}/features-correlated.tsv'.format(args.model),
             feature2identical[feature2].add(feature1)
         except KeyError:
             feature2identical[feature2] = {feature1}
-
-
-print(feature2identical['<SEP>nu'])
-print(feature2corr['<SEP>nu'])
-i = 1/0
 
 
 for label in labels:
@@ -125,9 +116,10 @@ for label in labels:
                     npmi = feature2corr[feature][corr]
                     try:
                         (idx2, feature2, mean2, importance_sum2, count2, _, _, _) = feature2results[corr]
-                        corr_list.append('{}/{}/{:.2f}/{:.2f}/{:.2f}/{}'.format(idx2, feature2, npmi, mean2, importance_sum2, count2))
+                        corr_list.append((npmi, '{}/{}/{:.2f}/{:.2f}/{:.2f}/{}'.format(idx2, feature2, npmi, mean2, importance_sum2, count2)))
                     except KeyError:
-                        corr_list.append('--/{}/{:.2f}/--/--/--'.format(corr, npmi))
+                        corr_list.append((npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
+                corr_list = [entry for (_, entry) in sorted(corr_list, key=lambda x: x[0], reverse=True)]
             f_out.write(', '.join(corr_list))
             f_out.write('\n')
 
