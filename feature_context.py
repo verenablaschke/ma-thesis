@@ -29,6 +29,12 @@ with open('{}/features-correlated.tsv'.format(args.model),
         if corr < args.min_corr_info:
             # The file is sorted by correlation scores (descending order)
             break
+        if feature1 == '<SEP>nu' and feature2 == 'nu<SEP>':
+            print(line)
+        if feature1 == 'nu<SEP>' and feature2 == '<SEP>nu':
+            print(line)
+        if feature1 == feature2:
+            continue
         if corr < args.min_corr_merge:
             try:
                 feature2corr[feature1][feature2] = corr
@@ -38,17 +44,20 @@ with open('{}/features-correlated.tsv'.format(args.model),
                 feature2corr[feature2][feature1] = corr
             except KeyError:
                 feature2corr[feature2] = {feature1: corr}
-        else:
-            if feature1 == feature2:
-                continue
-            try:
-                feature2identical[feature1].add(feature2)
-            except KeyError:
-                feature2identical[feature1] = {feature2}
-            try:
-                feature2identical[feature2].add(feature1)
-            except KeyError:
-                feature2identical[feature2] = {feature1}
+            continue
+        try:
+            feature2identical[feature1].add(feature2)
+        except KeyError:
+            feature2identical[feature1] = {feature2}
+        try:
+            feature2identical[feature2].add(feature1)
+        except KeyError:
+            feature2identical[feature2] = {feature1}
+
+
+print(feature2identical['<SEP>nu'])
+print(feature2corr['<SEP>nu'])
+i = 1/0
 
 
 for label in labels:
@@ -83,7 +92,7 @@ for label in labels:
 
     with open('{}/importance_values_{}_all_sorted_{}context.tsv'.format(
             args.model, label, threshold), 'w+', encoding='utf8') as f_out:
-        f_out.write('INDEX\t' + header + '\tCONTEXT\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\tCORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
+        f_out.write('INDEX\t' + header + '\tCONTEXT\tN_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\tCORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
         for result in top_results:
             (idx, feature, mean, importance_sum, count, context, identical, correlated) = result
@@ -95,19 +104,20 @@ for label in labels:
                 idx, feature, mean, importance_sum, count, context))
 
             mirror_list = []
+            n_identical_top = 0
             if identical:
                 for mirror in identical:
                     try:
                         (idx2, feature2, mean2, importance_sum2, count2, _, _, _) = feature2results[mirror]
                         if idx2 < threshold and idx2 > idx:
-                            skip.add(idx)
+                            n_identical_top += 1
+                            skip.add(idx2)
                             print(feature, mirror)
                             print('Moved ' + str(idx2))
                         mirror_list.append('{}/{}/{:.2f}/{:.2f}/{}'.format(idx2, feature2, mean2, importance_sum2, count2))
                     except KeyError:
                         mirror_list.append('--/{}/--/--/--'.format(mirror))
-            f_out.write(', '.join(mirror_list))
-            f_out.write('\t')
+            f_out.write('{}\t{}\t'.format(n_identical_top, ', '.join(mirror_list)))
 
             corr_list = []
             if correlated:
