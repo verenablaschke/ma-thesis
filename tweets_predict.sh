@@ -3,7 +3,7 @@
 # In the case of line ending problems (Windows vs. UNIX encodings), run:
 # sed -i 's/\r$//' tweets.sh
 
-python3 get_tweets.py
+# python3 get_tweets.py
 python3 tweet_cleanup.py
 python3 extract_features.py tweets models/tweets
 python3 feature_correlation.py models/tweets

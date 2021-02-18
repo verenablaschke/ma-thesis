@@ -96,7 +96,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         words_charlvl = words_wordlvl
 
     ngrams = []
-    escape_toks = ['<URL>', '<USERNAME>']
+    escape_toks = ['<URL>', '<USERNAME>', '<HASHTAG>']
     sep = '<SEP>'
     for word_n in word_ns:
         cur_ngrams = []
@@ -173,7 +173,7 @@ for utterance, label in zip(data['utterances'], data['labels']):
 
 threshold = 10
 for label, feature2context in featuremap.items():
-    with open(args.model + '/featuremap-' + label + '.tsv', 'w+',
+    with open('{}/featuremap-{}.tsv'.format(args.model, label), 'w+',
               encoding='utf8') as f:
         for feature, context in feature2context.items():
             f.write(feature)

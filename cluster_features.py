@@ -180,7 +180,7 @@ def create_figs(n, add_labels=True):
     top_features, random_features = get_select_features(n)
     pca = PCA(n_components=2)
     X = pca.fit_transform(matrix)
-    print(pca.explained_variance_ratio_)
+    print("{:.2f}, {:.2f}".format(*pca.explained_variance_ratio_))
     Path(args.model + '/figures/').mkdir(parents=True, exist_ok=True)
     print("Scatter (top)")
     scatter(X, top_features, n, 'top', add_labels)
