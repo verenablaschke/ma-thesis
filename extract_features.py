@@ -119,20 +119,22 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
             if word_len == 0:
                 continue
                 
-            pfx = chars[:char_n - 1]
-            ngram = sep + ''.join(pfx)
-            cur_ngrams.append(ngram)
-            update_featuremap(featuremap, label, ngram, context)
+            if char_n > 1:
+                pfx = chars[:char_n - 1]
+                ngram = sep + ''.join(pfx)
+                cur_ngrams.append(ngram)
+                update_featuremap(featuremap, label, ngram, context)
             
             for i in range(len(chars) + 1 - char_n):
                 ngram = ''.join(chars[i:i + char_n])
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
 
-            sfx = chars[word_len + 1 - char_n:]
-            ngram = ''.join(sfx) + sep
-            cur_ngrams.append(ngram)
-            update_featuremap(featuremap, label, ngram, context)
+            if char_n > 1:
+                sfx = chars[word_len + 1 - char_n:]
+                ngram = ''.join(sfx) + sep
+                cur_ngrams.append(ngram)
+                update_featuremap(featuremap, label, ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
         print(utterance, ngrams)
