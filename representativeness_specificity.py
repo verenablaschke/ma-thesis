@@ -31,7 +31,7 @@ label_counter = Counter(labels)
 labels = list(label_counter.keys())
 
 with open(args.model + '/feature-distribution.tsv', 'w+', encoding='utf8') as f:
-    f.write("FEATURE\t")
+    f.write("FEATURE")
     for label in labels:
         f.write('\t{}\t{}-REP\t{}-SPEC'.format(label, label, label))
     f.write("\n<ALL>")

@@ -18,7 +18,7 @@ labels = ['1', '0'] if args.type == 'tweets' else ['nordnorsk', 'vestnorsk',
                                                    'troendersk', 'oestnorsk']
 
 
-
+print("Reading the feature correlations.")
 feature2corr = {}
 feature2identical = {}
 with open('{}/features-correlated.tsv'.format(args.model),
@@ -52,6 +52,7 @@ with open('{}/features-correlated.tsv'.format(args.model),
 
 
 for label in labels:
+    print("Getting the feature context.")
     feature2context = {}
     with open('{}/featuremap-{}.tsv'.format(args.model, label),
               'r', encoding='utf8') as f:
@@ -80,10 +81,26 @@ for label in labels:
                 top_results.append(details)
             idx += 1
 
+    print("Reading the representativeness/specificity features")
+    distribution = {}
+    with open(args.model + '/feature-distribution.tsv', 'r',
+              encoding='utf8') as f:
+        cols = next(f).strip().split('\t')
+        count_col = cols.index(label)
+        rep_col = cols.index(label + '-REP')
+        spec_col = cols.index(label + '-SPEC')
+        next(f)  # Summary of the entire dataset.
+        for line in f:
+            cells = line.strip().split('\t')
+            distribution[cells[0]] = (cells[count_col], cells[rep_col],
+                                      cells[spec_col])
 
     with open('{}/importance_values_{}_all_sorted_{}context.tsv'.format(
             args.model, label, threshold), 'w+', encoding='utf8') as f_out:
-        f_out.write('INDEX\t' + header + '\tCONTEXT\tN_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\tCORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
+        f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
+            'REPRESENTATIVENESS\tSPECIFICITY\tN_IDENTICAL_TOP\tIDENTICAL '
+            '(IDX/FEATURE/MEAN/SUM/COUNT)\tCORRELATED (IDX/FEATURE/NPMI/MEAN/'
+            'SUM/COUNT)\n')
         skip = set()
         for result in top_results:
             (idx, feature, mean, importance_sum, count, context, identical, correlated) = result
@@ -91,8 +108,11 @@ for label in labels:
                 # Already listed
                 continue
 
-            f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t'.format(
-                idx, feature, mean, importance_sum, count, context))
+            n_occ, rep, spec = distribution[feature]
+
+            f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
+                idx, feature, mean, importance_sum, count, context,
+                n_occ, rep, spec))
 
             mirror_list = []
             n_identical_top = 0
