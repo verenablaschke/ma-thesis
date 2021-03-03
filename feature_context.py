@@ -1,4 +1,5 @@
 import argparse
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model')
@@ -16,6 +17,17 @@ args = parser.parse_args()
 threshold = args.top
 labels = ['1', '0'] if args.type == 'tweets' else ['nordnorsk', 'vestnorsk',
                                                    'troendersk', 'oestnorsk']
+
+log_file = '{}/log_importance_values_all_sorted_{}context.tsv'.format(args.model,
+        threshold) 
+with open(log_file, 'w+', encoding='utf8') as f_log:
+    f_log.write('LABEL\t'
+                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\tIMPORTANCE_MIN\tIMPORTANCE_MAX\t'
+                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\tN_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
+                'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
+                'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\tCORRCOEF_IMPORTANCE_REP\t'
+                'SPECIFICITY_MEAN\tSPECIFICITY_VAR\tSPECIFICITY_MIN\t'
+                'SPECIFICITY_MAX\tCORRCOEF_IMPORTANCE_SPEC\n')
 
 
 print("Reading the feature correlations.")
@@ -95,6 +107,8 @@ for label in labels:
             distribution[cells[0]] = (cells[count_col], cells[rep_col],
                                       cells[spec_col])
 
+    importance_scores, n_utterance_scores, rep_scores, spec_scores = [], [], [], []
+
     with open('{}/importance_values_{}_all_sorted_{}context.tsv'.format(
             args.model, label, threshold), 'w+', encoding='utf8') as f_out:
         f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
@@ -113,6 +127,10 @@ for label in labels:
             f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
                 idx, feature, mean, importance_sum, count, context,
                 n_occ, rep, spec))
+            importance_scores.append(float(mean))
+            n_utterance_scores.append(int(n_occ))
+            rep_scores.append(float(rep))
+            spec_scores.append(float(spec))
 
             mirror_list = []
             n_identical_top = 0
@@ -143,4 +161,18 @@ for label in labels:
             f_out.write(', '.join(corr_list))
             f_out.write('\n')
 
-
+    with open(log_file, 'a', encoding='utf8') as f_log:
+        f_log.write('{}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
+                    '\t{:.1f}\t{:.1f}\t{:.1f}\t{:.1f}'
+                    '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}'
+                    '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\n'.format(
+            label, np.mean(importance_scores), np.var(importance_scores),
+            np.min(importance_scores), np.max(importance_scores),
+            np.mean(n_utterance_scores), np.var(n_utterance_scores),
+            np.min(n_utterance_scores), np.max(n_utterance_scores),
+            np.mean(rep_scores), np.var(rep_scores),
+            np.min(rep_scores), np.max(rep_scores),
+            np.corrcoef(importance_scores, rep_scores)[0, 1],
+            np.mean(spec_scores), np.var(spec_scores),
+            np.min(spec_scores), np.max(spec_scores),
+            np.corrcoef(importance_scores, spec_scores)[0, 1]))
