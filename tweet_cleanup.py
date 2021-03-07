@@ -27,7 +27,7 @@ with open ('data/tweets.tsv', 'r', encoding='utf8') as f_in:
             
             tweet = re.sub('#\w+', '<HASHTAG>', tweet)
 
-            tweet = re.sub('\b[0-9]+\b', '<NUMBER>', tweet)
+            tweet = re.sub('(?:(?<=\s)|(?<=^))[0-9]+(?:(?=\s)|(?=$))', '<NUMBER>', tweet)
 
             if new_tweet:
                 f_out.write(prev_tweet + '\n')
