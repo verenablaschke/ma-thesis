@@ -18,18 +18,6 @@ threshold = args.top
 labels = ['1', '0'] if args.type == 'tweets' else ['nordnorsk', 'vestnorsk',
                                                    'troendersk', 'oestnorsk']
 
-log_file = '{}/log_importance_values_all_sorted_{}context.tsv'.format(args.model,
-        threshold) 
-with open(log_file, 'w+', encoding='utf8') as f_log:
-    f_log.write('LABEL\t'
-                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\tIMPORTANCE_MIN\tIMPORTANCE_MAX\t'
-                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\tN_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
-                'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
-                'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\tCORRCOEF_IMPORTANCE_REP\t'
-                'SPECIFICITY_MEAN\tSPECIFICITY_VAR\tSPECIFICITY_MIN\t'
-                'SPECIFICITY_MAX\tCORRCOEF_IMPORTANCE_SPEC\n')
-
-
 print("Reading the feature correlations.")
 feature2corr = {}
 feature2identical = {}
@@ -161,12 +149,38 @@ for label in labels:
             f_out.write(', '.join(corr_list))
             f_out.write('\n')
 
+
+label2count = {}
+with open(args.model + '/features.tsv', encoding='utf8') as f:
+    next(f)  # Header
+    for line in f:
+        if len(line) == 0:
+            continue
+        label = line.split('\t')[1]
+        try:
+            label2count[label] += 1
+        except KeyError:
+            label2count[label] = 1
+total_count = sum(val for val in label2count.values())
+
+log_file = '{}/log_importance_values_all_sorted_{}context.tsv'.format(args.model,
+        threshold) 
+with open(log_file, 'w+', encoding='utf8') as f_log:
+    f_log.write('LABEL\tPROPORTION\t'
+                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\tIMPORTANCE_MIN\tIMPORTANCE_MAX\t'
+                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\tN_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
+                'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
+                'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\tCORRCOEF_IMPORTANCE_REP\t'
+                'SPECIFICITY_MEAN\tSPECIFICITY_VAR\tSPECIFICITY_MIN\t'
+                'SPECIFICITY_MAX\tCORRCOEF_IMPORTANCE_SPEC\n')
+for label in labels:
     with open(log_file, 'a', encoding='utf8') as f_log:
-        f_log.write('{}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
+        f_log.write('{}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
                     '\t{:.1f}\t{:.1f}\t{}\t{}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\n'.format(
-            label, np.mean(importance_scores), np.var(importance_scores),
+            label, label2count[label] / total_count,
+            np.mean(importance_scores), np.var(importance_scores),
             np.min(importance_scores), np.max(importance_scores),
             np.mean(n_utterance_scores), np.var(n_utterance_scores),
             np.min(n_utterance_scores), np.max(n_utterance_scores),
