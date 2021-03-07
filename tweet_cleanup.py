@@ -1,3 +1,4 @@
+import html
 import re
 import unicodedata
 
@@ -20,13 +21,14 @@ with open ('data/tweets.tsv', 'r', encoding='utf8') as f_in:
             tweet = fields[2] if new_tweet else line
             # Replace non-breaking spaces etc.
             tweet = unicodedata.normalize("NFKC", tweet)
+            # Replace, e.g., &gt with >
+            tweet = html.unescape(tweet)
             # Twitter usernames
             tweet = re.sub('((?<=^)|(?<=\W))@[a-zA-Z0-9_]+', '<USERNAME>', tweet)
             # URLs: of the form abc.de; start with http(s):// or www or contain a /
             tweet = re.sub('((?<=^)|(?<=\W))((https?://|www\d{0,3}\.)[a-zA-Z0-9.\-]+\.[a-z]{2,}|[a-zA-Z0-9.\-]+\.[a-z]{2,}/)([a-zA-Z0-9/\?%\+#~\.\-@\*!\(\)\[\]=:;,&\$/\']*)?', '<URL>', tweet)
             
             tweet = re.sub('#\w+', '<HASHTAG>', tweet)
-
             tweet = re.sub('(?:(?<=\s)|(?<=^))[0-9]+(?:(?=\s)|(?=$))', '<NUMBER>', tweet)
 
             if new_tweet:
