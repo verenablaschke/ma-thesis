@@ -163,7 +163,7 @@ for label in labels:
 
     with open(log_file, 'a', encoding='utf8') as f_log:
         f_log.write('{}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
-                    '\t{:.1f}\t{:.1f}\t{:.1f}\t{:.1f}'
+                    '\t{:.1f}\t{:.1f}\t{}\t{}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\n'.format(
             label, np.mean(importance_scores), np.var(importance_scores),

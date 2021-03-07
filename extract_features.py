@@ -96,7 +96,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         words_charlvl = words_wordlvl
 
     ngrams = []
-    escape_toks = ['<URL>', '<USERNAME>', '<HASHTAG>']
+    escape_toks = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
     sep = '<SEP>'
     for word_n in word_ns:
         cur_ngrams = []
