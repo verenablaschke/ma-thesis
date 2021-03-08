@@ -5,7 +5,7 @@
 
 # python3 get_tweets.py
 python3 tweet_cleanup.py
-python3 extract_features.py tweets models/tweets
+python3 extract_features.py tweets models/tweets --lower
 python3 feature_correlation.py models/tweets
 python3 prepare_folds.py models/tweets 10
 

@@ -16,6 +16,7 @@ parser.add_argument('type', type=str, help="'dialects' or 'tweets'")
 parser.add_argument('model')
 parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
 parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]', type=str)
+parser.add_argument('--lower', dest='add_uncased', default=False, action='store_true')
 args = parser.parse_args()
 
 if args.type == 'dialects':
@@ -48,6 +49,7 @@ else:
     CHAR_NS = [int(i) for i in CHAR_NS.split(',')]
 print("Word-level n-grams used: " + str(WORD_NS))
 print("Char-level n-grams used: " + str(CHAR_NS))
+print("Adding uncased features: " + str(args.add_uncased))
 
 
 featuremap = {}
@@ -106,6 +108,10 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 tokens = [tok if tok in escape_toks else tok.lower() for tok in tokens]
             ngram = sep.join(tokens)
             # Padding to distinguish these from char n-grams
+            if args.add_uncased:
+                uncased_ngram = 'UNCASED:<SOS>' + ngram.lower() + '<EOS>'
+                cur_ngrams.append(uncased_ngram)
+                update_featuremap(featuremap, label, uncased_ngram, '<SOS>' + ngram + '<EOS>')
             ngram = '<SOS>' + ngram + '<EOS>'
             cur_ngrams.append(ngram)
         ngrams.append(cur_ngrams)
@@ -124,17 +130,29 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 ngram = sep + ''.join(pfx)
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
+                if args.add_uncased:
+                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    cur_ngrams.append(uncased_ngram)
+                    update_featuremap(featuremap, label, uncased_ngram, context)
             
             for i in range(len(chars) + 1 - char_n):
                 ngram = ''.join(chars[i:i + char_n])
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
+                if args.add_uncased:
+                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    cur_ngrams.append(uncased_ngram)
+                    update_featuremap(featuremap, label, uncased_ngram, context)
 
             if char_n > 1:
                 sfx = chars[word_len + 1 - char_n:]
                 ngram = ''.join(sfx) + sep
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
+                if args.add_uncased:
+                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    cur_ngrams.append(uncased_ngram)
+                    update_featuremap(featuremap, label, uncased_ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
         print(utterance, ngrams)
