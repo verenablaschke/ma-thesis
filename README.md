@@ -1,5 +1,7 @@
 
 ```
+pip3 install -r requirements.txt
+
 bash dialects_predict.sh
 # Wait until this has finished running in all screens!
 bash dialects_analyze.sh

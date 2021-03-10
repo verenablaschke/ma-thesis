@@ -9,6 +9,8 @@ import argparse
 import pickle
 import datetime
 from collections import Counter
+from transformers import FlaubertModel, FlaubertTokenizer
+import torch
 
 
 parser = argparse.ArgumentParser()
@@ -16,7 +18,10 @@ parser.add_argument('type', type=str, help="'dialects' or 'tweets'")
 parser.add_argument('model')
 parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
 parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]', type=str)
-parser.add_argument('--lower', dest='add_uncased', default=False, action='store_true')
+parser.add_argument('--lower', dest='add_uncased', default=False,
+                    action='store_true')
+parser.add_argument('--embed', dest='use_embeddings', default=False,
+                    action='store_true')
 args = parser.parse_args()
 
 if args.type == 'dialects':
@@ -47,9 +52,10 @@ if len(CHAR_NS) == 0:
     CHAR_NS = []
 else:
     CHAR_NS = [int(i) for i in CHAR_NS.split(',')]
-print("Word-level n-grams used: " + str(WORD_NS))
-print("Char-level n-grams used: " + str(CHAR_NS))
+print("Word-level n-grams used: " + str(WORD_NS) if not args.use_embeddings else "-")
+print("Char-level n-grams used: " + str(CHAR_NS) if not args.use_embeddings else "-")
 print("Adding uncased features: " + str(args.add_uncased))
+print("Using embeddings: " + str(args.use_embeddings))
 
 
 featuremap = {}
@@ -167,6 +173,26 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
     return ngrams_flat
 
 
+def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile):
+    # Based on the _tokenize method:
+    # https://github.com/huggingface/transformers/blob/c89bdfbe720bc8f41c7dc6db5473a2cb0955f224/src/transformers/models/flaubert/tokenization_flaubert.py#L113
+    # With the difference that I want to keep track of which token
+    # a given BPE subtoken comes from.
+    text = flaubert_tokenizer.preprocess_text(utterance)
+    text = flaubert_tokenizer.moses_pipeline(text, lang="fr")
+    text = flaubert_tokenizer.moses_tokenize(text, lang="fr")
+    toks = []
+    for token in text:
+        if token:
+            subtokens = [t for t in flaubert_tokenizer.bpe(token).split(" ")]
+            for subtok in subtokens:
+                update_featuremap(featuremap, label, subtok, token)
+            toks.extend(subtokens)
+    with open(outfile, 'a', encoding='utf8') as f:
+        f.write("{}\t{}\t{}\n".format(utterance, label, ' '.join(toks)))
+    return toks
+
+
 infile = 'data/bokmaal+phon_cleaned.tsv' if DIALECTS else 'data/tweets_cleaned.tsv'
 label_col = 0 if DIALECTS else 1
 data_col = 4 if DIALECTS else 2
@@ -180,24 +206,37 @@ print(data['labels'].value_counts())
 
 outfile = args.model + '/features.tsv'
 Path(args.model).mkdir(parents=True, exist_ok=True)
-with open(outfile, 'w+', encoding='utf8') as f:
-    f.write('utterance\tlabel')
-    for n in WORD_NS:
-        f.write('\tword-' + str(n))
-    for n in CHAR_NS:
-        f.write('\tchar-' + str(n))
-    f.write('\n')
-for utterance, label in zip(data['utterances'], data['labels']):
-    utterance2ngrams(utterance, label, outfile)
 
+# Extract and save the features.
+if args.use_embeddings:
+    with open(outfile, 'w+', encoding='utf8') as f:
+        f.write('utterance\tlabel\tBPE tokens\n')
+    modelname = 'flaubert/flaubert_base_cased' # TODO try out large
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(modelname,
+                                                           do_lowercase=False)
+    for utterance, label in zip(data['utterances'], data['labels']):
+        utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile)
+else:
+    with open(outfile, 'w+', encoding='utf8') as f:
+        f.write('utterance\tlabel')
+        for n in WORD_NS:
+            f.write('\tword-' + str(n))
+        for n in CHAR_NS:
+            f.write('\tchar-' + str(n))
+        f.write('\n')
+    for utterance, label in zip(data['utterances'], data['labels']):
+        utterance2ngrams(utterance, label, outfile)
 
+# Save the feature->context map.
 threshold = 10
 for label, feature2context in featuremap.items():
     with open('{}/featuremap-{}.tsv'.format(args.model, label), 'w+',
               encoding='utf8') as f:
         for feature, context in feature2context.items():
             f.write(feature)
-            filtered_context = ['{}({})'.format(cont, count) for cont, count in Counter(context).most_common() if count >= threshold]
+            filtered_context = ['{}({})'.format(cont, count)
+                                for cont, count in Counter(context).most_common()
+                                if count >= threshold]
             if filtered_context:
                 f.write('\t')
                 f.write('\t'.join(filtered_context))

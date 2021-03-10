@@ -14,6 +14,8 @@ import sys
 import argparse
 import pickle
 import datetime
+from transformers import FlaubertModel, FlaubertTokenizer
+import torch
 
 
 def split_ngrams(joined_ngrams):
@@ -34,6 +36,27 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     test_x = vectorizer.transform(ngrams_test)
 
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
+
+
+def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
+                      flaubert_tokenizer, flaubert, max_len=42):
+    token_ids_train = [flaubert_tokenizer.encode(toks, max_length=max_len,
+                                                 truncation=True,
+                                                 padding='max_length')
+                       for x in toks_train]
+    train_x = flaubert(torch.tensor(token_ids_train))[0]
+
+    token_ids_test = [flaubert_tokenizer.encode(toks, max_length=max_len,
+                                                truncation=True,
+                                                padding='max_length')
+                       for x in toks_test]
+    test_x = flaubert(torch.tensor(token_ids_test))[0]
+
+    label_encoder = LabelEncoder()
+    train_y = label_encoder.fit_transform(labels_train)
+    test_y = label_encoder.transform(labels_test)
+
+    return train_x, test_x, train_y, test_y, label_encoder, max_len
 
 
 def preprocess_and_vectorize(utterance, vectorizer):
@@ -67,10 +90,30 @@ def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):
         return pred[0], label_encoder.inverse_transform(pred)[0], margins, softmax
     return pred[0], label_encoder.inverse_transform(pred)[0], margins, model.predict_proba(x)
 
+
 def predict_proba2(model, data, vectorizer, linear_svc, n_labels=4):
     probs = np.zeros((len(data), n_labels))
     for i, utterance in enumerate(data):
         x = vectorizer.transform([utterance])
+        if linear_svc:
+            pred = model.predict(x)
+            margins = model.decision_function(x)
+            exp = np.exp(margins)
+            probs[i] = exp / np.sum(exp)  # softmax
+        else:
+            probs[i] = model.predict_proba(x)
+    GET_NGRAMS = True
+    return probs
+
+
+def predict_proba_embeddings(model, data, flaubert, flaubert_tokenizer,
+                             linear_svc, max_len, n_labels=2):
+    probs = np.zeros((len(data), n_labels))
+    for i, utterance in enumerate(data):
+        token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
+                                               truncation=True,
+                                               padding='max_length')]
+        x = flaubert(torch.tensor(token_ids))[0]
         if linear_svc:
             pred = model.predict(x)
             margins = model.decision_function(x)
@@ -125,13 +168,23 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
-                 test_x_ngrams, test_x, test_y, out_folder, linear_svc):
+                 test_x_ngrams, test_x, test_y, out_folder, linear_svc,
+                 flaubert=None, flaubert_tokenizer=None, max_len=None):
     labels = list(range(n_labels))
     explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
                                   split_expression=split_ngrams,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
                                   recalculate_ngrams=False)
+    if flaubert:
+        predict_function = lambda z: predict_proba_embeddings(model, z,
+                                                              flaubert,
+                                                              flaubert_tokenizer,
+                                                              linear_svc,
+                                                              max_len, n_labels)
+    else:
+        predict_function = lambda z: predict_proba2(classifier, z, vectorizer,
+                                                    linear_svc, n_labels)
     with open(out_folder + 'predictions.tsv', 'w+', encoding='utf8') as f_pred:
         for idx, (utterance, ngrams, encoded, y) in enumerate(zip(test_x_raw,
                                                                   test_x_ngrams,
@@ -144,11 +197,7 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                                    y_raw, pred_raw))
 
             exp = explainer.explain_instance(ngrams,
-                                             lambda z: predict_proba2(classifier,
-                                                                      z,
-                                                                      vectorizer,
-                                                                      linear_svc,
-                                                                      n_labels),
+                                             predict_function,
                                              num_features=20,
                                              labels=labels,
                                              # labels=interesting_labels

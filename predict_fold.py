@@ -14,12 +14,16 @@ import pickle
 import datetime
 from predict import *
 from pathlib import Path
+from transformers import FlaubertModel, FlaubertTokenizer
+import torch
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model', help='path to the model')
 parser.add_argument('type', help='type of the data (dialects/tweets)')
 parser.add_argument('fold', help='fold number')
+parser.add_argument('--embed', dest='use_embeddings', default=False,
+                    action='store_true')
 args = parser.parse_args()
 
 
@@ -43,9 +47,18 @@ raw_test, ngrams_test, labels_test = get_features(folder + 'test_data.txt')
 n_labels = len(set(labels_train))
 class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
 
-
-train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
-    ngrams_train, ngrams_test, labels_train, labels_test)
+if use_embeddings:
+    modelname = 'flaubert/flaubert_base_cased' # TODO try out large
+    flaubert, _ = FlaubertModel.from_pretrained(modelname,
+                                                output_loading_info=True)
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(modelname,
+    train_x, test_x, train_y, test_y, label_encoder, max_len = encode_embeddings(
+        ngrams_train, ngrams_test, labels_train, labels_test,
+        flaubert_tokenizer, flaubert, max_len=42)
+else:
+    flaubert, flaubert_tokenizer, max_len = None, None, None
+    train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
+        ngrams_train, ngrams_test, labels_train, labels_test)
 
 print("Training the model")
 classifier = train(train_x, train_y, linear_svc=args.type == 'dialects',
@@ -68,4 +81,5 @@ with open(folder + 'log.txt', 'w+', encoding='utf8') as f:
 print('Generating explanations')
 explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
              ngrams_test, test_x, test_y, folder,
-             linear_svc=args.type == 'dialects')
+             linear_svc=args.type == 'dialects',
+             flaubert, flaubert_tokenizer, max_len)
