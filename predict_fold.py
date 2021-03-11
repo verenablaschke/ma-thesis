@@ -24,6 +24,10 @@ parser.add_argument('type', help='type of the data (dialects/tweets)')
 parser.add_argument('fold', help='fold number')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
+parser.add_argument('--embmod', dest='embedding_model',
+                    default='flaubert/flaubert-base-cased', type=str)
+parser.add_argument('--emblen', dest='n_bpe_toks', default=42, type=int)
+parser.add_argument('--embbatch', dest='batch_size', default=50, type=int)
 parser.add_argument('--lime', dest='n_lime_features', default=100, type=int)
 args = parser.parse_args()
 
@@ -49,16 +53,21 @@ n_labels = len(set(labels_train))
 class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
 
 if args.use_embeddings:
-    modelname = 'flaubert/flaubert_base_cased' # TODO try out large
-    flaubert, _ = FlaubertModel.from_pretrained(modelname,
+    flaubert, _ = FlaubertModel.from_pretrained(args.embedding_model,
                                                 output_loading_info=True)
-    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(modelname,
-                                                           do_lowercase=False)
-    train_x, test_x, train_y, test_y, label_encoder, max_len = encode_embeddings(
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(args.embedding_model,
+        do_lowercase='uncased' in args.embedding_model)
+    embedding_size = 768
+    if '-small-' in args.embedding_model:
+        embedding_size = 512
+    elif '-large-' in args.embedding_model:
+        embedding_size = 1024
+    train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
         ngrams_train, ngrams_test, labels_train, labels_test,
-        flaubert_tokenizer, flaubert, max_len=42)
+        flaubert_tokenizer, flaubert, args.n_bpe_toks, args.embbatch,
+        embedding_size)
 else:
-    flaubert, flaubert_tokenizer, max_len = None, None, None
+    flaubert, flaubert_tokenizer = None, None
     train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
         ngrams_train, ngrams_test, labels_train, labels_test)
 
@@ -84,4 +93,4 @@ print('Generating explanations')
 explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
              ngrams_test, test_x, test_y, folder, args.n_lime_features,
              args.type == 'dialects',
-             flaubert, flaubert_tokenizer, max_len)
+             flaubert, flaubert_tokenizer, args.n_bpe_toks)

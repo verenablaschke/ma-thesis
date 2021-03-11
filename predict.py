@@ -59,8 +59,8 @@ def get_embeddings(utterances, max_len, embedding_size, batch_size,
 
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
-                      flaubert_tokenizer, flaubert, max_len=42,
-                      batch_size=500, embedding_size=768):
+                      flaubert_tokenizer, flaubert, max_len,
+                      batch_size, embedding_size):
     train_x = get_embeddings(toks_train, max_len, embedding_size, batch_size,
                              flaubert_tokenizer, flaubert)
     test_x = get_embeddings(toks_test, max_len, embedding_size, batch_size,
@@ -68,7 +68,7 @@ def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)
-    return train_x, test_x, train_y, test_y, label_encoder, max_len
+    return train_x, test_x, train_y, test_y, label_encoder
 
 
 def preprocess_and_vectorize(utterance, vectorizer):
@@ -78,10 +78,11 @@ def preprocess_and_vectorize(utterance, vectorizer):
 
 def train(train_x, train_y, linear_svc, class_weight=None):
     if linear_svc:
-        model = svm.LinearSVC(C=1.0, class_weight=class_weight)
+        model = svm.LinearSVC(C=1.0, class_weight=class_weight, verbose=True)
     else:
         # Binary cases
-        model = svm.SVC(C=1.0, probability=True, class_weight=class_weight)
+        model = svm.SVC(C=1.0, probability=True, class_weight=class_weight,
+                        verbose=True)
     model.fit(train_x, train_y)
     return model
 
@@ -181,7 +182,8 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                  test_x_ngrams, test_x, test_y, out_folder, n_lime_features,
-                 linear_svc, flaubert=None, flaubert_tokenizer=None, max_len=None):
+                 linear_svc, flaubert=None, flaubert_tokenizer=None,
+                 max_len=None):
     labels = list(range(n_labels))
     explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
                                   split_expression=split_ngrams,

@@ -22,6 +22,8 @@ parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
+parser.add_argument('--embmod', dest='embedding_model', default='flaubert/flaubert-base-cased',
+                    type=str)
 args = parser.parse_args()
 
 if args.type == 'dialects':
@@ -211,8 +213,7 @@ Path(args.model).mkdir(parents=True, exist_ok=True)
 if args.use_embeddings:
     with open(outfile, 'w+', encoding='utf8') as f:
         f.write('utterance\tlabel\tBPE tokens\n')
-    modelname = 'flaubert/flaubert_base_cased' # TODO try out large
-    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(modelname,
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(args.embedding_model,
                                                            do_lowercase=False)
     for utterance, label in zip(data['utterances'], data['labels']):
         utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile)
