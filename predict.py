@@ -38,24 +38,36 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 
+
+def get_embeddings(utterances, max_len, embedding_size, batch_size,
+                   flaubert_tokenizer, flaubert):
+    token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
+                                           truncation=True,
+                                           padding='max_length')
+                 for utterance in utterances]
+    n = len(token_ids)
+    x = torch.empty((n, max_len, embedding_size))
+    print(n, batch_size)
+    for i in range(0, n, batch_size):
+        print("- Batch {}--{}".format(i, i + batch_size))
+        batch = flaubert(torch.tensor(token_ids[i:i + batch_size]))[0]
+        x[i:i + batch_size] = batch
+    x = torch.flatten(x, start_dim=1)
+    x = x.detach().numpy()
+    assert x.shape == (n, max_len * embedding_size)
+    return x
+
+
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
-                      flaubert_tokenizer, flaubert, max_len=42):
-    token_ids_train = [flaubert_tokenizer.encode(x, max_length=max_len,
-                                                 truncation=True,
-                                                 padding='max_length')
-                       for x in toks_train]
-    train_x = flaubert(torch.tensor(token_ids_train))[0]
-
-    token_ids_test = [flaubert_tokenizer.encode(x, max_length=max_len,
-                                                truncation=True,
-                                                padding='max_length')
-                       for x in toks_test]
-    test_x = flaubert(torch.tensor(token_ids_test))[0]
-
+                      flaubert_tokenizer, flaubert, max_len=42,
+                      batch_size=500, embedding_size=768):
+    train_x = get_embeddings(toks_train, max_len, embedding_size, batch_size,
+                             flaubert_tokenizer, flaubert)
+    test_x = get_embeddings(toks_test, max_len, embedding_size, batch_size,
+                            flaubert_tokenizer, flaubert)
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)
-
     return train_x, test_x, train_y, test_y, label_encoder, max_len
 
 
@@ -168,8 +180,8 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
-                 test_x_ngrams, test_x, test_y, out_folder, linear_svc,
-                 flaubert=None, flaubert_tokenizer=None, max_len=None):
+                 test_x_ngrams, test_x, test_y, out_folder, n_lime_features,
+                 linear_svc, flaubert=None, flaubert_tokenizer=None, max_len=None):
     labels = list(range(n_labels))
     explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
                                   split_expression=split_ngrams,
@@ -198,7 +210,7 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
 
             exp = explainer.explain_instance(ngrams,
                                              predict_function,
-                                             num_features=20,
+                                             num_features=n_lime_features,
                                              labels=labels,
                                              # labels=interesting_labels
                                              num_samples=1000

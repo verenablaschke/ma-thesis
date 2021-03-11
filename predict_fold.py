@@ -24,6 +24,7 @@ parser.add_argument('type', help='type of the data (dialects/tweets)')
 parser.add_argument('fold', help='fold number')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
+parser.add_argument('--lime', dest='n_lime_features', default=100, type=int)
 args = parser.parse_args()
 
 
@@ -77,10 +78,10 @@ with open(folder + 'log.txt', 'w+', encoding='utf8') as f:
         test_x.shape, len(raw_test), len(test_y)))
     f.write('Accuracy\t{:.4f}\n'.format(acc))
     f.write('F1 macro\t{:.4f}\n'.format(f1))
-    f.write('Confusion matrix\n')
-    f.write(str(conf) + '\n')
+    f.write('Confusion matrix\n' + str(conf) + '\n')
+    f.write('\nLIME features: {}\n'.format(args.n_lime_features))
 print('Generating explanations')
 explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
-             ngrams_test, test_x, test_y, folder,
+             ngrams_test, test_x, test_y, folder, args.n_lime_features,
              args.type == 'dialects',
              flaubert, flaubert_tokenizer, max_len)
