@@ -40,13 +40,13 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       flaubert_tokenizer, flaubert, max_len=42):
-    token_ids_train = [flaubert_tokenizer.encode(toks, max_length=max_len,
+    token_ids_train = [flaubert_tokenizer.encode(x, max_length=max_len,
                                                  truncation=True,
                                                  padding='max_length')
                        for x in toks_train]
     train_x = flaubert(torch.tensor(token_ids_train))[0]
 
-    token_ids_test = [flaubert_tokenizer.encode(toks, max_length=max_len,
+    token_ids_test = [flaubert_tokenizer.encode(x, max_length=max_len,
                                                 truncation=True,
                                                 padding='max_length')
                        for x in toks_test]
