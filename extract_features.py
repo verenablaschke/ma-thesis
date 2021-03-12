@@ -22,8 +22,8 @@ parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
-parser.add_argument('--embmod', dest='embedding_model', default='flaubert/flaubert-base-cased',
-                    type=str)
+parser.add_argument('--embmod', dest='embedding_model',
+                    default='flaubert/flaubert_base_cased', type=str)
 args = parser.parse_args()
 
 if args.type == 'dialects':

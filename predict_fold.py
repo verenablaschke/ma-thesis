@@ -25,7 +25,7 @@ parser.add_argument('fold', help='fold number')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
 parser.add_argument('--embmod', dest='embedding_model',
-                    default='flaubert/flaubert-base-cased', type=str)
+                    default='flaubert/flaubert_base_cased' , type=str)
 parser.add_argument('--emblen', dest='n_bpe_toks', default=42, type=int)
 parser.add_argument('--embbatch', dest='batch_size', default=50, type=int)
 parser.add_argument('--lime', dest='n_lime_features', default=100, type=int)
@@ -66,6 +66,7 @@ if args.use_embeddings:
         ngrams_train, ngrams_test, labels_train, labels_test,
         flaubert_tokenizer, flaubert, args.n_bpe_toks, args.embbatch,
         embedding_size)
+    vectorizer = None
 else:
     flaubert, flaubert_tokenizer = None, None
     train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
