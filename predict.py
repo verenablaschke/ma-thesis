@@ -182,6 +182,7 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                  test_x_ngrams, test_x, test_y, out_folder, n_lime_features,
+                 num_lime_samples,
                  linear_svc, flaubert=None, flaubert_tokenizer=None,
                  max_len=None):
     labels = list(range(n_labels))
@@ -215,7 +216,7 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                              num_features=n_lime_features,
                                              labels=labels,
                                              # labels=interesting_labels
-                                             num_samples=1000
+                                             num_samples=num_lime_samples
                                              )
             for lab in labels:
                 lime_results = exp.as_list(label=lab)
