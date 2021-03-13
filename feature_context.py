@@ -7,10 +7,12 @@ parser.add_argument('type', help="'dialects' or 'tweets'")
 parser.add_argument('--t', dest='top', help="number of top-___ features",
                     default=100, type=int)
 parser.add_argument('--c', dest='min_corr_info',
-                    help="min NPMI correlation score for listing a correlated feature as ignored",
+                    help="min NPMI correlation score for listing a correlated"
+                         " feature as ignored",
                     default=0.8, type=float)
 parser.add_argument('--i', dest='min_corr_merge',
-                    help="min NPMI correlation score for considering two features as identical",
+                    help="min NPMI correlation score for considering two "
+                         "features as identical",
                     default=1.0, type=float)
 args = parser.parse_args()
 
@@ -30,12 +32,14 @@ with open(args.model + '/features.tsv', encoding='utf8') as f:
         except KeyError:
             label2count[label] = 1
 total_count = sum(val for val in label2count.values())
-log_file = '{}/log_importance_values_all_sorted_{}context.tsv'.format(args.model,
-        threshold) 
+log_file = '{}/log_importance_values_all_sorted_{}context.tsv' \
+           .format(args.model, threshold)
 with open(log_file, 'w+', encoding='utf8') as f_log:
     f_log.write('LABEL\tPROPORTION\t'
-                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\tIMPORTANCE_MIN\tIMPORTANCE_MAX\t'
-                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\tN_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
+                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
+                'IMPORTANCE_MIN\tIMPORTANCE_MAX\t'
+                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\t'
+                'N_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
                 'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
                 'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\t'
                 'CORRCOEF_IMPORTANCE_REP\tCOVARIANCE_IMPORTANCE_REP\t'
@@ -55,12 +59,14 @@ with open(args.model + '/features.tsv', encoding='utf8') as f:
             label2count[label] = 1
 total_count = sum(val for val in label2count.values())
 
-log_file = '{}/log_importance_values_all_sorted_{}context.tsv'.format(args.model,
-        threshold) 
+log_file = '{}/log_importance_values_all_sorted_{}context.tsv' \
+           .format(args.model, threshold)
 with open(log_file, 'w+', encoding='utf8') as f_log:
     f_log.write('LABEL\tPROPORTION\t'
-                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\tIMPORTANCE_MIN\tIMPORTANCE_MAX\t'
-                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\tN_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
+                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
+                'IMPORTANCE_MIN\tIMPORTANCE_MAX\t'
+                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\t'
+                'N_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
                 'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
                 'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\t'
                 'CORRCOEF_IMPORTANCE_REP\tCOVARIANCE_IMPORTANCE_REP\t'
@@ -72,7 +78,7 @@ print("Reading the feature correlations.")
 feature2corr = {}
 feature2identical = {}
 with open('{}/features-correlated.tsv'.format(args.model),
-              'r', encoding='utf8') as f:
+          'r', encoding='utf8') as f:
     for line in f:
         feature1, feature2, corr = line.strip().split('\t')
         corr = float(corr)
@@ -146,17 +152,18 @@ for label in labels:
             distribution[cells[0]] = (cells[count_col], cells[rep_col],
                                       cells[spec_col])
 
-    importance_scores, n_utterance_scores, rep_scores, spec_scores = [], [], [], []
+    imp_scores, n_utt_scores, rep_scores, spec_scores = [], [], [], []
 
     with open('{}/importance_values_{}_all_sorted_{}context.tsv'.format(
             args.model, label, threshold), 'w+', encoding='utf8') as f_out:
         f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
-            'REPRESENTATIVENESS\tSPECIFICITY\tN_IDENTICAL_TOP\tIDENTICAL '
-            '(IDX/FEATURE/MEAN/SUM/COUNT)\tCORRELATED (IDX/FEATURE/NPMI/MEAN/'
-            'SUM/COUNT)\n')
+                    'REPRESENTATIVENESS\tSPECIFICITY\t'
+                    'N_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\t'
+                    'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
         for result in top_results:
-            (idx, feature, mean, importance_sum, count, context, identical, correlated) = result
+            (idx, feature, mean, importance_sum, count, context,
+             identical, correlated) = result
             if idx in skip:
                 # Already listed
                 continue
@@ -166,8 +173,8 @@ for label in labels:
             f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
                 idx, feature, mean, importance_sum, count, context,
                 n_occ, rep, spec))
-            importance_scores.append(float(mean))
-            n_utterance_scores.append(int(n_occ))
+            imp_scores.append(float(mean))
+            n_utt_scores.append(int(n_occ))
             rep_scores.append(float(rep))
             spec_scores.append(float(spec))
 
@@ -176,27 +183,36 @@ for label in labels:
             if identical:
                 for mirror in identical:
                     try:
-                        (idx2, feature2, mean2, importance_sum2, count2, _, _, _) = feature2results[mirror]
+                        (idx2, feature2, mean2, importance_sum2,
+                         count2, _, _, _) = feature2results[mirror]
                         if idx2 < threshold and idx2 > idx:
                             n_identical_top += 1
                             skip.add(idx2)
                             print(feature, mirror)
                             print('Moved ' + str(idx2))
-                        mirror_list.append('{}/{}/{:.2f}/{:.2f}/{}'.format(idx2, feature2, mean2, importance_sum2, count2))
+                        mirror_list.append('{}/{}/{:.2f}/{:.2f}/{}'.format(
+                            idx2, feature2, mean2, importance_sum2, count2))
                     except KeyError:
                         mirror_list.append('--/{}/--/--/--'.format(mirror))
-            f_out.write('{}\t{}\t'.format(n_identical_top, ', '.join(mirror_list)))
+            f_out.write('{}\t{}\t'.format(n_identical_top,
+                                          ', '.join(mirror_list)))
 
             corr_list = []
             if correlated:
                 for corr in correlated:
                     npmi = feature2corr[feature][corr]
                     try:
-                        (idx2, feature2, mean2, importance_sum2, count2, _, _, _) = feature2results[corr]
-                        corr_list.append((npmi, '{}/{}/{:.2f}/{:.2f}/{:.2f}/{}'.format(idx2, feature2, npmi, mean2, importance_sum2, count2)))
+                        (idx2, feature2, mean2, importance_sum2,
+                         count2, _, _, _) = feature2results[corr]
+                        corr_list.append(
+                            (npmi, '{}/{}/{:.2f}/{:.2f}/{:.2f}/{}'.format(
+                                idx2, feature2, npmi, mean2,
+                                importance_sum2, count2)))
                     except KeyError:
-                        corr_list.append((npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
-                corr_list = [entry for (_, entry) in sorted(corr_list, key=lambda x: x[0], reverse=True)]
+                        corr_list.append(
+                            (npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
+                corr_list = [entry for (_, entry) in sorted(
+                    corr_list, key=lambda x: x[0], reverse=True)]
             f_out.write(', '.join(corr_list))
             f_out.write('\n')
 
@@ -204,17 +220,18 @@ for label in labels:
         f_log.write('{}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
                     '\t{:.1f}\t{:.1f}\t{}\t{}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}'
-                    '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}\n'.format(
-            label, label2count[label] / total_count,
-            np.mean(importance_scores), np.var(importance_scores),
-            np.min(importance_scores), np.max(importance_scores),
-            np.mean(n_utterance_scores), np.var(n_utterance_scores),
-            np.min(n_utterance_scores), np.max(n_utterance_scores),
-            np.mean(rep_scores), np.var(rep_scores),
-            np.min(rep_scores), np.max(rep_scores),
-            np.corrcoef(importance_scores, rep_scores)[0, 1],
-            np.cov(importance_scores, rep_scores)[0, 1],
-            np.mean(spec_scores), np.var(spec_scores),
-            np.min(spec_scores), np.max(spec_scores),
-            np.corrcoef(importance_scores, spec_scores)[0, 1],
-            np.cov(importance_scores, spec_scores)[0, 1]))
+                    '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}\n'
+                    .format(label, label2count[label] / total_count,
+                            np.mean(imp_scores), np.var(imp_scores),
+                            np.min(imp_scores), np.max(imp_scores),
+                            np.mean(n_utt_scores),
+                            np.var(n_utt_scores),
+                            np.min(n_utt_scores), np.max(n_utt_scores),
+                            np.mean(rep_scores), np.var(rep_scores),
+                            np.min(rep_scores), np.max(rep_scores),
+                            np.corrcoef(imp_scores, rep_scores)[0, 1],
+                            np.cov(imp_scores, rep_scores)[0, 1],
+                            np.mean(spec_scores), np.var(spec_scores),
+                            np.min(spec_scores), np.max(spec_scores),
+                            np.corrcoef(imp_scores, spec_scores)[0, 1],
+                            np.cov(imp_scores, spec_scores)[0, 1]))

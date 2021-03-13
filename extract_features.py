@@ -1,23 +1,20 @@
 # coding: utf-8
 
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import re
 import sys
 import argparse
-import pickle
-import datetime
 from collections import Counter
-from transformers import FlaubertModel, FlaubertTokenizer
-import torch
+from transformers import FlaubertTokenizer
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('type', type=str, help="'dialects' or 'tweets'")
 parser.add_argument('model')
 parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
-parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]', type=str)
+parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
+                    type=str)
 parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
@@ -41,8 +38,10 @@ if not args.model:
 
 args.word_ngrams = args.word_ngrams.strip()
 args.char_ngrams = args.char_ngrams.strip()
-if args.word_ngrams[0] != '[' or args.word_ngrams[-1] != ']' or args.char_ngrams[0] != '[' or args.char_ngrams[-1] != ']' :
-    print("The list of n-gram levels needs to be enclosed in square brackets, e.g. [1,2,3] or [].")
+if args.word_ngrams[0] != '[' or args.word_ngrams[-1] != ']' \
+        or args.char_ngrams[0] != '[' or args.char_ngrams[-1] != ']':
+    print('The list of n-gram levels needs to be enclosed in square brackets,'
+          ' e.g. [1,2,3] or [].')
     sys.exit()
 WORD_NS = args.word_ngrams[1:-1]
 if len(WORD_NS) == 0:
@@ -54,8 +53,10 @@ if len(CHAR_NS) == 0:
     CHAR_NS = []
 else:
     CHAR_NS = [int(i) for i in CHAR_NS.split(',')]
-print("Word-level n-grams used: " + str(WORD_NS) if not args.use_embeddings else "-")
-print("Char-level n-grams used: " + str(CHAR_NS) if not args.use_embeddings else "-")
+print("Word-level n-grams used: " + str(WORD_NS)
+      if not args.use_embeddings else "-")
+print("Char-level n-grams used: " + str(CHAR_NS)
+      if not args.use_embeddings else "-")
 print("Adding uncased features: " + str(args.add_uncased))
 print("Using embeddings: " + str(args.use_embeddings))
 
@@ -79,9 +80,12 @@ def update_featuremap(featuremap, label, ngram, context):
 
 
 # U0329, U030D are the combining lines for marking syllabic consonants
-char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)', re.UNICODE | re.IGNORECASE)
+char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)',
+                          re.UNICODE | re.IGNORECASE)
 
-def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS, verbose=False):
+
+def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
+                     char_ns=CHAR_NS, verbose=False):
     utterance = utterance.strip().replace('\n', ' ')
     if DIALECTS:
         words = utterance.split(' ')
@@ -113,13 +117,15 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
         for i in range(len(words_wordlvl) + 1 - word_n):
             tokens = words_wordlvl[i:i + word_n]
             if not DIALECTS:
-                tokens = [tok if tok in escape_toks else tok.lower() for tok in tokens]
+                tokens = [tok if tok in escape_toks else tok.lower()
+                          for tok in tokens]
             ngram = sep.join(tokens)
             # Padding to distinguish these from char n-grams
             if args.add_uncased:
                 uncased_ngram = 'UNCASED:<SOS>' + ngram.lower() + '<EOS>'
                 cur_ngrams.append(uncased_ngram)
-                update_featuremap(featuremap, label, uncased_ngram, '<SOS>' + ngram + '<EOS>')
+                update_featuremap(featuremap, label, uncased_ngram,
+                                  '<SOS>' + ngram + '<EOS>')
             ngram = '<SOS>' + ngram + '<EOS>'
             cur_ngrams.append(ngram)
         ngrams.append(cur_ngrams)
@@ -132,7 +138,6 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
             word_len = len(chars)
             if word_len == 0:
                 continue
-                
             if char_n > 1:
                 pfx = chars[:char_n - 1]
                 ngram = sep + ''.join(pfx)
@@ -141,8 +146,8 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 if args.add_uncased:
                     uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label, uncased_ngram, context)
-            
+                    update_featuremap(featuremap, label,
+                                      uncased_ngram, context)
             for i in range(len(chars) + 1 - char_n):
                 ngram = ''.join(chars[i:i + char_n])
                 cur_ngrams.append(ngram)
@@ -150,7 +155,8 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 if args.add_uncased:
                     uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label, uncased_ngram, context)
+                    update_featuremap(featuremap, label,
+                                      uncased_ngram, context)
 
             if char_n > 1:
                 sfx = chars[word_len + 1 - char_n:]
@@ -160,7 +166,8 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS, char_ns=CHAR_NS
                 if args.add_uncased:
                     uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label, uncased_ngram, context)
+                    update_featuremap(featuremap, label,
+                                      uncased_ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
         print(utterance, ngrams)
@@ -195,7 +202,8 @@ def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile):
     return toks
 
 
-infile = 'data/bokmaal+phon_cleaned.tsv' if DIALECTS else 'data/tweets_cleaned.tsv'
+infile = 'data/bokmaal+phon_cleaned.tsv' \
+         if DIALECTS else 'data/tweets_cleaned.tsv'
 label_col = 0 if DIALECTS else 1
 data_col = 4 if DIALECTS else 2
 data = pd.read_csv(infile, encoding='utf8', delimiter='\t',
@@ -213,8 +221,8 @@ Path(args.model).mkdir(parents=True, exist_ok=True)
 if args.use_embeddings:
     with open(outfile, 'w+', encoding='utf8') as f:
         f.write('utterance\tlabel\tBPE tokens\n')
-    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(args.embedding_model,
-                                                           do_lowercase=False)
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
+        args.embedding_model, do_lowercase=False)
     for utterance, label in zip(data['utterances'], data['labels']):
         utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile)
 else:
@@ -235,9 +243,9 @@ for label, feature2context in featuremap.items():
               encoding='utf8') as f:
         for feature, context in feature2context.items():
             f.write(feature)
-            filtered_context = ['{}({})'.format(cont, count)
-                                for cont, count in Counter(context).most_common()
-                                if count >= threshold]
+            filtered_context = ['{}({})'.format(cont, nr)
+                                for cont, nr in Counter(context).most_common()
+                                if nr >= threshold]
             if filtered_context:
                 f.write('\t')
                 f.write('\t'.join(filtered_context))

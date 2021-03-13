@@ -24,45 +24,47 @@ else:
 # Counties in the dataset (pre-reform)
 
 nord_norge = {'finnmark': ['hammerfest', 'kautokeino', 'kirkenes',
-                             'kjoellefjord', 'lakselv', 'tana', 'vardoe'],
-                'nordland': ['ballangen', 'beiarn', 'bodoe', 'hattfjelldal',
-                             'heroeyN', 'mo_i_rana', 'myre', 'narvik', 'stamsund',
-                             'steigen', 'soemna'],
-                'troms': ['botnhamn', 'karlsoey', 'kirkesdalen', 'kvaefjord',
-                        'kvaenangen', 'kaafjord', 'lavangen', 'medby',
-                        'mefjordvaer', 'stonglandseidet', 'tromsoe']}
+                           'kjoellefjord', 'lakselv', 'tana', 'vardoe'],
+              'nordland': ['ballangen', 'beiarn', 'bodoe', 'hattfjelldal',
+                           'heroeyN', 'mo_i_rana', 'myre', 'narvik',
+                           'stamsund', 'steigen', 'soemna'],
+              'troms': ['botnhamn', 'karlsoey', 'kirkesdalen', 'kvaefjord',
+                         'kvaenangen', 'kaafjord', 'lavangen', 'medby',
+                         'mefjordvaer', 'stonglandseidet', 'tromsoe']}
 # Indre Troms: kirkesdalen
 # Northern Sami: Kåfjord
 
 soerlandet = {'aust_agder': ['evje', 'landvik', 'valle', 'vegaarshei'],
-                'vest_agder': ['kristiansand', 'lyngdal', 'sirdal', 'vennesla',
+              'vest_agder': ['kristiansand', 'lyngdal', 'sirdal', 'vennesla',
                              'aaseral']}
 
-troendelag = {'nord_troendelag': ['inderoey', 'lierne', 'meraaker', 'namdalen'],
-                'soer_troendelag': ['bjugn', 'gauldal', 'oppdal', 'roeros',
-                                    'selbu', 'skaugdalen', 'stokkoeya',
-                                    'trondheim']}
+troendelag = {'nord_troendelag': ['inderoey', 'lierne', 'meraaker',
+                                  'namdalen'],
+              'soer_troendelag': ['bjugn', 'gauldal', 'oppdal', 'roeros',
+                                  'selbu', 'skaugdalen', 'stokkoeya',
+                                  'trondheim']}
 
 vestlandet = {'hordaland': ['bergen', 'boemlo', 'eidfjord', 'fusa',
                             'kvinnherad', 'lindaas', 'voss'],
-                'moere_og_romsdal': ['aure', 'bud', 'heroeyMR', 'rauma',
-                                     'stranda', 'surnadal', 'todalen', 'volda'],
-                'rogaland': ['gjesdal', 'hjelmeland', 'karmoey', 'sokndal',
-                             'stavanger', 'suldal', 'time'],
-                'sogn_og_fjordane': ['hyllestad', 'joelster', 'kalvaag', 'luster',
-                                     'stryn']}
+              'moere_og_romsdal': ['aure', 'bud', 'heroeyMR', 'rauma',
+                                   'stranda', 'surnadal', 'todalen', 'volda'],
+              'rogaland': ['gjesdal', 'hjelmeland', 'karmoey', 'sokndal',
+                           'stavanger', 'suldal', 'time'],
+              'sogn_og_fjordane': ['hyllestad', 'joelster', 'kalvaag',
+                                   'luster', 'stryn']}
 oestlandet = {'akershus': ['enebakk', 'lommedalen', 'nes'],
-                'buskerud': ['darbu', 'flaa', 'rollag', 'sylling', 'aal'],
-                'hedmark': ['alvdal', 'dalsbygda', 'drevsjoe', 'kirkenaer',
-                            'rena', 'stange', 'trysil'],
-                'oppland': ['brekkom', 'gausdal', 'jevnaker', 'kvam', 'lom',
-                            'skreia', 'vang', 'vestre_slidre'],
-                'telemark': ['hjartdal', 'langesund', 'nissedal', 'tinn',
-                             'vinje'],
-                'vestfold': ['brunlanes', 'hof', 'lardal'],
-                'oestfold': ['aremark', 'fredrikstad', 'roemskog']}
+              'buskerud': ['darbu', 'flaa', 'rollag', 'sylling', 'aal'],
+              'hedmark': ['alvdal', 'dalsbygda', 'drevsjoe', 'kirkenaer',
+                          'rena', 'stange', 'trysil'],
+              'oppland': ['brekkom', 'gausdal', 'jevnaker', 'kvam', 'lom',
+                          'skreia', 'vang', 'vestre_slidre'],
+              'telemark': ['hjartdal', 'langesund', 'nissedal', 'tinn',
+                           'vinje'],
+              'vestfold': ['brunlanes', 'hof', 'lardal'],
+              'oestfold': ['aremark', 'fredrikstad', 'roemskog']}
 
-# The dialect area division is based on Mæhlum & Røyneland: Det norske dialektlandskapet
+# The dialect area division is based on
+# Mæhlum & Røyneland 2018: Det norske dialektlandskapet
 vestnorsk = {}
 for k in vestlandet:
     vestnorsk[k] = vestlandet[k]
@@ -88,7 +90,7 @@ skip_tokens = ['#', '##',  # pauses
                '?', '!', '"', '...', '…', '"',
                # "Interjeksjonar vi ikkje endrar stavemåten på"
                'ee', 'eh', 'ehe', 'em', 'heh', 'hm', 'm', 'm-m', 'mhm', 'mm'
-                ]
+               ]
 if MODE == 'ORTHO' or MODE == 'BOTH':
     skip_tokens.append('e')
 
@@ -117,12 +119,13 @@ class Line_Iter(object):
 def is_named_entity(string):
     # Names: F1 (F2, F3, ...), M1, E1
     # Other NEs: N1
-    # Names of interview participants use the participant code, which contains a number.
+    # Names of interview participants use the participant code,
+    # which contains a number.
     return bool(re.search(r'\d', string))
 
 
 phono_replace_first = {'nng': 'ŋŋ', 'ng': 'ŋ', 'kkj': 'çç',
-                       'ssj': 'ʂʂ', 'ttj':'tʧ'}
+                       'ssj': 'ʂʂ', 'ttj': 'tʧ'}
 phono_replace_next = {'\'ŋ': 'ŋ̍', '\'m': 'm̩', '\'n': 'n̩', '\'l': 'l̩',
                       '\'r': 'r̩', '\'s': 's̩', '\'L': ' ̍ɽ', 'L': 'ɽ',
                       'kj': 'ç', 'sj': 'ʂ', 'tj': 'ʧ',
@@ -151,10 +154,12 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
         places.add(place)
         if MODE == 'BOTH':
             try:
-                in_file_ortho = open(INPUT_DIR_ORTHO + file, 'r', encoding='utf8')
+                in_file_ortho = open(INPUT_DIR_ORTHO + file, 'r',
+                                     encoding='utf8')
                 line_iter_ortho = Line_Iter(in_file_ortho)
             except FileNotFoundError:
-                print('The file \'' + file + '\' does not have an orthography-based counterpart. (Skipping file.)')
+                print('The file \'' + file + '\' does not have an orthography-'
+                      'based counterpart. (Skipping file.)')
                 skipped.append(file)
                 continue
         with open(INPUT_DIR + file, 'r', encoding='utf8') as in_file:
@@ -164,8 +169,8 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                     line = line_iter.next()
                     if MODE == 'BOTH':
                         # Some lines are empty except for the informant code.
-                        # Remove these lines to make sure the phonetic and orthographic
-                        # versions are still lined up properly.
+                        # Remove these lines to make sure the phonetic and
+                        # orthographic versions are still lined up properly.
                         tokens_phon = line.strip().split()
                         while len(tokens_phon) <= 1:
                             tokens_phon = line_iter.next().strip().split()
@@ -173,30 +178,36 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                         tokens_ortho = []
                         try:
                             while len(tokens_ortho) <= 1:
-                                line_ortho = line_iter_ortho.next().replace('"', '')
+                                line_ortho = line_iter_ortho.next().replace(
+                                    '"', '')
                                 tokens_ortho = line_ortho.strip().split()
                         except StopIteration:
-                            # Sometimes, the ortho file is missing the last line(s).
+                            # Sometimes, the ortho file is missing the last
+                            # few line(s).
                             break
-                        # Sometimes, a longer utterance / sequence of utterances is
-                        # encoded as a single utterance in the ortho file, but as a
-                        # sequence of utterances by the same speaker in the phono
-                        # file. -> Split the ortho utterance into shorter parts.
+                        # Sometimes, a longer utterance or sequence of
+                        # utterances is encoded as a single utterance in the
+                        # ortho file, but as a sequence of utterances by the
+                        # same speaker in the phono file.
+                        # -> Split the ortho utterance into shorter parts.
                         n_toks_total = len(tokens_phon)
                         if len(tokens_ortho) > n_toks_total:
                             cur_tokens_ortho = tokens_ortho[:n_toks_total]
-                            n_toks_ortho = len(tokens_ortho) 
+                            n_toks_ortho = len(tokens_ortho)
                             while n_toks_ortho > n_toks_total:
                                 next_line = line_iter.next_iter_only().strip()
                                 line_iter.save_line(next_line)
                                 toks = next_line.split()
                                 # Skip speaker code (token 0)
                                 n_toks = len(toks[1:])
-                                next_line_ortho = ' '.join(tokens_ortho[n_toks_total:n_toks_total + n_toks])
-                                line_iter_ortho.save_line(speaker + ' ' + next_line_ortho)
+                                next_line_ortho = ' '.join(tokens_ortho[
+                                    n_toks_total:n_toks_total + n_toks])
+                                line_iter_ortho.save_line(
+                                    speaker + ' ' + next_line_ortho)
                                 n_toks_total += n_toks
                             if n_toks_ortho != n_toks_total:
-                                print("DIFF LENGTHS", n_toks_ortho, n_toks_total)
+                                print("DIFF LENGTHS",
+                                      n_toks_ortho, n_toks_total)
                             tokens_ortho = cur_tokens_ortho
 
                     else:
@@ -205,7 +216,6 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
 
                     if not speaker.startswith(place):
                         # Interviewer, not informant
-                        # TODO check if there is information on where the interviewers are from
                         continue
                     informants.add(speaker)
                     utterance = []
@@ -215,7 +225,8 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                             print('DIFFERENT UTTERANCE LENGTHS', file)
                             print(tokens_phon[1:])
                             print(tokens_ortho[1:])
-                        for tok_phon, tok_ortho in zip(tokens_phon[1:], tokens_ortho[1:]):
+                        for tok_phon, tok_ortho in zip(tokens_phon[1:],
+                                                       tokens_ortho[1:]):
                             if tok_phon.endswith('-'):
                                 continue
                             if tok_ortho in skip_tokens:
@@ -230,7 +241,8 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                             tok_ortho = tok_ortho.replace('_', '')
                             if len(tok_phon) > 0 and tok_phon[0].islower():
                                 # Capitalization check to exclude place names
-                                utterance.append(tok_ortho + '/' + clean_phono(tok_phon))
+                                utterance.append(tok_ortho + '/' + clean_phono(
+                                    tok_phon))
                     else:
                         for token in tokens[1:]:
                             if token.endswith('-'):
@@ -246,7 +258,9 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                     if len(utterance) < MIN_WORDS_PER_UTTERANCE:
                         continue
                     utterance = ' '.join(utterance).strip()
-                    out_file.write(place2area[place] + '\t' + place2county[place] + '\t' + place + '\t' + file + '\t' + utterance + '\n')
+                    out_file.write('{}\t{}\t{}\t{}\t{}\n'.format(
+                        place2area[place], place2county[place],
+                        place, file, utterance))
                     try:
                         area2towns[place2area[place]].add(place)
                     except KeyError:
@@ -280,7 +294,8 @@ with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     log_file.write('No. of places: ' + str(len(places)) + '\n')
     log_file.write(str(places) + '\n\n')
     for area, towns in area2towns.items():
-        log_file.write(area + ': ' + str(len(towns)) + ' / ' + str(len(area2files[area])) + '\n')
+        log_file.write('{}: {} / {}\n'.format(area, len(towns),
+                                              len(area2files[area]))
         log_file.write(str(towns) + '\n\n')
         # log_file.write(str(area2files[area]) + '\n\n')
     log_file.write('No. of informants: ' + str(len(informants)) + '\n')

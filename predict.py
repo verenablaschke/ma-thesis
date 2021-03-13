@@ -2,19 +2,13 @@
 
 # called by kfold.py
 
-import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import model_selection, svm
+from sklearn import svm
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
-import re
-import sys
-import argparse
-import pickle
 import datetime
-from transformers import FlaubertModel, FlaubertTokenizer
 import torch
 
 
@@ -36,7 +30,6 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     test_x = vectorizer.transform(ngrams_test)
 
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
-
 
 
 def get_embeddings(utterances, max_len, embedding_size, batch_size,
@@ -100,8 +93,10 @@ def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):
         exp = np.exp(margins)
         softmax = exp / np.sum(exp)
     #     print("{}: {}".format(utterance, softmax.round(3)))
-        return pred[0], label_encoder.inverse_transform(pred)[0], margins, softmax
-    return pred[0], label_encoder.inverse_transform(pred)[0], margins, model.predict_proba(x)
+        return (pred[0], label_encoder.inverse_transform(pred)[0],
+                margins, softmax)
+    return (pred[0], label_encoder.inverse_transform(pred)[0],
+            margins, model.predict_proba(x))
 
 
 def predict_proba2(model, data, vectorizer, linear_svc, n_labels=4):
@@ -109,13 +104,12 @@ def predict_proba2(model, data, vectorizer, linear_svc, n_labels=4):
     for i, utterance in enumerate(data):
         x = vectorizer.transform([utterance])
         if linear_svc:
-            pred = model.predict(x)
+            # pred = model.predict(x)
             margins = model.decision_function(x)
             exp = np.exp(margins)
             probs[i] = exp / np.sum(exp)  # softmax
         else:
             probs[i] = model.predict_proba(x)
-    GET_NGRAMS = True
     return probs
 
 
@@ -128,18 +122,19 @@ def predict_proba_embeddings(model, data, flaubert, flaubert_tokenizer,
                                                padding='max_length')]
         x = flaubert(torch.tensor(token_ids))[0]
         if linear_svc:
-            pred = model.predict(x)
+            # pred = model.predict(x)
             margins = model.decision_function(x)
             exp = np.exp(margins)
             probs[i] = exp / np.sum(exp)  # softmax
         else:
             probs[i] = model.predict_proba(x)
-    GET_NGRAMS = True
     return probs
 
 
 def score(pred, test_y):
-    return accuracy_score(test_y, pred), f1_score(test_y, pred, average='macro'), confusion_matrix(test_y, pred)
+    return (accuracy_score(test_y, pred),
+            f1_score(test_y, pred, average='macro'),
+            confusion_matrix(test_y, pred))
 
 
 def support_vectors(model, label_encoder, train_x, train_x_raw,
@@ -149,14 +144,16 @@ def support_vectors(model, label_encoder, train_x, train_x_raw,
         print('==========================\n')
         dec_fn = model.decision_function(train_x)[:, label]
         # support vectors and vectors 'in the middle of the street'
-        support_vector_indices_pos = np.where(np.logical_and(dec_fn > 0, dec_fn <= 1))[0]
+        support_vector_indices_pos = np.where(
+            np.logical_and(dec_fn > 0, dec_fn <= 1))[0]
         print('positive side')
         for idx in support_vector_indices_pos:
             print('-', train_x_raw[idx])
-        support_vector_indices_neg = np.where(np.logical_and(dec_fn <= 0, dec_fn >= -1))[0]
+        support_vector_indices_neg = np.where(
+            np.logical_and(dec_fn <= 0, dec_fn >= -1))[0]
         print()
         print('negative side')
-        for idx in support_vector_indices_pos:
+        for idx in support_vector_indices_neg:
             print('-', train_x_raw[idx])
         print('\n\n')
 
@@ -186,25 +183,22 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                  linear_svc, flaubert=None, flaubert_tokenizer=None,
                  max_len=None):
     labels = list(range(n_labels))
-    explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(labels),
+    explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(
+                                    labels),
                                   split_expression=split_ngrams,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
                                   recalculate_ngrams=False)
     if flaubert:
-        predict_function = lambda z: predict_proba_embeddings(model, z,
-                                                              flaubert,
-                                                              flaubert_tokenizer,
-                                                              linear_svc,
-                                                              max_len, n_labels)
+        predict_function = lambda z: predict_proba_embeddings(
+            classifier, z, flaubert, flaubert_tokenizer,
+            linear_svc, max_len, n_labels)
     else:
         predict_function = lambda z: predict_proba2(classifier, z, vectorizer,
                                                     linear_svc, n_labels)
     with open(out_folder + 'predictions.tsv', 'w+', encoding='utf8') as f_pred:
-        for idx, (utterance, ngrams, encoded, y) in enumerate(zip(test_x_raw,
-                                                                  test_x_ngrams,
-                                                                  test_x,
-                                                                  test_y)):
+        for idx, (utterance, ngrams, encoded, y) in enumerate(
+                zip(test_x_raw, test_x_ngrams, test_x, test_y)):
             y_raw = label_encoder.inverse_transform([y])[0]
             pred_enc = classifier.predict(encoded)[0]
             pred_raw = label_encoder.inverse_transform([pred_enc])[0]
@@ -225,7 +219,8 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                                                lab_raw),
                           'a+', encoding='utf8') as f:
                     for feature, score in lime_results:
-                        f.write('{}\t{}\t{:.10f}\n'.format(idx, feature, score))
+                        f.write('{}\t{}\t{:.10f}\n'
+                                .format(idx, feature, score))
 
             if idx % 50 == 0:
                 now = datetime.datetime.now()
@@ -236,11 +231,12 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                 print('PREDICTED', pred_raw)
                 print('\n')
                 with open(out_folder + '/log.txt', 'a', encoding='utf8') as f:
-                    f.write(str(idx) + '  --  ' + str(now) + '  --  "' + utterance + '""\n')
+                    f.write('{} -- {} -- "{}"\n'.format(idx, now, utterance))
                     f.write('ACTUAL: ' + str(y_raw) + '\n')
                     f.write('PREDICTED: ' + str(pred_raw) + '\n')
                     for label_nr in range(n_labels):
                         lab = label_encoder.inverse_transform([label_nr])[0]
                         f.write('Class ' + lab + ': ' + ', '.join(
-                            ['{}\t{:.5f}'.format(x[0], x[1]) for x in exp.as_list(label=label_nr)[:5]]) + '\n')
+                            ['{}\t{:.5f}'.format(x[0], x[1])
+                             for x in exp.as_list(label=label_nr)[:5]]) + '\n')
                     f.write('\n')

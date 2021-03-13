@@ -1,18 +1,7 @@
 # coding: utf-8
 
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import model_selection, svm
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
-from ngram_lime.lime.lime_text import LimeTextExplainer
-import re
-import sys
+from sklearn import model_selection
 import argparse
-import pickle
-import datetime
-from predict import *
 from pathlib import Path
 
 

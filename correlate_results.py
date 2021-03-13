@@ -1,6 +1,4 @@
 import argparse
-import numpy as np
-import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('importance_file',

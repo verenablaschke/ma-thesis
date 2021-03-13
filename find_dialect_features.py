@@ -50,4 +50,5 @@ word2list['sl'] = sl
 with open(OUT_FILE, 'w+', encoding='utf8') as f:
     for word, variants in word2list.items():
         f.write('{}\n'.format(word.upper()))
-        f.write(', '.join(['{} ({})'.format(*c) for c in Counter(variants).most_common()]) + '\n\n')
+        f.write(', '.join(['{} ({})'.format(*c)
+                           for c in Counter(variants).most_common()]) + '\n\n')

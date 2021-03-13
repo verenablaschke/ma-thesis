@@ -1,4 +1,3 @@
-import math
 import argparse
 import numpy as np
 from sklearn.decomposition import PCA
@@ -18,9 +17,11 @@ sys.setrecursionlimit(10000)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model')
-parser.add_argument('classes', help='separated by commas, e.g. nordnorsk,vestnorsk,oestnorsk,troendersk')
+parser.add_argument('classes', help='separated by commas, '
+                    'e.g. nordnorsk,vestnorsk,oestnorsk,troendersk')
 parser.add_argument('k', help='number of folds', default='10', type=int)
-parser.add_argument('numfeatures', help='number of features per class', type=int)
+parser.add_argument('numfeatures', help='number of features per class',
+                    type=int)
 args = parser.parse_args()
 
 print(args)
@@ -44,7 +45,8 @@ for fold in range(args.k):
     #             elif MODE == 'falsepos' and pred == CLASS and y != pred:
     #                 indices.append(idx)
     for label in labels:
-        in_file = '{}/fold-{}/importance_values_{}_all_sorted.tsv'.format(args.model, fold, label)
+        in_file = '{}/fold-{}/importance_values_{}_all_sorted.tsv'.format(
+            args.model, fold, label)
         # print(in_file)
         with open(in_file, 'r', encoding='utf8') as in_file:
             next(in_file)  # Skip header
@@ -88,19 +90,19 @@ for idx_feat, (feature, label2fold) in enumerate(scores.items()):
             label2feature2score[label] = {feature: score}
 
 
-
 def get_select_features(n=50):
     top_features = set()
     random_features = set()
     for label, feature2score in label2feature2score.items():
         print(label)
-        top_features.update(f for (f, _) in sorted(feature2score.items(),
-            key=lambda x: x[1], reverse=True)[:n])
+        top_features.update(f for (f, _) in sorted(
+            feature2score.items(), key=lambda x: x[1], reverse=True)[:n])
         featurelist = list(feature2score.items())
         random.shuffle(featurelist)
         random_features.update(f for (f, _) in featurelist[:n])
     print(len(top_features), len(random_features))
     return top_features, random_features
+
 
 # TODO make more flexible
 colours = ['red', 'green', 'blue', 'purple']
@@ -154,7 +156,9 @@ def tree(matrix, features, n, selection):
         X_rand[idx] = matrix[feature2idx[feat]]
     dist = 1 - cosine_similarity(X_rand)
     Z = linkage(dist, method='average')
-    hierarchy.set_link_color_palette([mpl.colors.rgb2hex(rgb[:3]) for rgb in cm.rainbow(np.linspace(0, 1, 10))])
+    hierarchy.set_link_color_palette(
+        [mpl.colors.rgb2hex(rgb[:3])
+         for rgb in cm.rainbow(np.linspace(0, 1, 10))])
     fig, ax = plt.subplots()
     tree = dendrogram(Z, labels=features, orientation='left',
                       leaf_font_size=n_to_fontsize(n),
@@ -162,15 +166,18 @@ def tree(matrix, features, n, selection):
     with open(args.model + '/dendrogram-{}-{}.txt'.format(n, selection),
               'w+', encoding='utf8') as f:
         for feature, col in zip(tree['ivl'], tree['color_list']):
-            f.write("{}\t{}\t{}\n".format(col, feature, get_colour(feature)[1]))
+            f.write("{}\t{}\t{}\n".format(
+                col, feature, get_colour(feature)[1]))
     features = ax.get_ymajorticklabels()
     for feat in features:
         feat.set_color(get_colour(feat.get_text())[0])
-    ax.legend(handles=[Patch(color=col, label=lab) for lab, col in label2col.items()],
+    ax.legend(handles=[Patch(color=col, label=lab)
+                       for lab, col in label2col.items()],
               loc='upper left')
     # plt.show()
     fig.set_size_inches(20, 15)
-    fig.savefig(args.model + '/figures/dendrogram-{}-{}.png'.format(n, selection),
+    fig.savefig('{}/figures/dendrogram-{}-{}.png'.format(
+                    args.model, n, selection),
                 # dpi=200
                 # bbox_inches='tight'
                 )

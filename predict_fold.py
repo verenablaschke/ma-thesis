@@ -1,22 +1,12 @@
 # coding: utf-8
 
-import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import model_selection, svm
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
-from ngram_lime.lime.lime_text import LimeTextExplainer
-import re
-import sys
 import argparse
 import pickle
-import datetime
-from predict import *
+from predict import encode, encode_embeddings, predict, score, train, \
+                    explain_lime
 from pathlib import Path
 from transformers import FlaubertModel, FlaubertTokenizer
-import torch
-import pickle
 
 
 parser = argparse.ArgumentParser()
@@ -29,7 +19,8 @@ parser.add_argument('--embmod', dest='embedding_model',
                     default='flaubert/flaubert_base_cased' , type=str)
 parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
 parser.add_argument('--embbatch', dest='batch_size', default=50, type=int)
-parser.add_argument('--limefeat', dest='n_lime_features', default=100, type=int)
+parser.add_argument('--limefeat', dest='n_lime_features', default=100,
+                    type=int)
 parser.add_argument('--z', dest='n_lime_samples', default=1000, type=int)
 parser.add_argument('--save', dest='save_model', default=False,
                     action='store_true')
@@ -43,6 +34,7 @@ folder = '{}/fold-{}/'.format(args.model, args.fold)
 MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
 LIME_FOLDER = folder + args.output_subfolder + '/'
 
+
 def get_features(filename):
     raw, ngrams, labels = [], [], []
     with open(filename, 'r', encoding='utf8') as f:
@@ -55,6 +47,7 @@ def get_features(filename):
             ngrams.append(' '.join(cells[2:]))
     return np.array(raw), np.array(ngrams), np.array(labels)
 
+
 print("Encoding the data.")
 raw_train, ngrams_train, labels_train = get_features(folder + 'train_data.txt')
 raw_test, ngrams_test, labels_test = get_features(folder + 'test_data.txt')
@@ -64,8 +57,8 @@ class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
 if args.use_embeddings:
     flaubert, _ = FlaubertModel.from_pretrained(args.embedding_model,
                                                 output_loading_info=True)
-    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(args.embedding_model,
-        do_lowercase='uncased' in args.embedding_model)
+    flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
+        args.embedding_model, do_lowercase='uncased' in args.embedding_model)
     embedding_size = 768
     if '-small-' in args.embedding_model:
         embedding_size = 512

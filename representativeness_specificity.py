@@ -16,7 +16,8 @@ with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:
         cells = line.strip().split('\t')
         label = cells[1]
         labels.append(label)
-        features = {feature for feature_pkg in cells[2:] for feature in feature_pkg.split()}
+        features = {feature for feature_pkg in cells[2:]
+                    for feature in feature_pkg.split()}
         for feature in features:
             try:
                 feature2labels[feature][label] += 1
@@ -30,7 +31,8 @@ print("Calculating representativeness/specificity.")
 label_counter = Counter(labels)
 labels = list(label_counter.keys())
 
-with open(args.model + '/feature-distribution.tsv', 'w+', encoding='utf8') as f:
+with open(args.model + '/feature-distribution.tsv',
+          'w+', encoding='utf8') as f:
     f.write("FEATURE")
     for label in labels:
         f.write('\t{}\t{}-REP\t{}-SPEC'.format(label, label, label))

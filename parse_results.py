@@ -1,6 +1,5 @@
 import argparse
 import numpy as np
-import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model', help='path to the model')
@@ -64,15 +63,15 @@ else:
     glob = [(feature, np.sqrt(np.sum(np.absolute(scores[feature]))),
              len(scores[feature])) for feature in scores]
 glob = sorted(glob, key=lambda x: x[1] if x[2] >= THRESHOLD else -1,
-               reverse=True)
+              reverse=True)
 print("sorted")
 
 
-out_file = '{}/importance_values_{}_{}_{}_sorted.tsv'
+out_file = '{}/importance_values_{}_{}_{}_sorted.tsv' \
            .format(FOLDER, args.combination_method, CLASS, MODE)
 if args.single_fold:
-    out_file = '{}/fold-{}/importance_values_{}_{}_{}_sorted.tsv'
-               .format(FOLDER, args.combination_method, args.k, CLASS, MODE)    
+    out_file = '{}/fold-{}/importance_values_{}_{}_{}_sorted.tsv' \
+               .format(FOLDER, args.combination_method, args.k, CLASS, MODE)
 print(out_file)
 with open(out_file, 'w', encoding='utf8') as out_file:
     out_file.write('FEATURE\t{}\tSUM\tCOUNT\n'
