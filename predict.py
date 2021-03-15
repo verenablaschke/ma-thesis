@@ -196,6 +196,13 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
     else:
         predict_function = lambda z: predict_proba2(classifier, z, vectorizer,
                                                     linear_svc, n_labels)
+
+    for lab_raw in label_encoder.inverse_transform(labels):
+        with open('{}/importance_values_{}.txt'.format(out_folder, lab_raw),
+                  'w+', encoding='utf8') as f:
+            # Making sure we have new files instead of potentially adding onto
+            # old runs.
+            pass
     with open(out_folder + 'predictions.tsv', 'w+', encoding='utf8') as f_pred:
         for idx, (utterance, ngrams, encoded, y) in enumerate(
                 zip(test_x_raw, test_x_ngrams, test_x, test_y)):
@@ -217,7 +224,7 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                 lab_raw = label_encoder.inverse_transform([lab])[0]
                 with open('{}/importance_values_{}.txt'.format(out_folder,
                                                                lab_raw),
-                          'a+', encoding='utf8') as f:
+                          'a', encoding='utf8') as f:
                     for feature, score in lime_results:
                         f.write('{}\t{}\t{:.10f}\n'
                                 .format(idx, feature, score))
