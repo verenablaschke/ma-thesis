@@ -14,6 +14,9 @@ parser.add_argument('--i', dest='min_corr_merge',
                     help="min NPMI correlation score for considering two "
                          "features as identical",
                     default=1.0, type=float)
+parser.add_argument('--comb', dest='combination_method',
+                    help='options: sqrt (square root of sums), mean',
+                    default='sqrt', type=str)
 args = parser.parse_args()
 
 threshold = args.top
@@ -32,8 +35,8 @@ with open(args.model + '/features.tsv', encoding='utf8') as f:
         except KeyError:
             label2count[label] = 1
 total_count = sum(val for val in label2count.values())
-log_file = '{}/log_importance_values_all_sorted_{}context.tsv' \
-           .format(args.model, threshold)
+log_file = '{}/log_importance_values_{}_all_sorted_{}context.tsv' \
+           .format(args.model, args.combination_method, threshold)
 with open(log_file, 'w+', encoding='utf8') as f_log:
     f_log.write('LABEL\tPROPORTION\t'
                 'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
@@ -58,21 +61,6 @@ with open(args.model + '/features.tsv', encoding='utf8') as f:
         except KeyError:
             label2count[label] = 1
 total_count = sum(val for val in label2count.values())
-
-log_file = '{}/log_importance_values_all_sorted_{}context.tsv' \
-           .format(args.model, threshold)
-with open(log_file, 'w+', encoding='utf8') as f_log:
-    f_log.write('LABEL\tPROPORTION\t'
-                'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
-                'IMPORTANCE_MIN\tIMPORTANCE_MAX\t'
-                'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\t'
-                'N_UTTERANCES_MIN\tN_UTTERANCES_MAX\t'
-                'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
-                'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\t'
-                'CORRCOEF_IMPORTANCE_REP\tCOVARIANCE_IMPORTANCE_REP\t'
-                'SPECIFICITY_MEAN\tSPECIFICITY_VAR\t'
-                'SPECIFICITY_MIN\tSPECIFICITY_MAX\t'
-                'CORRCOEF_IMPORTANCE_SPEC\tCOVARIANCE_IMPORTANCE_SPEC\n')
 
 print("Reading the feature correlations.")
 feature2corr = {}
@@ -123,8 +111,9 @@ for label in labels:
                 pass
     feature2results = {}
     top_results = []
-    with open('{}/importance_values_{}_all_sorted.tsv'.format(
-              args.model, label), 'r', encoding='utf8') as f_in:
+    with open('{}/importance_values_{}_{}_all_sorted.tsv'
+              .format(args.model, args.combination_method, label),
+              'r', encoding='utf8') as f_in:
         header = next(f_in).strip()
         idx = 0
         for line in f_in:
@@ -154,8 +143,9 @@ for label in labels:
 
     imp_scores, n_utt_scores, rep_scores, spec_scores = [], [], [], []
 
-    with open('{}/importance_values_{}_all_sorted_{}context.tsv'.format(
-            args.model, label, threshold), 'w+', encoding='utf8') as f_out:
+    with open('{}/importance_values_{}_{}_all_sorted_{}context.tsv'
+              .format(args.model, args.combination_method, label, threshold),
+              'w+', encoding='utf8') as f_out:
         f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
                     'REPRESENTATIVENESS\tSPECIFICITY\t'
                     'N_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\t'
@@ -174,7 +164,7 @@ for label in labels:
                 idx, feature, mean, importance_sum, count, context,
                 n_occ, rep, spec))
             imp_scores.append(float(mean))
-            n_utt_scores.append(int(n_occ))
+            n_utt_scores.append(int(float(n_occ)))
             rep_scores.append(float(rep))
             spec_scores.append(float(spec))
 
