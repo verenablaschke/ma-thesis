@@ -122,10 +122,20 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
             ngram = sep.join(tokens)
             # Padding to distinguish these from char n-grams
             if args.add_uncased:
-                uncased_ngram = 'UNCASED:<SOS>' + ngram.lower() + '<EOS>'
-                cur_ngrams.append(uncased_ngram)
-                update_featuremap(featuremap, label, uncased_ngram,
-                                  '<SOS>' + ngram + '<EOS>')
+                only_escaped = True
+                tmp_tokens = []
+                for tok in tokens:
+                    if tok in escape_toks:
+                        tmp_tokens.append(tok)
+                    else:
+                        only_escaped = False
+                        tmp_tokens.append(tok.lower())
+                if not only_escaped:
+                    uncased_ngram = 'UNCASED:<SOS>{}<EOS>'.format(
+                        sep.join(tmp_tokens))
+                    cur_ngrams.append(uncased_ngram)
+                    update_featuremap(featuremap, label, uncased_ngram,
+                                      '<SOS>' + ngram + '<EOS>')
             ngram = '<SOS>' + ngram + '<EOS>'
             cur_ngrams.append(ngram)
         ngrams.append(cur_ngrams)

@@ -37,12 +37,12 @@ for _, directories, _ in os.walk(fold_dir):
             runs2folders[run] = [directory]
         directory = fold_dir + '/' + directory
         scores = {}
-        # for label in labels:
-        #     scores = parse_fold(mode, fold_dir, directory, label, scores,
-        #                         label + '-')
-        # filename_details = '{}_{}'.format(combination_method, mode)
-        # calculate_results(combination_method, scores, min_count, directory,
-        #                   filename_details)
+        for label in labels:
+            scores = parse_fold(mode, fold_dir, directory, label, scores,
+                                label + '-')
+        filename_details = '{}_{}'.format(combination_method, mode)
+        calculate_results(combination_method, scores, min_count, directory,
+                          filename_details)
 
 for run, folder_list in runs2folders.items():
     print('\n')
