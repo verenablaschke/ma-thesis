@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import os
 import re
 
@@ -23,57 +25,52 @@ else:
 
 # Counties in the dataset (pre-reform)
 
-nord_norge = {'finnmark': ['hammerfest', 'kautokeino', 'kirkenes',
-                           'kjoellefjord', 'lakselv', 'tana', 'vardoe'],
-              'nordland': ['ballangen', 'beiarn', 'bodoe', 'hattfjelldal',
-                           'heroeyN', 'mo_i_rana', 'myre', 'narvik',
-                           'stamsund', 'steigen', 'soemna'],
-              'troms': ['botnhamn', 'karlsoey', 'kirkesdalen', 'kvaefjord',
-                         'kvaenangen', 'kaafjord', 'lavangen', 'medby',
-                         'mefjordvaer', 'stonglandseidet', 'tromsoe']}
-# Indre Troms: kirkesdalen
+nordnorsk = {'finnmark': ['hammerfest', 'kautokeino', 'kirkenes',
+                          'kjoellefjord', 'lakselv', 'tana', 'vardoe'],
+             'nordland': ['ballangen', 'beiarn', 'bodoe', 'hattfjelldal',
+                          'heroeyN', 'mo_i_rana', 'myre', 'narvik',
+                          'stamsund', 'steigen', 'soemna'],
+             'troms': ['botnhamn', 'karlsoey', 'kirkesdalen', 'kvaefjord',
+                       'kvaenangen', 'kaafjord', 'lavangen', 'medby',
+                       'mefjordvaer', 'stonglandseidet', 'tromsoe']}
+# Indre Troms: Kirkesdalen
 # Northern Sami: Kåfjord
 
-soerlandet = {'aust_agder': ['evje', 'landvik', 'valle', 'vegaarshei'],
-              'vest_agder': ['kristiansand', 'lyngdal', 'sirdal', 'vennesla',
-                             'aaseral']}
-
-troendelag = {'nord_troendelag': ['inderoey', 'lierne', 'meraaker',
+troendersk = {'nord_troendelag': ['inderoey', 'lierne', 'meraaker',
                                   'namdalen'],
               'soer_troendelag': ['bjugn', 'gauldal', 'oppdal', 'roeros',
                                   'selbu', 'skaugdalen', 'stokkoeya',
-                                  'trondheim']}
+                                  'trondheim'],
+              'moere_og_romsdal': ['aure', 'surnadal', 'todalen']}
 
-vestlandet = {'hordaland': ['bergen', 'boemlo', 'eidfjord', 'fusa',
-                            'kvinnherad', 'lindaas', 'voss'],
-              'moere_og_romsdal': ['aure', 'bud', 'heroeyMR', 'rauma',
-                                   'stranda', 'surnadal', 'todalen', 'volda'],
-              'rogaland': ['gjesdal', 'hjelmeland', 'karmoey', 'sokndal',
-                           'stavanger', 'suldal', 'time'],
-              'sogn_og_fjordane': ['hyllestad', 'joelster', 'kalvaag',
-                                   'luster', 'stryn']}
-oestlandet = {'akershus': ['enebakk', 'lommedalen', 'nes'],
-              'buskerud': ['darbu', 'flaa', 'rollag', 'sylling', 'aal'],
-              'hedmark': ['alvdal', 'dalsbygda', 'drevsjoe', 'kirkenaer',
-                          'rena', 'stange', 'trysil'],
-              'oppland': ['brekkom', 'gausdal', 'jevnaker', 'kvam', 'lom',
-                          'skreia', 'vang', 'vestre_slidre'],
-              'telemark': ['hjartdal', 'langesund', 'nissedal', 'tinn',
-                           'vinje'],
-              'vestfold': ['brunlanes', 'hof', 'lardal'],
-              'oestfold': ['aremark', 'fredrikstad', 'roemskog']}
+vestnorsk = {'hordaland': ['bergen', 'boemlo', 'eidfjord', 'fusa',
+                           'kvinnherad', 'lindaas', 'voss'],
+             'moere_og_romsdal': ['bud', 'heroeyMR', 'rauma', 'stranda',
+                                  'volda'],
+             'rogaland': ['gjesdal', 'hjelmeland', 'karmoey', 'sokndal',
+                          'stavanger', 'suldal', 'time'],
+             'sogn_og_fjordane': ['hyllestad', 'joelster', 'kalvaag',
+                                  'luster', 'stryn'],
+             'aust_agder': ['evje', 'landvik', 'valle', 'vegaarshei'],
+             'vest_agder': ['kristiansand', 'lyngdal', 'sirdal', 'vennesla',
+                            'aaseral']}
+oestnorsk = {'akershus': ['enebakk', 'lommedalen', 'nes'],
+             'buskerud': ['darbu', 'flaa', 'rollag', 'sylling', 'aal'],
+             'hedmark': ['alvdal', 'dalsbygda', 'drevsjoe', 'kirkenaer',
+                         'rena', 'stange', 'trysil'],
+             'oppland': ['brekkom', 'gausdal', 'jevnaker', 'kvam', 'lom',
+                         'skreia', 'vang', 'vestre_slidre'],
+             'telemark': ['hjartdal', 'langesund', 'nissedal', 'tinn',
+                          'vinje'],
+             'vestfold': ['brunlanes', 'hof', 'lardal'],
+             'oestfold': ['aremark', 'fredrikstad', 'roemskog']}
 
 # The dialect area division is based on
 # Mæhlum & Røyneland 2018: Det norske dialektlandskapet
-vestnorsk = {}
-for k in vestlandet:
-    vestnorsk[k] = vestlandet[k]
-for k in soerlandet:
-    vestnorsk[k] = soerlandet[k]
-norwegian = {'nordnorsk': nord_norge,
-             'troendersk': troendelag,
+norwegian = {'nordnorsk': nordnorsk,
+             'troendersk': troendersk,
              'vestnorsk': vestnorsk,
-             'oestnorsk': oestlandet}
+             'oestnorsk': oestnorsk}
 norwegian_places = []
 place2county = {}
 place2area = {}
@@ -295,7 +292,7 @@ with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     log_file.write(str(places) + '\n\n')
     for area, towns in area2towns.items():
         log_file.write('{}: {} / {}\n'.format(area, len(towns),
-                                              len(area2files[area]))
+                                              len(area2files[area])))
         log_file.write(str(towns) + '\n\n')
         # log_file.write(str(area2files[area]) + '\n\n')
     log_file.write('No. of informants: ' + str(len(informants)) + '\n')
@@ -312,4 +309,3 @@ with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     if MODE == 'BOTH':
         log_file.write('Skipped (no orthographic counterpart):\n')
         log_file.write(str(skipped) + '\n\n')
-    
