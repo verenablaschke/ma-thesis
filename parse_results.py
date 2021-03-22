@@ -1,8 +1,10 @@
 import argparse
 import numpy as np
+import sys
 
 
-def parse_fold(mode, fold_dir, subfolder, label, scores, feature_pfx=''):
+def parse_fold(mode, fold_dir, subfolder, label, scores,
+               scale_by_model_score, feature_pfx=''):
     if mode != 'all':
         indices = []
         with open('{}/predictions.tsv'.format(fold_dir), 'r',
@@ -20,14 +22,25 @@ def parse_fold(mode, fold_dir, subfolder, label, scores, feature_pfx=''):
     print(in_file)
     with open(in_file, 'r', encoding='utf8') as in_file:
         for i, line in enumerate(in_file):
-            idx, feature, score = line.strip().split('\t')
+            cells = line.strip().split('\t')
+            idx, feature, score = cells[0], cells[1], float(cells[2])
+            if scale_by_model_score:
+                try:
+                    model_score = float(cells[4])
+                    if model_score < 0:
+                        print("MODEL SCORE BELOW ZERO", model_score)
+                        model_score = 0.0
+                    score *= model_score
+                except IndexError:
+                    print("NO MODEL SCORE")
+                    sys.exit()
             if mode != 'all' and idx not in indices:
                 continue
             try:
                 prev = scores[feature_pfx + feature]
             except KeyError:
                 prev = []
-            scores[feature_pfx + feature] = prev + [float(score)]
+            scores[feature_pfx + feature] = prev + [score]
             if i % 50000 == 0:
                 print(i, feature_pfx + feature)
     return scores
@@ -72,13 +85,16 @@ if __name__ == "__main__":
     parser.add_argument('--comb', dest='combination_method',
                         help='options: sqrt (square root of sums), mean',
                         default='sqrt', type=str)
+    parser.add_argument('--scale', dest='scale_by_model_score',
+                        default=True, action='store_true')
     args = parser.parse_args()
 
     folds = [args.k] if args.single_fold else range(args.k)
     scores = {}
     for fold in folds:
         fold_dir = '{}/fold-{}'.format(args.model, fold)
-        parse_fold(args.mode, fold_dir, fold_dir, args.label, scores)
+        parse_fold(args.mode, fold_dir, fold_dir, args.label, scores,
+                   args.scale_by_model_score)
 
     if args.single_fold:
         filename_details = '{}_{}_{}'.format(args.k, args.label, args.mode)
