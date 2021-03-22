@@ -2,6 +2,7 @@
 
 import numpy as np
 import argparse
+import datetime
 import pickle
 from predict import encode, encode_embeddings, predict, score, train, \
                     explain_lime
@@ -16,7 +17,7 @@ parser.add_argument('fold', help='fold number')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
 parser.add_argument('--embmod', dest='embedding_model',
-                    default='flaubert/flaubert_base_cased' , type=str)
+                    default='flaubert/flaubert_base_cased', type=str)
 parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
 parser.add_argument('--embbatch', dest='batch_size', default=50, type=int)
 parser.add_argument('--limefeat', dest='n_lime_features', default=100,
@@ -74,14 +75,17 @@ else:
     train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
         ngrams_train, ngrams_test, labels_train, labels_test)
 
+print(datetime.datetime.now())
 if args.load_model:
     print("Loading the model")
     with open(MODEL_FILES_FOLDER + 'classifier.pickle', 'rb') as file:
         classifier = pickle.load(file)
 else:
     print("Training the model")
+    start_time = datetime.datetime.now()
     classifier = train(train_x, train_y, linear_svc=args.type == 'dialects',
                        class_weight=class_weight)
+    done_time = datetime.datetime.now()
     print("Scoring the model")
     pred = predict(classifier, test_x)
     (acc, f1, conf) = score(pred, test_y)
@@ -93,10 +97,15 @@ else:
         f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
             train_x.shape, len(raw_train), len(train_y),
             test_x.shape, len(raw_test), len(test_y)))
+        f.write('Trained the model from {} to {}'.format(start_time,
+                                                         done_time))
         f.write('Accuracy\t{:.4f}\n'.format(acc))
         f.write('F1 macro\t{:.4f}\n'.format(f1))
         f.write('Confusion matrix\n' + str(conf) + '\n')
-        f.write('\nLIME features: {}\n'.format(args.n_lime_features))
+with open(folder + 'log.txt', 'w+', encoding='utf8') as f:
+    f.write('Arguments:\n')
+    for arg, val in vars(args).items():
+        f.write('{}: {}\n'.format(arg, val))
 
 if args.save_model:
     print("Saving model")

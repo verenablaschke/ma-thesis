@@ -69,13 +69,14 @@ def preprocess_and_vectorize(utterance, vectorizer):
     # return vectorizer.transform([preprocess(utterance)])
 
 
-def train(train_x, train_y, linear_svc, class_weight=None):
+def train(train_x, train_y, linear_svc, class_weight=None, verbose=False):
     if linear_svc:
-        model = svm.LinearSVC(C=1.0, class_weight=class_weight, verbose=True)
+        model = svm.LinearSVC(C=1.0, class_weight=class_weight,
+                              verbose=verbose)
     else:
         # Binary cases
         model = svm.SVC(C=1.0, probability=True, class_weight=class_weight,
-                        verbose=True)
+                        verbose=verbose)
     model.fit(train_x, train_y)
     return model
 
@@ -216,18 +217,18 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                              predict_function,
                                              num_features=n_lime_features,
                                              labels=labels,
-                                             # labels=interesting_labels
                                              num_samples=num_lime_samples
                                              )
             for lab in labels:
                 lime_results = exp.as_list(label=lab)
                 lab_raw = label_encoder.inverse_transform([lab])[0]
+                prediction_score = exp.score[lab]
                 with open('{}/importance_values_{}.txt'.format(out_folder,
                                                                lab_raw),
                           'a', encoding='utf8') as f:
-                    for feature, score in lime_results:
-                        f.write('{}\t{}\t{:.10f}\n'
-                                .format(idx, feature, score))
+                    for feature, coeff in lime_results:
+                        f.write('{}\t{}\t{:.10f}\t{:.10f}\n'
+                                .format(idx, feature, coeff, prediction_score))
 
             if idx % 50 == 0:
                 now = datetime.datetime.now()
