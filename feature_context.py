@@ -21,6 +21,8 @@ parser.add_argument('--scores', dest='spec_rep_all', default=False,
                     help='extract specificity/representativeness/importance '
                     'scores for all features (regardless of the threshold)',
                     action='store_true')
+parser.add_argument('--scale', dest='scale_by_model_score',
+                    default=False, action='store_true')
 args = parser.parse_args()
 
 threshold = args.top
@@ -55,8 +57,9 @@ with open(log_file, 'w+', encoding='utf8') as f_log:
                 'CORRCOEF_IMPORTANCE_SPEC\tCOVARIANCE_IMPORTANCE_SPEC\n')
 
 if args.spec_rep_all:
-    all_scores_file = '{}/importance-spec-rep-{}.tsv' \
-                      .format(args.model, args.combination_method)
+    all_scores_file = '{}/importance-spec-rep-all-{}-{}scaled.tsv' \
+                      .format(args.model, args.combination_method,
+                              '' if args.scale_by_model_score else 'un')
     with open(all_scores_file, 'w+', encoding='utf8') as f_all:
         f_all.write('FEATURE\tLABEL\tIMPORTANCE\t'
                     'REPRESENTATIVENESS\tSPECIFICITY\tCOUNT\n')
@@ -109,6 +112,10 @@ with open('{}/features-correlated.tsv'.format(args.model),
 for label in labels:
     print("LABEL", label)
     print("Getting the feature context.")
+    filename_template = '{}/importance_values_{}_{}_all_{}scaled_sorted' \
+                        .format(args.model, args.combination_method, label,
+                                '' if args.scale_by_model_score else 'un')
+    print(filename_template)
     feature2context = {}
     with open('{}/featuremap-{}.tsv'.format(args.model, label),
               'r', encoding='utf8') as f:
@@ -122,14 +129,13 @@ for label in labels:
                 pass
     feature2results = {}
     top_results = []
-    with open('{}/importance_values_{}_{}_all_sorted.tsv'
-              .format(args.model, args.combination_method, label),
-              'r', encoding='utf8') as f_in:
+    with open('{}.tsv'.format(filename_template),
+              encoding='utf8') as f_in:
         header = next(f_in).strip()
         idx = 0
         for line in f_in:
-            feature, imp, importance_sum, count = line.strip().split('\t')
-            details = (idx, feature, float(imp), float(importance_sum), count,
+            feature, imp, count = line.strip().split('\t')
+            details = (idx, feature, float(imp), count,
                        feature2context.get(feature, ''),
                        feature2identical.get(feature, None),
                        feature2corr.get(feature, None))
@@ -167,11 +173,10 @@ for label in labels:
                 n_utt_scores.append(n_occ)
                 rep_scores.append(rep)
                 spec_scores.append(spec)
-                f_all.write('{}\t{}\t{:.2f}\t{:.2f}\t{:.2f}\t{}\n'
+                f_all.write('{}\t{}\t{:.4f}\t{:.4f}\t{:.4f}\t{}\n'
                             .format(feature, label, imp, rep, spec, n_occ))
 
-    with open('{}/importance_values_{}_{}_all_sorted_{}_context.tsv'
-              .format(args.model, args.combination_method, label, threshold),
+    with open('{}_{}_context.tsv' .format(filename_template, threshold),
               'w+', encoding='utf8') as f_out:
         f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
                     'REPRESENTATIVENESS\tSPECIFICITY\t'
@@ -179,7 +184,7 @@ for label in labels:
                     'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
         for result in top_results:
-            (idx, feature, imp, importance_sum, count, context,
+            (idx, feature, imp, count, context,
              identical, correlated) = result
             if idx in skip:
                 # Already listed
@@ -187,8 +192,8 @@ for label in labels:
 
             n_occ, rep, spec = distribution[feature]
 
-            f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
-                idx, feature, imp, importance_sum, count, context,
+            f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
+                idx, feature, imp, count, context,
                 n_occ, rep, spec))
             imp_scores_top.append(imp)
             n_utt_scores_top.append(n_occ)
@@ -200,15 +205,15 @@ for label in labels:
             if identical:
                 for mirror in identical:
                     try:
-                        (idx2, feature2, mean2, importance_sum2,
+                        (idx2, feature2, mean2,
                          count2, _, _, _) = feature2results[mirror]
                         if idx2 < threshold and idx2 > idx:
                             n_identical_top += 1
                             skip.add(idx2)
                             print(feature, mirror)
                             print('Moved ' + str(idx2))
-                        mirror_list.append('{}/{}/{:.2f}/{:.2f}/{}'.format(
-                            idx2, feature2, mean2, importance_sum2, count2))
+                        mirror_list.append('{}/{}/{:.2f}/{}'.format(
+                            idx2, feature2, mean2, count2))
                     except KeyError:
                         mirror_list.append('--/{}/--/--/--'.format(mirror))
             f_out.write('{}\t{}\t'.format(n_identical_top,
@@ -219,12 +224,11 @@ for label in labels:
                 for corr in correlated:
                     npmi = feature2corr[feature][corr]
                     try:
-                        (idx2, feature2, mean2, importance_sum2,
+                        (idx2, feature2, mean2,
                          count2, _, _, _) = feature2results[corr]
                         corr_list.append(
-                            (npmi, '{}/{}/{:.2f}/{:.2f}/{:.2f}/{}'.format(
-                                idx2, feature2, npmi, mean2,
-                                importance_sum2, count2)))
+                            (npmi, '{}/{}/{:.2f}/{:.2f}/{}'.format(
+                                idx2, feature2, npmi, mean2, count2)))
                     except KeyError:
                         corr_list.append(
                             (npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
