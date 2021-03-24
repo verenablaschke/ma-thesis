@@ -3,8 +3,9 @@ import numpy as np
 import sys
 
 
-def parse_fold(mode, fold_dir, subfolder, label, scores,
+def parse_fold(mode, fold_dir, subfolder, label, combination_method, min_count,
                scale_by_model_score, feature_pfx=''):
+    scores = {}
     if mode != 'all':
         indices = []
         with open('{}/predictions.tsv'.format(fold_dir), 'r',
@@ -26,7 +27,7 @@ def parse_fold(mode, fold_dir, subfolder, label, scores,
             idx, feature, score = cells[0], cells[1], float(cells[2])
             if scale_by_model_score:
                 try:
-                    model_score = float(cells[4])
+                    model_score = float(cells[3])
                     if model_score < 0:
                         print("MODEL SCORE BELOW ZERO", model_score)
                         model_score = 0.0
@@ -43,33 +44,38 @@ def parse_fold(mode, fold_dir, subfolder, label, scores,
             scores[feature_pfx + feature] = prev + [score]
             if i % 50000 == 0:
                 print(i, feature_pfx + feature)
-    return scores
+    return calculate_results(combination_method, scores, min_count, subfolder,
+                             filename_details)
+
+
+def global_score(method, scores, feature):
+    if method == 'mean':
+        return np.mean(scores[feature])
+    return np.sqrt(np.sum(np.absolute(scores[feature])))
 
 
 def calculate_results(combination_method, scores, min_count, folder,
                       filename_details):
+    # global value of an importance score (on a fold level)
     print("sorting")
-    if combination_method == 'mean':
-        glob = [(feature, np.mean(scores[feature]), len(scores[feature]))
-                for feature in scores]
-    else:
-        glob = [(feature, np.sqrt(np.sum(np.absolute(scores[feature]))),
-                 len(scores[feature])) for feature in scores]
-    glob = sorted(glob, key=lambda x: x[1] if x[2] >= min_count else -1,
-                  reverse=True)
+    global_scores_dict = {
+        feature: (global_score(combination_method, scores, feature),
+                  len(scores[feature]))
+        for feature in scores if len(scores[feature]) >= min_count}
+    global_scores = [(k, global_scores_dict[k])
+                     for k in sorted(global_scores_dict,
+                                     key=global_scores_dict.get, reverse=True)]
     print("sorted")
 
     out_file = '{}/importance_values_{}_sorted.tsv'.format(folder,
                                                            filename_details)
-    print(out_file)
+    print("Writing fold results to", out_file)
     with open(out_file, 'w', encoding='utf8') as out_file:
-        out_file.write('FEATURE\t{}\tSUM\tCOUNT\n'
+        out_file.write('FEATURE\t{}\tCOUNT\n'
                        .format(combination_method.upper()))
-        for (feature, score, num) in glob:
-            out_file.write('{}\t{:.10f}\t'.format(feature, score))
-            entries = scores[feature]
-            out_file.write('{:.10f}\t'.format(np.sum(entries)))
-            out_file.write('{}\n'.format(num))
+        for (feature, (score, num)) in global_scores:
+            out_file.write('{}\t{:.10f}\t{}\n'.format(feature, score, num))
+    return global_scores_dict
 
 
 if __name__ == "__main__":
@@ -86,23 +92,42 @@ if __name__ == "__main__":
                         help='options: sqrt (square root of sums), mean',
                         default='sqrt', type=str)
     parser.add_argument('--scale', dest='scale_by_model_score',
-                        default=True, action='store_true')
+                        default=False, action='store_true')
     args = parser.parse_args()
 
     folds = [args.k] if args.single_fold else range(args.k)
-    scores = {}
+    scores_all_folds = []
+    all_features = set()
     for fold in folds:
+        filename_details = '{}_{}_{}_{}scaled'.format(
+            args.combination_method, args.label, args.mode,
+            '' if args.scale_by_model_score else 'un')
         fold_dir = '{}/fold-{}'.format(args.model, fold)
-        parse_fold(args.mode, fold_dir, fold_dir, args.label, scores,
-                   args.scale_by_model_score)
+        fold_scores = parse_fold(args.mode, fold_dir, fold_dir, args.label,
+                                 args.combination_method, args.min_count,
+                                 args.scale_by_model_score)
+        scores_all_folds.append(fold_scores)
+        all_features.update(fold_scores)
 
-    if args.single_fold:
-        filename_details = '{}_{}_{}'.format(args.k, args.label, args.mode)
-        folder = '{}/fold-{}'.format(args.model, args.k)
-    else:
-        filename_details = '{}_{}_{}'.format(args.combination_method,
-                                             args.label,
-                                             args.mode)
-        folder = args.model
-    calculate_results(args.combination_method, scores, args.min_count, folder,
-                      filename_details)
+    if not args.single_fold:
+        print("Averaging scores across folds")
+        avg_scores = []  # averaged across folds!
+        for feature in all_features:
+            avg_scores.append(
+                (feature,
+                 np.nanmean([fold_scores.get(feature, (np.nan,))[0]
+                             for fold_scores in scores_all_folds]),
+                 np.nanmean([fold_scores.get(feature, (None, 0))[1]
+                             for fold_scores in scores_all_folds])))
+
+        avg_scores = sorted(avg_scores, key=lambda x: x[1], reverse=True)
+        print("sorted")
+
+        out_file = '{}/importance_values_{}_sorted.tsv' \
+                   .format(args.model, filename_details)
+        print("Writing overall results to", out_file)
+        with open(out_file, 'w', encoding='utf8') as out_file:
+            out_file.write('FEATURE\t{}\tCOUNT\n'
+                           .format(args.combination_method.upper()))
+            for (feature, score, num) in avg_scores:
+                out_file.write('{}\t{:.10f}\t{}\n'.format(feature, score, num))

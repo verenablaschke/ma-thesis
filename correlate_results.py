@@ -12,19 +12,19 @@ parser.add_argument('--c', dest='min_corr', default=0.8, type=float,
 args = parser.parse_args()
 
 
-print("Reading importance values")
+print("Reading importance values:", args.importance_file)
 importance_values = {}
 features = []
 with open(args.importance_file, 'r', encoding='utf8') as f:
     next(f)  # Skip header
     for line in f:
-        feature, val, _, _ = line.strip().split('\t')
+        feature, val, _ = line.strip().split('\t')
         importance_values[feature] = val
         if float(val) < args.min_imp:
             continue
         features.append(feature)
 
-print("Reading correlated features")
+print("Reading correlated features:", args.correlation_file,)
 correlations = {}
 with open(args.correlation_file, 'r', encoding='utf8') as f:
     for line in f:
@@ -38,8 +38,8 @@ with open(args.correlation_file, 'r', encoding='utf8') as f:
         values[feature2] = val
         correlations[feature1] = values
 
-print("Writing to file")
 outfile = '.'.join(args.importance_file.split('.')[:-1]) + '_correlated.tsv'
+print("Writing to file:", outfile)
 with open(outfile, 'w+', encoding='utf8') as f:
     for feature in features:
         f.write(feature + '\t' + importance_values[feature])

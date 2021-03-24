@@ -7,14 +7,13 @@ for label in 0 1; do
     echo "$label"
     screen -dmS $label
     for type in all pos falsepos truepos; do
-        echo "-- $type"
-        screen -S $label -X stuff "python3 parse_results.py models/tweets $label $type 10
-"
-        screen -S $label -X stuff "python3 correlate_results.py models/tweets/importance_values_$label_$type_sorted.tsv models/tweets/features-correlated.tsv
-"
-    done
-    for i in $(seq 0 9); do
-        screen -S $label -X stuff "python3 parse_results.py models/tweets $label all $i --s
-"
+        echo "- $type"
+        for comb in sqrt mean; do
+            echo "-- $comb"
+            screen -S $label -X stuff "python3 parse_results.py models/tweets ${label} ${type} 10 --comb ${comb}\n"
+            screen -S $label -X stuff "python3 correlate_results.py models/tweets/importance_values_${comb}_${label}_${type}_unscaled_sorted.tsv models/tweets/features-correlated.tsv\n"
+            screen -S $label -X stuff "python3 parse_results.py models/tweets ${label} ${type} 10 --comb ${comb} --scale\n"
+            screen -S $label -X stuff "python3 correlate_results.py models/tweets/importance_values_${comb}_${label}_${type}_scaled_sorted.tsv models/tweets/features-correlated.tsv\n"
+        done
     done
 done

@@ -17,6 +17,10 @@ parser.add_argument('--i', dest='min_corr_merge',
 parser.add_argument('--comb', dest='combination_method',
                     help='options: sqrt (square root of sums), mean',
                     default='sqrt', type=str)
+parser.add_argument('--scores', dest='spec_rep_all', default=False,
+                    help='extract specificity/representativeness/importance '
+                    'scores for all features (regardless of the threshold)',
+                    action='store_true')
 args = parser.parse_args()
 
 threshold = args.top
@@ -38,7 +42,7 @@ total_count = sum(val for val in label2count.values())
 log_file = '{}/log_importance_values_{}_all_sorted_{}context.tsv' \
            .format(args.model, args.combination_method, threshold)
 with open(log_file, 'w+', encoding='utf8') as f_log:
-    f_log.write('LABEL\tPROPORTION\t'
+    f_log.write('LABEL\tSCOPE\tPROPORTION\t'
                 'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
                 'IMPORTANCE_MIN\tIMPORTANCE_MAX\t'
                 'N_UTTERANCES_MEAN\tN_UTTERANCES_VAR\t'
@@ -49,6 +53,13 @@ with open(log_file, 'w+', encoding='utf8') as f_log:
                 'SPECIFICITY_MEAN\tSPECIFICITY_VAR\t'
                 'SPECIFICITY_MIN\tSPECIFICITY_MAX\t'
                 'CORRCOEF_IMPORTANCE_SPEC\tCOVARIANCE_IMPORTANCE_SPEC\n')
+
+if args.spec_rep_all:
+    all_scores_file = '{}/importance-spec-rep-{}.tsv' \
+                      .format(args.model, args.combination_method)
+    with open(all_scores_file, 'w+', encoding='utf8') as f_all:
+        f_all.write('FEATURE\tLABEL\tIMPORTANCE\t'
+                    'REPRESENTATIVENESS\tSPECIFICITY\tCOUNT\n')
 
 with open(args.model + '/features.tsv', encoding='utf8') as f:
     next(f)  # Header
@@ -117,8 +128,8 @@ for label in labels:
         header = next(f_in).strip()
         idx = 0
         for line in f_in:
-            feature, mean, importance_sum, count = line.strip().split('\t')
-            details = (idx, feature, float(mean), float(importance_sum), count,
+            feature, imp, importance_sum, count = line.strip().split('\t')
+            details = (idx, feature, float(imp), float(importance_sum), count,
                        feature2context.get(feature, ''),
                        feature2identical.get(feature, None),
                        feature2corr.get(feature, None))
@@ -138,12 +149,28 @@ for label in labels:
         next(f)  # Summary of the entire dataset.
         for line in f:
             cells = line.strip().split('\t')
-            distribution[cells[0]] = (cells[count_col], cells[rep_col],
-                                      cells[spec_col])
+            distribution[cells[0]] = (int(float(cells[count_col])),
+                                      float(cells[rep_col]),
+                                      float(cells[spec_col]))
 
-    imp_scores, n_utt_scores, rep_scores, spec_scores = [], [], [], []
+    imp_scores, imp_scores_top = [], []
+    n_utt_scores, n_utt_scores_top = [], []
+    rep_scores, rep_scores_top = [], []
+    spec_scores, spec_scores_top = [], []
 
-    with open('{}/importance_values_{}_{}_all_sorted_{}context.tsv'
+    if args.spec_rep_all:
+        with open(all_scores_file, 'a', encoding='utf8') as f_all:
+            for feature, result in feature2results.items():
+                imp = result[2]
+                n_occ, rep, spec = distribution[feature]
+                imp_scores.append(imp)
+                n_utt_scores.append(n_occ)
+                rep_scores.append(rep)
+                spec_scores.append(spec)
+                f_all.write('{}\t{}\t{:.2f}\t{:.2f}\t{:.2f}\t{}\n'
+                            .format(feature, label, imp, rep, spec, n_occ))
+
+    with open('{}/importance_values_{}_{}_all_sorted_{}_context.tsv'
               .format(args.model, args.combination_method, label, threshold),
               'w+', encoding='utf8') as f_out:
         f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
@@ -152,7 +179,7 @@ for label in labels:
                     'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
         for result in top_results:
-            (idx, feature, mean, importance_sum, count, context,
+            (idx, feature, imp, importance_sum, count, context,
              identical, correlated) = result
             if idx in skip:
                 # Already listed
@@ -161,12 +188,12 @@ for label in labels:
             n_occ, rep, spec = distribution[feature]
 
             f_out.write('{}\t{}\t{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
-                idx, feature, mean, importance_sum, count, context,
+                idx, feature, imp, importance_sum, count, context,
                 n_occ, rep, spec))
-            imp_scores.append(float(mean))
-            n_utt_scores.append(int(float(n_occ)))
-            rep_scores.append(float(rep))
-            spec_scores.append(float(spec))
+            imp_scores_top.append(imp)
+            n_utt_scores_top.append(n_occ)
+            rep_scores_top.append(rep)
+            spec_scores_top.append(spec)
 
             mirror_list = []
             n_identical_top = 0
@@ -207,21 +234,40 @@ for label in labels:
             f_out.write('\n')
 
     with open(log_file, 'a', encoding='utf8') as f_log:
-        f_log.write('{}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
+        f_log.write('{}\ttop {}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
                     '\t{:.1f}\t{:.1f}\t{}\t{}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}'
                     '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}\n'
-                    .format(label, label2count[label] / total_count,
-                            np.mean(imp_scores), np.var(imp_scores),
-                            np.min(imp_scores), np.max(imp_scores),
-                            np.mean(n_utt_scores),
-                            np.var(n_utt_scores),
-                            np.min(n_utt_scores), np.max(n_utt_scores),
-                            np.mean(rep_scores), np.var(rep_scores),
-                            np.min(rep_scores), np.max(rep_scores),
-                            np.corrcoef(imp_scores, rep_scores)[0, 1],
-                            np.cov(imp_scores, rep_scores)[0, 1],
-                            np.mean(spec_scores), np.var(spec_scores),
-                            np.min(spec_scores), np.max(spec_scores),
-                            np.corrcoef(imp_scores, spec_scores)[0, 1],
-                            np.cov(imp_scores, spec_scores)[0, 1]))
+                    .format(label, threshold, label2count[label] / total_count,
+                            np.mean(imp_scores_top), np.var(imp_scores_top),
+                            np.min(imp_scores_top), np.max(imp_scores_top),
+                            np.mean(n_utt_scores_top),
+                            np.var(n_utt_scores_top),
+                            np.min(n_utt_scores_top), np.max(n_utt_scores_top),
+                            np.mean(rep_scores_top), np.var(rep_scores_top),
+                            np.min(rep_scores_top), np.max(rep_scores_top),
+                            np.corrcoef(imp_scores_top, rep_scores_top)[0, 1],
+                            np.cov(imp_scores_top, rep_scores_top)[0, 1],
+                            np.mean(spec_scores_top), np.var(spec_scores_top),
+                            np.min(spec_scores_top), np.max(spec_scores_top),
+                            np.corrcoef(imp_scores_top, spec_scores_top)[0, 1],
+                            np.cov(imp_scores_top, spec_scores_top)[0, 1]))
+        if args.spec_rep_all:
+            f_log.write('{}\tall\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
+                        '\t{:.1f}\t{:.1f}\t{}\t{}'
+                        '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}'
+                        '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}\n'
+                        .format(label, label2count[label] / total_count,
+                                np.mean(imp_scores), np.var(imp_scores),
+                                np.min(imp_scores), np.max(imp_scores),
+                                np.mean(n_utt_scores),
+                                np.var(n_utt_scores),
+                                np.min(n_utt_scores), np.max(n_utt_scores),
+                                np.mean(rep_scores), np.var(rep_scores),
+                                np.min(rep_scores), np.max(rep_scores),
+                                np.corrcoef(imp_scores, rep_scores)[0, 1],
+                                np.cov(imp_scores, rep_scores)[0, 1],
+                                np.mean(spec_scores), np.var(spec_scores),
+                                np.min(spec_scores), np.max(spec_scores),
+                                np.corrcoef(imp_scores, spec_scores)[0, 1],
+                                np.cov(imp_scores, spec_scores)[0, 1]))
