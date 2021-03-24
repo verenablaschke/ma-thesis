@@ -23,11 +23,18 @@ python feature_context.py models\tweets tweets --scores --comb sqrt
 python feature_context.py models\tweets tweets --scores --comb sqrt --scale
 
 
-python plot_importance.py models\tweets\importance-spec-rep-all-sqrt-scaled.tsv
-python plot_importance.py models\tweets\importance-spec-rep-all-mean-scaled.tsv
-python plot_importance.py models\tweets\importance-spec-rep-all-sqrt-unscaled.tsv
-python plot_importance.py models\tweets\importance-spec-rep-all-mean-unscaled.tsv
+python plot_importance.py models\tweets --comb mean
+python plot_importance.py models\tweets --comb mean --scale
+python plot_importance.py models\tweets --comb sqrt
+python plot_importance.py models\tweets --comb sqrt --scale
 
+
+
+python feature_context.py models\dialects dialects --scores --comb mean
+python feature_context.py models\dialects dialects --scores --comb sqrt
+
+python plot_importance.py models\dialects --comb mean
+python plot_importance.py models\dialects --comb sqrt
 
 
 

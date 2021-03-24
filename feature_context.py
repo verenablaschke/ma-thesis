@@ -134,7 +134,7 @@ for label in labels:
         header = next(f_in).strip()
         idx = 0
         for line in f_in:
-            feature, imp, count = line.strip().split('\t')
+            feature, imp, count = line.strip().split('\t')[0:3]
             details = (idx, feature, float(imp), count,
                        feature2context.get(feature, ''),
                        feature2identical.get(feature, None),
