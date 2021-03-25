@@ -27,9 +27,13 @@ parser.add_argument('--save', dest='save_model', default=False,
                     action='store_true')
 parser.add_argument('--load', dest='load_model', default=False,
                     action='store_true')
+parser.add_argument('--v', dest='verbose', default=False,
+                    action='store_true')
 parser.add_argument('--out', dest='output_subfolder', default='', type=str)
 args = parser.parse_args()
 
+for arg, val in vars(args).items():
+    print('{}: {}'.format(arg, val))
 
 folder = '{}/fold-{}/'.format(args.model, args.fold)
 MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
@@ -84,7 +88,7 @@ else:
     print("Training the model")
     start_time = datetime.datetime.now()
     classifier = train(train_x, train_y, linear_svc=args.type == 'dialects',
-                       class_weight=class_weight)
+                       class_weight=class_weight, verbose=args.verbose)
     done_time = datetime.datetime.now()
     print("Scoring the model")
     pred = predict(classifier, test_x)
