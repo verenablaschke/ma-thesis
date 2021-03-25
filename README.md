@@ -36,6 +36,10 @@ python feature_context.py models\dialects dialects --scores --comb sqrt
 python plot_importance.py models\dialects --comb mean
 python plot_importance.py models\dialects --comb sqrt
 
+python compare_averages.py models\tweets\importance_values_sqrt_{}_all_unscaled_sorted.tsv models\tweets\importance_values_sqrt_{}_all_scaled_sorted.tsv
 
 
+python compare_averages.py models\dialects\importance_values_sqrt_{}_all_unscaled_sorted.tsv models\dialects\importance_values_sqrt_{}_all_scaled_sorted.tsv
+python compare_averages.py models\dialects\importance_values_mean_{}_all_unscaled_sorted.tsv models\dialects\importance_values_mean_{}_all_scaled_sorted.tsv
+python compare_averages.py models\dialects\importance_values_mean_{}_all_unscaled_sorted.tsv models\dialects\importance_values_sqrt_{}_all_unscaled_sorted.tsv
 ```
