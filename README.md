@@ -42,4 +42,7 @@ python compare_averages.py models\tweets\importance_values_sqrt_{}_all_unscaled_
 python compare_averages.py models\dialects\importance_values_sqrt_{}_all_unscaled_sorted.tsv models\dialects\importance_values_sqrt_{}_all_scaled_sorted.tsv
 python compare_averages.py models\dialects\importance_values_mean_{}_all_unscaled_sorted.tsv models\dialects\importance_values_mean_{}_all_scaled_sorted.tsv
 python compare_averages.py models\dialects\importance_values_mean_{}_all_unscaled_sorted.tsv models\dialects\importance_values_sqrt_{}_all_unscaled_sorted.tsv
+
+
+python compare_lime_sample_sizes.py models/dialects-z/fold-0 dialects
 ```

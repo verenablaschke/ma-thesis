@@ -4,7 +4,7 @@ import sys
 
 
 def parse_fold(mode, fold_dir, subfolder, label, combination_method, min_count,
-               scale_by_model_score, feature_pfx=''):
+               scale_by_model_score, filename_details, feature_pfx=''):
     scores = {}
     if mode != 'all':
         indices = []

@@ -1,4 +1,4 @@
-# import argparse
+import argparse
 import itertools
 import numpy as np
 import os
@@ -6,19 +6,28 @@ import re
 from scipy.spatial.distance import jensenshannon
 from parse_results import parse_fold, calculate_results
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('path_to_fold')
-# args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument('path_to_fold')
+parser.add_argument('type', help='dialects or tweets')
+parser.add_argument('--m', dest='mode', help='all/truepos/falsepos/pos',
+                    default='all')
+parser.add_argument('--comb', dest='combination_method', help='sqrt/sum',
+                    default='sqrt')
+parser.add_argument('--mc', dest='min_count', default=10, type=int)
+parser.add_argument('--n', dest='n_runs', help='number of runs per |Z|',
+                    default=10, type=int)
+parser.add_argument('--scale', dest='scale_by_model_score',
+                    default=False, action='store_true')
+args = parser.parse_args()
 
-# folder = args.path_to_fold
-
-fold_dir = 'models/tweets-z/fold-0'
-labels = '0'  # ['0', '1']
+fold_dir = args.path_to_fold
+labels = '0' if args.type == 'tweets' else ['nordnorsk', 'oestnorsk',
+                                            'troendersk', 'vestnorsk']
+mode = args.mode
+combination_method = args.combination_method
+min_count = args.min_count
+n_runs = args.n_runs
 pattern = re.compile('\d+-\d+')
-mode = 'all'
-combination_method = 'sqrt'
-min_count = 10
-n_runs = 10
 
 
 out_file = fold_dir + '/lime_sample_sizes.tsv'
@@ -37,10 +46,13 @@ for _, directories, _ in os.walk(fold_dir):
             runs2folders[run] = [directory]
         directory = fold_dir + '/' + directory
         scores = {}
-        for label in labels:
-            scores = parse_fold(mode, fold_dir, directory, label, scores,
-                                label + '-')
         filename_details = '{}_{}'.format(combination_method, mode)
+        for label in labels:
+            scores = parse_fold(mode, fold_dir, directory, label,
+                                combination_method, min_count,
+                                args.scale_by_model_score,
+                                filename_details,
+                                label + '-')
         calculate_results(combination_method, scores, min_count, directory,
                           filename_details)
 

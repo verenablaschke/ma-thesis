@@ -140,7 +140,7 @@ def clean_phono(utterance):
 
 places = set()
 informants = set()
-area2towns, area2files = {}, {}
+area2towns, area2files, area2utt_len, area2informants = {}, {}, {}, {}
 skipped = []
 _, _, filenames = next(os.walk(INPUT_DIR))
 with open(OUT_FILE, 'w', encoding='utf8') as out_file:
@@ -149,6 +149,7 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
         if place not in norwegian_places:
             continue
         places.add(place)
+
         if MODE == 'BOTH':
             try:
                 in_file_ortho = open(INPUT_DIR_ORTHO + file, 'r',
@@ -159,6 +160,17 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                       'based counterpart. (Skipping file.)')
                 skipped.append(file)
                 continue
+
+        area = place2area[place]
+        try:
+            area2towns[area].add(place)
+        except KeyError:
+            area2towns[area] = {place}
+        try:
+            area2files[area].append(file)
+        except KeyError:
+            area2files[area] = [file]
+
         with open(INPUT_DIR + file, 'r', encoding='utf8') as in_file:
             line_iter = Line_Iter(in_file)
             try:
@@ -215,8 +227,12 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                         # Interviewer, not informant
                         continue
                     informants.add(speaker)
-                    utterance = []
+                    try:
+                        area2informants[area].add(speaker)
+                    except KeyError:
+                        area2informants[area] = {speaker}
 
+                    utterance = []
                     if MODE == 'BOTH':
                         if len(tokens_phon[1:]) != len(tokens_ortho[1:]):
                             print('DIFFERENT UTTERANCE LENGTHS', file)
@@ -252,20 +268,17 @@ with open(OUT_FILE, 'w', encoding='utf8') as out_file:
                             if len(token) > 0 and token[0].islower():
                                 # Capitalization check to exclude place names
                                 utterance.append(clean_phono(token))
-                    if len(utterance) < MIN_WORDS_PER_UTTERANCE:
+                    utterance_len = len(utterance)
+                    if utterance_len < MIN_WORDS_PER_UTTERANCE:
                         continue
                     utterance = ' '.join(utterance).strip()
                     out_file.write('{}\t{}\t{}\t{}\t{}\n'.format(
-                        place2area[place], place2county[place],
+                        area, place2county[place],
                         place, file, utterance))
                     try:
-                        area2towns[place2area[place]].add(place)
+                        area2utt_len[area].append(utterance_len)
                     except KeyError:
-                        area2towns[place2area[place]] = {place}
-                    try:
-                        area2files[place2area[place]].append(file)
-                    except KeyError:
-                        area2files[place2area[place]] = [file]
+                        area2utt_len[area] = [utterance_len]
             except StopIteration:
                 pass
 
@@ -291,8 +304,20 @@ with open(LOG_FILE, 'w', encoding='utf8') as log_file:
     log_file.write('No. of places: ' + str(len(places)) + '\n')
     log_file.write(str(places) + '\n\n')
     for area, towns in area2towns.items():
-        log_file.write('{}: {} / {}\n'.format(area, len(towns),
-                                              len(area2files[area])))
+        informants = area2informants[area]
+        utterance_lens = area2utt_len[area]
+        log_file.write('{}\n{} locations\n{} interviews\n{} informants '
+                       '({} young women, {} old women, {} men, {} old men)\n'
+                       '{} utterances (mean length {:.2f})\n'
+                       .format(area.upper(), len(towns),
+                               len(area2files[area]), len(informants),
+                               len(informants.intersection(uk)),
+                               len(informants.intersection(gk)),
+                               len(informants.intersection(um)),
+                               len(informants.intersection(gm)),
+                               len(utterance_lens),
+                               sum(utterance_lens) / len(utterance_lens)
+                               ))
         log_file.write(str(towns) + '\n\n')
         # log_file.write(str(area2files[area]) + '\n\n')
     log_file.write('No. of informants: ' + str(len(informants)) + '\n')
