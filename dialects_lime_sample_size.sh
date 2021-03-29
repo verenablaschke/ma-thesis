@@ -17,7 +17,7 @@
 for i in $(seq 0 9); do
     echo "Setting up fold $i"
     screen -dmS dialects$i
-    screen -S dialects$i -X stuff "python3 predict_fold.py models/dialects-z dialects 0 --load --z 100 --out '100-$i' --limefeat 100 --v
-"
+    screen -S dialects$i -X stuff "python3 predict_fold.py models/dialects-z dialects 0 --load --z 50 --out '50-$i' --limefeat 100 --v\n"
+    screen -S dialects$i -X stuff "python3 predict_fold.py models/dialects-z dialects 0 --load --z 1000 --out '1000-$i' --limefeat 100 --v\n"
+    screen -S dialects$i -X stuff "python3 predict_fold.py models/dialects-z dialects 0 --load --z 1500 --out '1500-$i' --limefeat 100 --v\n"
 done
-

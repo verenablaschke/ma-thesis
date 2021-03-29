@@ -40,21 +40,27 @@ for _, directories, _ in os.walk(fold_dir):
         if not pattern.search(directory):
             continue
         run = directory.rsplit('-', 1)[0]
-        try:
-            runs2folders[run].append(directory)
-        except KeyError:
-            runs2folders[run] = [directory]
+        # try:
+        #     runs2folders[run].append(directory)
+        # except KeyError:
+        #     runs2folders[run] = [directory]
         directory = fold_dir + '/' + directory
         scores = {}
-        filename_details = '{}_{}'.format(combination_method, mode)
         for label in labels:
-            scores = parse_fold(mode, fold_dir, directory, label,
-                                combination_method, min_count,
-                                args.scale_by_model_score,
-                                filename_details,
-                                label + '-')
-        calculate_results(combination_method, scores, min_count, directory,
-                          filename_details)
+            filename_details = '{}_{}_{}'.format(label, combination_method,
+                                                 mode)
+            scores.update(parse_fold(mode, fold_dir, directory, label,
+                                     combination_method, min_count,
+                                     args.scale_by_model_score,
+                                     filename_details, label + '-',
+                                     return_only_scores=True))
+        filename_details = 'ALL-LABELS_{}_{}'.format(combination_method, mode)
+        _, filename = calculate_results(combination_method, scores, min_count,
+                                        directory, filename_details)
+        try:
+            runs2folders[run].append(filename)
+        except KeyError:
+            runs2folders[run] = [filename]
 
 for run, folder_list in runs2folders.items():
     print('\n')
@@ -62,12 +68,11 @@ for run, folder_list in runs2folders.items():
     print("Getting scores.")
     feature2folder2val = {}
     for folder in folder_list:
-        with open('{}/{}/importance_values_{}_{}_sorted.tsv'.format(
-                    fold_dir, folder, combination_method, mode),
+        with open(folder,
                   encoding='utf8') as f:
             next(f)  # Header
             for line in f:
-                feature, val, _, _ = line.split('\t')
+                feature, val, _ = line.split('\t')
                 val = float(val)
                 try:
                     feature2folder2val[feature][folder] = val
@@ -76,7 +81,8 @@ for run, folder_list in runs2folders.items():
 
     print("Getting score distributions")
     array_len = len(feature2folder2val)
-    folder2distrib = {folder: np.zeros(array_len, dtype=np.float64) for folder in folder_list}
+    folder2distrib = {folder: np.zeros(array_len, dtype=np.float64)
+                      for folder in folder_list}
     for i, feature in enumerate(feature2folder2val):
         for folder in folder_list:
             try:

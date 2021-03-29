@@ -4,7 +4,8 @@ import sys
 
 
 def parse_fold(mode, fold_dir, subfolder, label, combination_method, min_count,
-               scale_by_model_score, filename_details, feature_pfx=''):
+               scale_by_model_score, filename_details, feature_pfx='',
+               return_only_scores=False):
     scores = {}
     if mode != 'all':
         indices = []
@@ -44,6 +45,8 @@ def parse_fold(mode, fold_dir, subfolder, label, combination_method, min_count,
             scores[feature_pfx + feature] = prev + [score]
             if i % 50000 == 0:
                 print(i, feature_pfx + feature)
+    if return_only_scores:
+        return scores
     return calculate_results(combination_method, scores, min_count, subfolder,
                              filename_details)
 
@@ -67,15 +70,15 @@ def calculate_results(combination_method, scores, min_count, folder,
                                      key=global_scores_dict.get, reverse=True)]
     print("sorted")
 
-    out_file = '{}/importance_values_{}_sorted.tsv'.format(folder,
-                                                           filename_details)
-    print("Writing fold results to", out_file)
-    with open(out_file, 'w', encoding='utf8') as out_file:
+    out_filename = '{}/importance_values_{}_sorted.tsv'.format(
+        folder, filename_details)
+    print("Writing fold results to", out_filename)
+    with open(out_filename, 'w', encoding='utf8') as out_file:
         out_file.write('FEATURE\t{}\tCOUNT\n'
                        .format(combination_method.upper()))
         for (feature, (score, num)) in global_scores:
             out_file.write('{}\t{:.10f}\t{}\n'.format(feature, score, num))
-    return global_scores_dict
+    return global_scores_dict, out_filename
 
 
 if __name__ == "__main__":
@@ -97,15 +100,15 @@ if __name__ == "__main__":
 
     folds = [args.k] if args.single_fold else range(args.k)
     scores_all_folds = []
+    filename_details = '{}_{}_{}_{}scaled'.format(
+        args.combination_method, args.label, args.mode,
+        '' if args.scale_by_model_score else 'un')
     all_features = set()
     for fold in folds:
-        filename_details = '{}_{}_{}_{}scaled'.format(
-            args.combination_method, args.label, args.mode,
-            '' if args.scale_by_model_score else 'un')
         fold_dir = '{}/fold-{}'.format(args.model, fold)
         fold_scores = parse_fold(args.mode, fold_dir, fold_dir, args.label,
                                  args.combination_method, args.min_count,
-                                 args.scale_by_model_score)
+                                 args.scale_by_model_score)[0]
         scores_all_folds.append(fold_scores)
         all_features.update(fold_scores)
 

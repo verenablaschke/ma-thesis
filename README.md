@@ -45,4 +45,5 @@ python compare_averages.py models\dialects\importance_values_mean_{}_all_unscale
 
 
 python compare_lime_sample_sizes.py models/dialects-z/fold-0 dialects
+python compare_lime_sample_sizes.py models/tweets-z/fold-0 tweets
 ```

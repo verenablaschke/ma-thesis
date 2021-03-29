@@ -32,12 +32,17 @@ parser.add_argument('--v', dest='verbose', default=False,
 parser.add_argument('--out', dest='output_subfolder', default='', type=str)
 args = parser.parse_args()
 
-for arg, val in vars(args).items():
-    print('{}: {}'.format(arg, val))
-
 folder = '{}/fold-{}/'.format(args.model, args.fold)
 MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
 LIME_FOLDER = folder + args.output_subfolder + '/'
+Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
+
+for arg, val in vars(args).items():
+    print('{}: {}'.format(arg, val))
+with open(LIME_FOLDER + 'log.txt', 'w+', encoding='utf8') as f:
+    f.write('Arguments:\n')
+    for arg, val in vars(args).items():
+        f.write('{}: {}\n'.format(arg, val))
 
 
 def get_features(filename):
@@ -97,7 +102,7 @@ else:
     print('F1 macro', f1)
     print('Confusion matrix')
     print(conf)
-    with open(folder + 'log.txt', 'w+', encoding='utf8') as f:
+    with open(folder + 'log.txt', 'a', encoding='utf8') as f:
         f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
             train_x.shape, len(raw_train), len(train_y),
             test_x.shape, len(raw_test), len(test_y)))
@@ -106,10 +111,6 @@ else:
         f.write('Accuracy\t{:.4f}\n'.format(acc))
         f.write('F1 macro\t{:.4f}\n'.format(f1))
         f.write('Confusion matrix\n' + str(conf) + '\n')
-with open(folder + 'log.txt', 'w+', encoding='utf8') as f:
-    f.write('Arguments:\n')
-    for arg, val in vars(args).items():
-        f.write('{}: {}\n'.format(arg, val))
 
 if args.save_model:
     print("Saving model")
@@ -118,7 +119,6 @@ if args.save_model:
         pickle.dump(classifier, file)
 
 print('Generating explanations')
-Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
 explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
              ngrams_test, test_x, test_y, LIME_FOLDER, args.n_lime_features,
              args.n_lime_samples,
