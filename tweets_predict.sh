@@ -12,6 +12,6 @@ python3 prepare_folds.py models/tweets 10
 for i in $(seq 0 9); do
     echo "Setting up fold $i"
     screen -dmS tweets$i
-    screen -S tweets$i -X stuff "python3 predict_fold.py models/tweets tweets $i --z 1500
+    screen -S tweets$i -X stuff "python3 predict_fold.py models/tweets tweets $i --z 2000
 "
 done
