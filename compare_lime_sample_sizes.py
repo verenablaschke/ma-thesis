@@ -16,6 +16,8 @@ parser.add_argument('--comb', dest='combination_method', help='sqrt/sum',
 parser.add_argument('--mc', dest='min_count', default=10, type=int)
 parser.add_argument('--n', dest='n_runs', help='number of runs per |Z|',
                     default=10, type=int)
+parser.add_argument('--r', dest='n_lime_sample_run', default=None, type=str,
+                    help='specific number of LIME samples only')
 parser.add_argument('--scale', dest='scale_by_model_score',
                     default=False, action='store_true')
 args = parser.parse_args()
@@ -29,10 +31,10 @@ min_count = args.min_count
 n_runs = args.n_runs
 pattern = re.compile('\d+-\d+')
 
-
-out_file = fold_dir + '/lime_sample_sizes.tsv'
-with open(out_file, 'w+', encoding='utf8') as f:
-    f.write('N_SAMPLES\tAVG_DIST\n')
+if args.n_lime_sample_run is not None:
+    out_file = fold_dir + '/lime_sample_sizes.tsv'
+    with open(out_file, 'w+', encoding='utf8') as f:
+        f.write('N_SAMPLES\tAVG_DIST\n')
 
 runs2folders = {}
 for _, directories, _ in os.walk(fold_dir):
@@ -40,6 +42,9 @@ for _, directories, _ in os.walk(fold_dir):
         if not pattern.search(directory):
             continue
         run = directory.rsplit('-', 1)[0]
+        if (args.n_lime_sample_run is not None) and \
+                (run != args.n_lime_sample_run):
+            continue
         # try:
         #     runs2folders[run].append(directory)
         # except KeyError:
@@ -98,5 +103,8 @@ for run, folder_list in runs2folders.items():
         count += 1
     avg_distance = dist / count
     print(avg_distance)
-    with open(out_file, 'a', encoding='utf8') as f:
-        f.write('{}\t{:.4f}\n'.format(run, avg_distance))
+
+    if args.n_lime_sample_run is not None:
+        print("Updating file")
+        with open(out_file, 'a', encoding='utf8') as f:
+            f.write('{}\t{:.4f}\n'.format(run, avg_distance))

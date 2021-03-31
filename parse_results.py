@@ -106,9 +106,10 @@ if __name__ == "__main__":
     all_features = set()
     for fold in folds:
         fold_dir = '{}/fold-{}'.format(args.model, fold)
-        fold_scores = parse_fold(args.mode, fold_dir, fold_dir, args.label,
-                                 args.combination_method, args.min_count,
-                                 args.scale_by_model_score)[0]
+        fold_scores, _ = parse_fold(args.mode, fold_dir, fold_dir, args.label,
+                                    args.combination_method, args.min_count,
+                                    args.scale_by_model_score,
+                                    filename_details)
         scores_all_folds.append(fold_scores)
         all_features.update(fold_scores)
 
