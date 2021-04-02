@@ -2,8 +2,9 @@ import html
 import re
 import unicodedata
 
+chars = set()
 with open('data/tweets.tsv', 'r', encoding='utf8') as f_in:
-    with open('data/tweets_cleaned.tsv', 'w', encoding='utf8') as f_out:
+    with open('data/tweets_cleaned.tsv', 'w+', encoding='utf8') as f_out:
         prev_tweet = ''
         for line in f_in:
             line = line.strip()
@@ -23,6 +24,11 @@ with open('data/tweets.tsv', 'r', encoding='utf8') as f_in:
             tweet = unicodedata.normalize("NFKC", tweet)
             # Replace, e.g., &gt with >
             tweet = html.unescape(tweet)
+            # Zero-width characters
+            tweet = re.sub('[\u200b\u200c\u200d\xad]', '', tweet)
+            # Typographical variation
+            tweet = re.sub('[\x92‘’]', '', tweet)
+            tweet = re.sub('[«»“”„]', '', tweet)
             # Twitter usernames
             tweet = re.sub('((?<=^)|(?<=\W))@[a-zA-Z0-9_]+',
                            '<USERNAME>', tweet)
@@ -34,7 +40,8 @@ with open('data/tweets.tsv', 'r', encoding='utf8') as f_in:
                 '<URL>', tweet)
             # Hashtags, numbers
             tweet = re.sub('#\w+', '<HASHTAG>', tweet)
-            tweet = re.sub('(?:(?<=\s)|(?<=^))[0-9]+(?:(?=\s)|(?=$))', '<NUMBER>', tweet)
+            tweet = re.sub('(?:(?<=\s)|(?<=^))[0-9]+(?:(?=\s)|(?=$))',
+                           '<NUMBER>', tweet)
 
             if new_tweet:
                 f_out.write(prev_tweet + '\n')
@@ -42,5 +49,12 @@ with open('data/tweets.tsv', 'r', encoding='utf8') as f_in:
             else:
                 prev_tweet += ' ' + tweet
 
+            chars.update(tweet)
+
         if len(prev_tweet) > 0:
             f_out.write(prev_tweet + '\n')
+
+chars = list(chars)
+chars.sort()
+with open('data/tweets_chars.tsv', 'w+', encoding='utf8') as f:
+    f.write('{} characters\n{}\n'.format(len(chars), chars))

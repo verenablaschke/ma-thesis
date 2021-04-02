@@ -22,6 +22,11 @@ python feature_context.py models\tweets tweets --scores --comb mean --scale
 python feature_context.py models\tweets tweets --scores --comb sqrt
 python feature_context.py models\tweets tweets --scores --comb sqrt --scale
 
+python feature_context.py models\tweets tweets --scores --comb mean --m falsepos
+
+
+python feature_context.py models\tweets tweets --scores --comb mean
+
 
 python plot_importance.py models\tweets --comb mean
 python plot_importance.py models\tweets --comb mean --scale
@@ -49,4 +54,8 @@ python compare_lime_sample_sizes.py models/tweets-z/fold-0 tweets
 
 
 python check_model_r2.py models/tweets/ tweets
+
+
+
+python compare_averages.py models\tweets\importance_values_sqrt_{}_all_unscaled_sorted.tsv models\tweets\importance_values_sqrt_{}_falsepos_unscaled_sorted.tsv
 ```

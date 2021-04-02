@@ -17,6 +17,9 @@ parser.add_argument('--i', dest='min_corr_merge',
 parser.add_argument('--comb', dest='combination_method',
                     help='options: sqrt (square root of sums), mean',
                     default='sqrt', type=str)
+parser.add_argument('--m', dest='mode',
+                    help='options: all, pos, falsepos, truepos',
+                    default='all', type=str)
 parser.add_argument('--scores', dest='spec_rep_all', default=False,
                     help='extract specificity/representativeness/importance '
                     'scores for all features (regardless of the threshold)',
@@ -41,8 +44,8 @@ with open(args.model + '/features.tsv', encoding='utf8') as f:
         except KeyError:
             label2count[label] = 1
 total_count = sum(val for val in label2count.values())
-log_file = '{}/log_importance_values_{}_all_sorted_{}context.tsv' \
-           .format(args.model, args.combination_method, threshold)
+log_file = '{}/log_importance_values_{}_{}_sorted_{}context.tsv' \
+           .format(args.model, args.combination_method, args.mode, threshold)
 with open(log_file, 'w+', encoding='utf8') as f_log:
     f_log.write('LABEL\tSCOPE\tPROPORTION\t'
                 'IMPORTANCE_MEAN\tIMPORTANCE_VAR\t'
@@ -57,8 +60,8 @@ with open(log_file, 'w+', encoding='utf8') as f_log:
                 'CORRCOEF_IMPORTANCE_SPEC\tCOVARIANCE_IMPORTANCE_SPEC\n')
 
 if args.spec_rep_all:
-    all_scores_file = '{}/importance-spec-rep-all-{}-{}scaled.tsv' \
-                      .format(args.model, args.combination_method,
+    all_scores_file = '{}/importance-spec-rep-{}-{}-{}scaled.tsv' \
+                      .format(args.model, args.mode, args.combination_method,
                               '' if args.scale_by_model_score else 'un')
     with open(all_scores_file, 'w+', encoding='utf8') as f_all:
         f_all.write('FEATURE\tLABEL\tIMPORTANCE\t'
@@ -112,8 +115,9 @@ with open('{}/features-correlated.tsv'.format(args.model),
 for label in labels:
     print("LABEL", label)
     print("Getting the feature context.")
-    filename_template = '{}/importance_values_{}_{}_all_{}scaled_sorted' \
+    filename_template = '{}/importance_values_{}_{}_{}_{}scaled_sorted' \
                         .format(args.model, args.combination_method, label,
+                                args.mode,
                                 '' if args.scale_by_model_score else 'un')
     print(filename_template)
     feature2context = {}

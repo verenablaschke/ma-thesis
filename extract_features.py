@@ -21,6 +21,8 @@ parser.add_argument('--embed', dest='use_embeddings', default=False,
                     action='store_true')
 parser.add_argument('--embmod', dest='embedding_model',
                     default='flaubert/flaubert_base_cased', type=str)
+# python3 extract_features.py tweets '' --utt "test utterance here"
+parser.add_argument('--utt', dest='single_utterance', default=None, type=str)
 args = parser.parse_args()
 
 if args.type == 'dialects':
@@ -180,7 +182,13 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                                       uncased_ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
-        print(utterance, ngrams)
+        print(utterance)
+        for lvl_ngrams in ngrams:
+            print(lvl_ngrams)
+
+    if not outfile:
+        return
+
     ngrams_flat = []
     with open(outfile, 'a', encoding='utf8') as f:
         f.write(utterance + '\t' + str(label))
@@ -211,6 +219,11 @@ def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile):
         f.write("{}\t{}\t{}\n".format(utterance, label, ' '.join(toks)))
     return toks
 
+
+if args.single_utterance:
+    utterance2ngrams(args.single_utterance, None, None, WORD_NS, CHAR_NS,
+                     verbose=True)
+    sys.exit()
 
 infile = 'data/bokmaal+phon_cleaned.tsv' \
          if DIALECTS else 'data/tweets_cleaned.tsv'
