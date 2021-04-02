@@ -18,6 +18,7 @@ parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
 parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
 parser.add_argument('--embed', dest='use_embeddings', default=False,
+                    help='BPE tokenization (for Flaubert embeddings)',
                     action='store_true')
 parser.add_argument('--embmod', dest='embedding_model',
                     default='flaubert/flaubert_base_cased', type=str)
@@ -62,7 +63,7 @@ print("Char-level n-grams used: " + str(CHAR_NS)
 print("Adding uncased features: " + str(args.add_uncased))
 print("Using embeddings: " + str(args.use_embeddings))
 
-
+ESCAPE_TOKS = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
 featuremap = {}
 
 
@@ -112,14 +113,13 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
         words_charlvl = words_wordlvl
 
     ngrams = []
-    escape_toks = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
     sep = '<SEP>'
     for word_n in word_ns:
         cur_ngrams = []
         for i in range(len(words_wordlvl) + 1 - word_n):
             tokens = words_wordlvl[i:i + word_n]
             if not DIALECTS:
-                tokens = [tok if tok in escape_toks else tok.lower()
+                tokens = [tok if tok in ESCAPE_TOKS else tok.lower()
                           for tok in tokens]
             ngram = sep.join(tokens)
             # Padding to distinguish these from char n-grams
@@ -127,7 +127,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                 only_escaped = True
                 tmp_tokens = []
                 for tok in tokens:
-                    if tok in escape_toks:
+                    if tok in ESCAPE_TOKS:
                         tmp_tokens.append(tok)
                     else:
                         only_escaped = False
@@ -144,7 +144,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
     for char_n in char_ns:
         cur_ngrams = []
         for word, context in zip(words_charlvl, words_wordlvl):
-            if word in escape_toks:
+            if word in ESCAPE_TOKS:
                 continue
             chars = list(char_pattern.findall(word))
             word_len = len(chars)
@@ -200,29 +200,39 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
     return ngrams_flat
 
 
-def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile):
-    # Based on the _tokenize method:
-    # https://github.com/huggingface/transformers/blob/c89bdfbe720bc8f41c7dc6db5473a2cb0955f224/src/transformers/models/flaubert/tokenization_flaubert.py#L113
-    # With the difference that I want to keep track of which token
-    # a given BPE subtoken comes from.
-    text = flaubert_tokenizer.preprocess_text(utterance)
-    text = flaubert_tokenizer.moses_pipeline(text, lang="fr")
-    text = flaubert_tokenizer.moses_tokenize(text, lang="fr")
+def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
+                       verbose=False):
     toks = []
-    for token in text:
-        if token:
+    for token in utterance.split():
+        print(token)
+        if token in ESCAPE_TOKS:
+            subtokens = [token]
+        else:
             subtokens = [t for t in flaubert_tokenizer.bpe(token).split(" ")]
-            for subtok in subtokens:
-                update_featuremap(featuremap, label, subtok, token)
-            toks.extend(subtokens)
+        for subtok in subtokens:
+            update_featuremap(featuremap, label, subtok, token)
+        toks.extend(subtokens)
+    if verbose:
+        print(utterance)
+        print(toks)
+    if not outfile:
+        return
     with open(outfile, 'a', encoding='utf8') as f:
         f.write("{}\t{}\t{}\n".format(utterance, label, ' '.join(toks)))
     return toks
 
 
 if args.single_utterance:
-    utterance2ngrams(args.single_utterance, None, None, WORD_NS, CHAR_NS,
-                     verbose=True)
+    if args.use_embeddings:
+        flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
+            args.embedding_model, do_lowercase=False)
+        flaubert_tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
+        print(flaubert_tokenizer.additional_special_tokens)
+        utterance2bpe_toks(flaubert_tokenizer, args.single_utterance, '', None,
+                           verbose=True)
+    else:
+        utterance2ngrams(args.single_utterance, None, None, WORD_NS, CHAR_NS,
+                         verbose=True)
     sys.exit()
 
 infile = 'data/bokmaal+phon_cleaned.tsv' \
@@ -246,6 +256,7 @@ if args.use_embeddings:
         f.write('utterance\tlabel\tBPE tokens\n')
     flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
         args.embedding_model, do_lowercase=False)
+    # TODO: embeddings for special toks!
     for utterance, label in zip(data['utterances'], data['labels']):
         utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile)
 else:
