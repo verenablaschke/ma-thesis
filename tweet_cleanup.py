@@ -27,8 +27,10 @@ with open('data/tweets.tsv', 'r', encoding='utf8') as f_in:
             # Zero-width characters
             tweet = re.sub('[\u200b\u200c\u200d\xad]', '', tweet)
             # Typographical variation
-            tweet = re.sub('[\x92‘’]', '', tweet)
-            tweet = re.sub('[«»“”„]', '', tweet)
+            tweet = re.sub('[«»“”„]|(´´)|(``)|( ́ ́)|( ̀ ̀)', '"',
+                           tweet)
+            tweet = re.sub("[\x92‘’´`]|('')|( ́)|( ̀)", "'", tweet)
+            tweet = re.sub("''", '"', tweet)
             # Twitter usernames
             tweet = re.sub('((?<=^)|(?<=\W))@[a-zA-Z0-9_]+',
                            '<USERNAME>', tweet)

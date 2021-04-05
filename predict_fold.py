@@ -106,8 +106,8 @@ else:
         f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
             train_x.shape, len(raw_train), len(train_y),
             test_x.shape, len(raw_test), len(test_y)))
-        f.write('Trained the model from {} to {}'.format(start_time,
-                                                         done_time))
+        f.write('Trained the model from {} to {}\n'.format(start_time,
+                                                           done_time))
         f.write('Accuracy\t{:.4f}\n'.format(acc))
         f.write('F1 macro\t{:.4f}\n'.format(f1))
         f.write('Confusion matrix\n' + str(conf) + '\n')

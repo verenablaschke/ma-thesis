@@ -17,7 +17,7 @@ parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
                     type=str)
 parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
-parser.add_argument('--embed', dest='use_embeddings', default=False,
+parser.add_argument('--bpe', dest='bpe', default=False,
                     help='BPE tokenization (for Flaubert embeddings)',
                     action='store_true')
 parser.add_argument('--embmod', dest='embedding_model',
@@ -56,12 +56,10 @@ if len(CHAR_NS) == 0:
     CHAR_NS = []
 else:
     CHAR_NS = [int(i) for i in CHAR_NS.split(',')]
-print("Word-level n-grams used: " + str(WORD_NS)
-      if not args.use_embeddings else "-")
-print("Char-level n-grams used: " + str(CHAR_NS)
-      if not args.use_embeddings else "-")
+print("Word-level n-grams used: " + str(WORD_NS) if not args.bpe else "-")
+print("Char-level n-grams used: " + str(CHAR_NS) if not args.bpe else "-")
 print("Adding uncased features: " + str(args.add_uncased))
-print("Using embeddings: " + str(args.use_embeddings))
+print("Using BPE tokenization for embeddings: " + str(args.bpe))
 
 ESCAPE_TOKS = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
 featuremap = {}
@@ -203,8 +201,19 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
 def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
                        verbose=False):
     toks = []
-    for token in utterance.split():
-        print(token)
+    initial_tokens = re.split("([^\w<>]+)", utterance)
+    n_initial_toks = len(initial_tokens)
+    skip = False
+    for idx, token in enumerate(initial_tokens):
+        if skip:
+            skip = False
+            continue
+        token = token.strip()
+        if not token:
+            continue
+        if idx + 1 < n_initial_toks and initial_tokens[idx + 1] == "'":
+            token += "'"
+            skip = True
         if token in ESCAPE_TOKS:
             subtokens = [token]
         else:
@@ -223,11 +232,10 @@ def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
 
 
 if args.single_utterance:
-    if args.use_embeddings:
+    if args.bpe:
         flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
             args.embedding_model, do_lowercase=False)
         flaubert_tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
-        print(flaubert_tokenizer.additional_special_tokens)
         utterance2bpe_toks(flaubert_tokenizer, args.single_utterance, '', None,
                            verbose=True)
     else:
@@ -251,7 +259,7 @@ outfile = args.model + '/features.tsv'
 Path(args.model).mkdir(parents=True, exist_ok=True)
 
 # Extract and save the features.
-if args.use_embeddings:
+if args.bpe:
     with open(outfile, 'w+', encoding='utf8') as f:
         f.write('utterance\tlabel\tBPE tokens\n')
     flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
