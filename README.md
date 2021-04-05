@@ -38,6 +38,10 @@ python plot_importance.py models\tweets --comb sqrt --scale
 python feature_context.py models\dialects dialects --scores --comb mean
 python feature_context.py models\dialects dialects --scores --comb sqrt
 
+
+python representativeness_specificity.py models\tweets-bpe
+python feature_context.py models\tweets-bpe tweets --scores --comb sqrt
+
 python plot_importance.py models\dialects --comb mean
 python plot_importance.py models\dialects --comb sqrt
 
