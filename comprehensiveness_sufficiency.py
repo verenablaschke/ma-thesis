@@ -10,6 +10,7 @@ from predict import encode, predict_proba
 parser = argparse.ArgumentParser()
 parser.add_argument('dir', help='path to the model + fold')
 parser.add_argument('type', help='type of the data (dialects/tweets)')
+parser.add_argument('--mode', dest='mode', help='all/pos', default='all')
 parser.add_argument('--top', dest='n_top_features', default='[5,10,20]')
 args = parser.parse_args()
 
@@ -51,26 +52,20 @@ for label in labels:
             label_scores.append(values)
     scores[label] = label_scores
 
-comp_scores = {n: {} for n in n_top_features}
-suff_scores = {n: {} for n in n_top_features}
-for idx, (raw, ngrams, x, label) in enumerate(zip(raw_test, ngrams_test,
-                                                  test_x, labels_test)):
-    y_pred_enc = classifier.predict(x)[0]
-    y_pred = label_encoder.inverse_transform([y_pred_enc])[0]
-    pred_proba = predict_proba(classifier, [ngrams], vectorizer, linear_svc,
-                               n_labels)[0, y_pred_enc]
+
+def get_scores(idx, label, y_pred_enc, y_pred, pred_proba_all, investigating):
+    pred_proba_all = predict_proba(classifier, [ngrams], vectorizer,
+                                   linear_svc, n_labels)[0]
+    investigating_enc = label_encoder.transform([investigating])[0]
+    pred_proba = pred_proba_all[investigating_enc]
 
     if idx % 50 == 0:
-        print(idx)
-        print(datetime.datetime.now())
-        print('"' + raw + '""')
-        print("Actual: {} ({:.2f}) | Expected: {}"
-              .format(y_pred, pred_proba, label))
+        print("- Investigating: {} ({:.2f})".format(investigating, pred_proba))
 
-    importance_scores = sorted(scores[y_pred][idx], key=lambda x: x[1],
+    importance_scores = sorted(scores[investigating][idx], key=lambda x: x[1],
                                reverse=True)
-    most_important = []
     for n in n_top_features:
+        most_important = []
         for (feature, _) in importance_scores[:n]:
             most_important.append(feature)
         most_important = ' '.join(most_important)
@@ -80,10 +75,10 @@ for idx, (raw, ngrams, x, label) in enumerate(zip(raw_test, ngrams_test,
 
         pred_proba_less_imp = predict_proba(classifier, [only_less_important],
                                             vectorizer, linear_svc,
-                                            n_labels)[0, y_pred_enc]
+                                            n_labels)[0, investigating_enc]
         pred_proba_only_top = predict_proba(classifier, [most_important],
                                             vectorizer, linear_svc,
-                                            n_labels)[0, y_pred_enc]
+                                            n_labels)[0, investigating_enc]
         # Comprehensiveness: (Mathew et al., 2020)
         # Removing the features from the actual input should affect the output
         # probability
@@ -95,15 +90,38 @@ for idx, (raw, ngrams, x, label) in enumerate(zip(raw_test, ngrams_test,
         sufficiency = pred_proba - pred_proba_only_top
         suff_scores[n].append(sufficiency)
         if idx % 50 == 0:
-            print("- Top {} features".format(n))
-            print("--- Most important features:", most_important)
-            print("--- Comprehensiveness: {:.2f} ({:.2f} - {:.2f})"
+            print("--- Top {} features".format(n))
+            print("----- Most important features:", most_important)
+            print("----- Comprehensiveness: {:.2f} ({:.2f} - {:.2f})"
                   .format(comprehensiveness, pred_proba, pred_proba_less_imp))
-            print("--- Sufficiency: {:.2f} ({:.2f} - {:.2f})\n"
+            print("----- Sufficiency: {:.2f} ({:.2f} - {:.2f})\n"
                   .format(sufficiency, pred_proba, pred_proba_only_top))
 
-with open('{}/comprehensiveness-sufficiency.tsv'.format(args.dir), 'w+',
-          encoding='utf8') as file:
+
+comp_scores = {n: [] for n in n_top_features}
+suff_scores = {n: [] for n in n_top_features}
+for idx, (raw, ngrams, x, label) in enumerate(zip(raw_test, ngrams_test,
+                                                  test_x, labels_test)):
+    y_pred_enc = classifier.predict(x)[0]
+    y_pred = label_encoder.inverse_transform([y_pred_enc])[0]
+    pred_proba_all = predict_proba(classifier, [ngrams], vectorizer,
+                                   linear_svc, n_labels)[0]
+    if idx % 50 == 0:
+        print(idx)
+        print(datetime.datetime.now())
+        print('"' + raw + '""')
+        print("Actual: {} ({:.2f}) | Expected: {}"
+              .format(y_pred, pred_proba_all[y_pred_enc], label))
+
+    if args.mode == 'all':
+        for label in labels:
+            get_scores(idx, label, y_pred_enc, y_pred, pred_proba_all, label)
+    else:
+        get_scores(idx, label, y_pred_enc, y_pred, pred_proba_all, y_pred)
+
+
+with open('{}/comprehensiveness-sufficiency-{}.tsv'
+          .format(args.dir, args.mode), 'w+', encoding='utf8') as file:
     for n in n_top_features:
         mean_comp = sum(comp_scores[n]) / len(comp_scores[n])
         file.write("Comprehensiveness\t{}\t{:.4f}\n".format(n, mean_comp))
