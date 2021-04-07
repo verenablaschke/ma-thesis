@@ -17,6 +17,8 @@ parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
                     type=str)
 parser.add_argument('--lower', dest='add_uncased', default=False,
                     action='store_true')
+parser.add_argument('--loweronly', dest='uncased_only', default=False,
+                    action='store_true')
 parser.add_argument('--bpe', dest='bpe', default=False,
                     help='BPE tokenization (for Flaubert embeddings)',
                     action='store_true')
@@ -25,6 +27,9 @@ parser.add_argument('--embmod', dest='embedding_model',
 # python3 extract_features.py tweets '' --utt "test utterance here"
 parser.add_argument('--utt', dest='single_utterance', default=None, type=str)
 args = parser.parse_args()
+
+if args.uncased_only:
+    args.add_uncased = True
 
 if args.type == 'dialects':
     DIALECTS = True
@@ -59,6 +64,7 @@ else:
 print("Word-level n-grams used: " + str(WORD_NS) if not args.bpe else "-")
 print("Char-level n-grams used: " + str(CHAR_NS) if not args.bpe else "-")
 print("Adding uncased features: " + str(args.add_uncased))
+print("Using only uncased features: " + str(args.uncased_only))
 print("Using BPE tokenization for embeddings: " + str(args.bpe))
 
 ESCAPE_TOKS = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
@@ -130,14 +136,21 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                     else:
                         only_escaped = False
                         tmp_tokens.append(tok.lower())
-                if not only_escaped:
-                    uncased_ngram = 'UNCASED:<SOS>{}<EOS>'.format(
-                        sep.join(tmp_tokens))
+                if args.uncased_only:
+                    uncased_ngram = '<SOS>{}<EOS>'.format(sep.join(tmp_tokens))
                     cur_ngrams.append(uncased_ngram)
                     update_featuremap(featuremap, label, uncased_ngram,
                                       '<SOS>' + ngram + '<EOS>')
-            ngram = '<SOS>' + ngram + '<EOS>'
-            cur_ngrams.append(ngram)
+                else:
+                    if not only_escaped:
+                        uncased_ngram = 'UNCASED:<SOS>{}<EOS>'.format(
+                            sep.join(tmp_tokens))
+                        cur_ngrams.append(uncased_ngram)
+                        update_featuremap(featuremap, label, uncased_ngram,
+                                          '<SOS>' + ngram + '<EOS>')
+            if not args.uncased_only:
+                ngram = '<SOS>' + ngram + '<EOS>'
+                cur_ngrams.append(ngram)
         ngrams.append(cur_ngrams)
     for char_n in char_ns:
         cur_ngrams = []
@@ -154,7 +167,10 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
-                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    if args.uncased_only:
+                        uncased_ngram = ngram.lower()
+                    else:
+                        uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
                     update_featuremap(featuremap, label,
                                       uncased_ngram, context)
@@ -163,7 +179,10 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
-                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    if args.uncased_only:
+                        uncased_ngram = ngram.lower()
+                    else:
+                        uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
                     update_featuremap(featuremap, label,
                                       uncased_ngram, context)
@@ -174,7 +193,10 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
                 cur_ngrams.append(ngram)
                 update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
-                    uncased_ngram = 'UNCASED:' + ngram.lower()
+                    if args.uncased_only:
+                        uncased_ngram = ngram.lower()
+                    else:
+                        uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
                     update_featuremap(featuremap, label,
                                       uncased_ngram, context)

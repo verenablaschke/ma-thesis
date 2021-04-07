@@ -100,7 +100,7 @@ def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):
             margins, model.predict_proba(x))
 
 
-def predict_proba2(model, data, vectorizer, linear_svc, n_labels=4):
+def predict_proba(model, data, vectorizer, linear_svc, n_labels=4):
     probs = np.zeros((len(data), n_labels))
     for i, utterance in enumerate(data):
         x = vectorizer.transform([utterance])
@@ -180,8 +180,8 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                  test_x_ngrams, test_x, test_y, out_folder, n_lime_features,
-                 num_lime_samples,
-                 linear_svc, flaubert=None, flaubert_tokenizer=None,
+                 num_lime_samples, linear_svc, recalculate_ngrams,
+                 flaubert=None, flaubert_tokenizer=None,
                  max_len=None):
     labels = list(range(n_labels))
     explainer = LimeTextExplainer(class_names=label_encoder.inverse_transform(
@@ -189,13 +189,13 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                   split_expression=split_ngrams,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
-                                  recalculate_ngrams=False)
+                                  recalculate_ngrams=recalculate_ngrams)
     if flaubert:
         predict_function = lambda z: predict_proba_embeddings(
             classifier, z, flaubert, flaubert_tokenizer,
             linear_svc, max_len, n_labels)
     else:
-        predict_function = lambda z: predict_proba2(classifier, z, vectorizer,
+        predict_function = lambda z: predict_proba(classifier, z, vectorizer,
                                                     linear_svc, n_labels)
 
     for lab_raw in label_encoder.inverse_transform(labels):

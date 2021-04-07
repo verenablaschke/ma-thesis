@@ -24,9 +24,15 @@ for _, directories, _ in os.walk(model_dir):
                     f1.append(float(line.strip().split('\t')[1]))
                     break
 
+try:
+    print("Average accuracy", sum(acc) / len(acc))
+except ZeroDivisionError:
+    print("No accuracy scores")
+try:
+    print("Average F1 (macro)", sum(f1) / len(f1))
+except ZeroDivisionError:
+    print("No F1 scores")
 with open('{}/model-scores.txt'.format(model_dir), 'w+', encoding='utf8') as f:
     f.write("Average accuracy ({} runs): {}\n"
             "Average macro F1 score ({} runs): {}\n"
             .format(len(acc), sum(acc) / len(acc), len(f1), sum(f1) / len(f1)))
-print("Average accuracy", sum(acc) / len(acc))
-print("Average F1 (macro)", sum(f1) / len(f1))
