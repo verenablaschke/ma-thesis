@@ -27,11 +27,10 @@
 # python3 get_tweets.py
 # python3 tweet_cleanup.py
 screen -dmS tweets-embed
-screen -S tweets-embed -X stuff "python3 extract_features.py tweets models/tweets-embed --embed
-"
-screen -S tweets-embed -X stuff "python3 feature_correlation.py models/tweets-embed
-"
-screen -S tweets-embed -X stuff "python3 prepare_folds.py models/tweets-embed 10
-"
-screen -S tweets-embed -X stuff "python3 predict_fold.py models/tweets-embed tweets 0 --embed
-"
+screen -S tweets-embed -X stuff "python3 extract_features.py tweets models/tweets-embed --bpe\n"
+screen -S tweets-embed -X stuff "python3 feature_correlation.py models/tweets-embed\n"
+screen -S tweets-embed -X stuff "python3 prepare_folds.py models/tweets-embed 10\n"
+
+screen -S tweets-embed -X stuff "python3 predict_fold.py models/tweets-embed tweets 0 --embed --mlm nn\n"
+...
+

@@ -31,7 +31,7 @@ min_count = args.min_count
 n_runs = args.n_runs
 pattern = re.compile('\d+-\d+')
 
-if args.n_lime_sample_run is not None:
+if args.n_lime_sample_run is None:
     out_file = fold_dir + '/lime_sample_sizes.tsv'
     with open(out_file, 'w+', encoding='utf8') as f:
         f.write('N_SAMPLES\tAVG_DIST\n')
@@ -95,16 +95,19 @@ for run, folder_list in runs2folders.items():
             except KeyError:
                 pass
 
-    print("Comparing distributions")
+    print("Comparing {} distributions".format(len(folder_list)))
     dist = 0
     count = 0
     for run1, run2 in itertools.combinations(folder_list, 2):
         dist += jensenshannon(folder2distrib[run1], folder2distrib[run2])
         count += 1
-    avg_distance = dist / count
-    print(avg_distance)
+    try:
+        avg_distance = dist / count
+        print(avg_distance)
 
-    if args.n_lime_sample_run is not None:
-        print("Updating file")
-        with open(out_file, 'a', encoding='utf8') as f:
-            f.write('{}\t{:.4f}\n'.format(run, avg_distance))
+        if args.n_lime_sample_run is None:
+            print("Updating file")
+            with open(out_file, 'a', encoding='utf8') as f:
+                f.write('{}\t{:.4f}\n'.format(run, avg_distance))
+    except ZeroDivisionError:
+        print("Not enough runs for", run)

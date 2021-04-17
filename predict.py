@@ -10,6 +10,8 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
+from keras.models import Sequential
+from keras.layers import Bidirectional, LSTM, Dense, Dropout
 
 
 def split_ngrams(joined_ngrams):
@@ -33,7 +35,7 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
 
 
 def get_embeddings(utterances, max_len, embedding_size, batch_size,
-                   flaubert_tokenizer, flaubert):
+                   flaubert_tokenizer, flaubert, flatten):
     token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
                                            truncation=True,
                                            padding='max_length')
@@ -45,19 +47,21 @@ def get_embeddings(utterances, max_len, embedding_size, batch_size,
         print("- Batch {}--{}".format(i, i + batch_size))
         batch = flaubert(torch.tensor(token_ids[i:i + batch_size]))[0]
         x[i:i + batch_size] = batch
-    x = torch.flatten(x, start_dim=1)
+    if flatten:
+        x = torch.flatten(x, start_dim=1)
     x = x.detach().numpy()
-    assert x.shape == (n, max_len * embedding_size)
+    if flatten:
+        assert x.shape == (n, max_len * embedding_size)
     return x
 
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       flaubert_tokenizer, flaubert, max_len,
-                      batch_size, embedding_size):
+                      batch_size, embedding_size, flatten):
     train_x = get_embeddings(toks_train, max_len, embedding_size, batch_size,
-                             flaubert_tokenizer, flaubert)
+                             flaubert_tokenizer, flaubert, flatten)
     test_x = get_embeddings(toks_test, max_len, embedding_size, batch_size,
-                            flaubert_tokenizer, flaubert)
+                            flaubert_tokenizer, flaubert, flatten)
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)
@@ -69,7 +73,29 @@ def preprocess_and_vectorize(utterance, vectorizer):
     # return vectorizer.transform([preprocess(utterance)])
 
 
-def train(train_x, train_y, linear_svc, class_weight=None, verbose=False):
+def train(train_x, train_y, model_type, n_classes, linear_svc,
+          class_weight=None, verbose=False):
+    if model_type == 'nn':
+        model = Sequential()
+        print(train_x.shape)
+        print(train_x.shape[1:])
+        model.add(Bidirectional(LSTM(512, return_sequences=False),
+                                input_shape=train_x.shape[1:]))
+        model.add(Dropout(0.25))
+        model.add(Dense(n_classes,
+                        # activation='softmax' if n_classes > 2 else 'sigmoid'
+                        activation='softmax'))
+        model.compile(loss='sparse_categorical_crossentropy',
+            # loss='categorical_crossentropy' if n_classes > 2
+            #                else 'binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['categorical_accuracy'])
+        model.summary()
+        history = model.fit(train_x, train_y, epochs=10,
+                            batch_size=128,
+                            class_weight=class_weight, verbose=1)
+        return model
+
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
                               verbose=verbose)
@@ -100,7 +126,7 @@ def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):
             margins, model.predict_proba(x))
 
 
-def predict_proba(model, data, vectorizer, linear_svc, n_labels=4):
+def predict_proba(model, data, vectorizer, linear_svc, n_labels):
     probs = np.zeros((len(data), n_labels))
     for i, utterance in enumerate(data):
         x = vectorizer.transform([utterance])
@@ -115,24 +141,28 @@ def predict_proba(model, data, vectorizer, linear_svc, n_labels=4):
 
 
 def predict_proba_embeddings(model, data, flaubert, flaubert_tokenizer,
-                             linear_svc, max_len, n_labels=2):
+                             linear_svc, neural, max_len, n_labels):
     probs = np.zeros((len(data), n_labels))
     for i, utterance in enumerate(data):
         token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
                                                truncation=True,
                                                padding='max_length')]
         x = flaubert(torch.tensor(token_ids))[0]
-        if linear_svc:
+        if neural:
+            probs[i] = model.predict(x.detach().cpu().numpy())
+        elif linear_svc:
             # pred = model.predict(x)
-            margins = model.decision_function(x)
+            margins = model.decision_function(x[0])
             exp = np.exp(margins)
             probs[i] = exp / np.sum(exp)  # softmax
         else:
-            probs[i] = model.predict_proba(x)
+            probs[i] = model.predict_proba(x[0])
     return probs
 
 
-def score(pred, test_y):
+def score(pred, test_y, flatten_pred):
+    if flatten_pred:
+        pred = np.argmax(pred, axis=1)
     return (accuracy_score(test_y, pred),
             f1_score(test_y, pred, average='macro'),
             confusion_matrix(test_y, pred))
@@ -180,7 +210,7 @@ def instances_far_from_decision_boundary(model, label_encoder, train_x,
 
 def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                  test_x_ngrams, test_x, test_y, out_folder, n_lime_features,
-                 num_lime_samples, linear_svc, recalculate_ngrams,
+                 num_lime_samples, linear_svc, neural, recalculate_ngrams,
                  flaubert=None, flaubert_tokenizer=None,
                  max_len=None):
     labels = list(range(n_labels))
@@ -193,10 +223,11 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
     if flaubert:
         predict_function = lambda z: predict_proba_embeddings(
             classifier, z, flaubert, flaubert_tokenizer,
-            linear_svc, max_len, n_labels)
+            linear_svc, neural, max_len, n_labels)
     else:
         predict_function = lambda z: predict_proba(classifier, z, vectorizer,
-                                                    linear_svc, n_labels)
+                                                   linear_svc, neural,
+                                                   n_labels)
 
     for lab_raw in label_encoder.inverse_transform(labels):
         with open('{}/importance_values_{}.txt'.format(out_folder, lab_raw),
@@ -208,7 +239,10 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
         for idx, (utterance, ngrams, encoded, y) in enumerate(
                 zip(test_x_raw, test_x_ngrams, test_x, test_y)):
             y_raw = label_encoder.inverse_transform([y])[0]
-            pred_enc = classifier.predict(encoded)[0]
+            if neural:
+                pred_enc = np.argmax(classifier.predict(np.array([encoded])))
+            else:
+                pred_enc = classifier.predict(encoded)[0]
             pred_raw = label_encoder.inverse_transform([pred_enc])[0]
             f_pred.write('{}\t{}\t{}\t{}\n'.format(idx, utterance,
                                                    y_raw, pred_raw))

@@ -213,6 +213,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns=WORD_NS,
     with open(outfile, 'a', encoding='utf8') as f:
         f.write(utterance + '\t' + str(label))
         for lvl_ngrams in ngrams:
+            lvl_ngrams = list(set(lvl_ngrams))
             ngrams_flat += lvl_ngrams
             f.write('\t')
             f.write(' '.join(lvl_ngrams))

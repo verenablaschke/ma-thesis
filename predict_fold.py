@@ -28,6 +28,9 @@ if __name__ == "__main__":
     parser.add_argument('model', help='path to the model')
     parser.add_argument('type', help='type of the data (dialects/tweets)')
     parser.add_argument('fold', help='fold number')
+    parser.add_argument('--mlm', dest='model_type',
+                        help='type of the ML model (svm, nn)',
+                        default='svm', type=str)
     parser.add_argument('--embed', dest='use_embeddings', default=False,
                         action='store_true')
     parser.add_argument('--embmod', dest='embedding_model',
@@ -82,7 +85,7 @@ if __name__ == "__main__":
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
             flaubert_tokenizer, flaubert, args.n_bpe_toks, args.batch_size,
-            embedding_size)
+            embedding_size, flatten=args.model_type == 'svm')
         vectorizer = None
     else:
         flaubert, flaubert_tokenizer = None, None
@@ -97,13 +100,15 @@ if __name__ == "__main__":
     else:
         print("Training the model")
         start_time = datetime.datetime.now()
-        classifier = train(train_x, train_y,
+        classifier = train(train_x, train_y, model_type=args.model_type,
+                           n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose)
         done_time = datetime.datetime.now()
         print("Scoring the model")
         pred = predict(classifier, test_x)
-        (acc, f1, conf) = score(pred, test_y)
+        (acc, f1, conf) = score(pred, test_y,
+                                flatten_pred=args.model_type == 'nn')
         print('Accuracy', acc)
         print('F1 macro', f1)
         print('Confusion matrix')
@@ -129,5 +134,6 @@ if __name__ == "__main__":
                  ngrams_test, test_x, test_y, LIME_FOLDER,
                  args.n_lime_features,
                  args.n_lime_samples, args.type == 'dialects',
+                 args.model_type == 'nn',
                  args.recalculate_ngrams,
                  flaubert, flaubert_tokenizer, args.n_bpe_toks)
