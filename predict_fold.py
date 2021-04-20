@@ -26,10 +26,11 @@ def get_features(filename):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('model', help='path to the model')
-    parser.add_argument('type', help='type of the data (dialects/tweets)')
+    parser.add_argument('type', choices=['dialects', 'tweets'])
     parser.add_argument('fold', help='fold number')
     parser.add_argument('--mlm', dest='model_type',
-                        help='type of the ML model (svm, nn)',
+                        help='type of the ML model',
+                        choices=['svm', 'nn', 'nn-attn'],
                         default='svm', type=str)
     parser.add_argument('--embed', dest='use_embeddings', default=False,
                         action='store_true')
@@ -45,7 +46,8 @@ if __name__ == "__main__":
     parser.add_argument('--load', dest='load_model', default=False,
                         action='store_true')
     parser.add_argument('--recalc', dest='recalculate_ngrams', default=False,
-                        help='no overlapping LIME features', action='store_true')
+                        help='no overlapping LIME features',
+                        action='store_true')
     parser.add_argument('--v', dest='verbose', default=False,
                         action='store_true')
     parser.add_argument('--out', dest='output_subfolder', default='', type=str)
@@ -103,7 +105,8 @@ if __name__ == "__main__":
         classifier = train(train_x, train_y, model_type=args.model_type,
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
-                           class_weight=class_weight, verbose=args.verbose)
+                           class_weight=class_weight, verbose=args.verbose, 
+                           log_file=folder + 'log.txt')
         done_time = datetime.datetime.now()
         print("Scoring the model")
         pred = predict(classifier, test_x)
@@ -130,6 +133,11 @@ if __name__ == "__main__":
             pickle.dump(classifier, file)
 
     print('Generating explanations')
+    if args.model_type == 'nn-attn':
+        # TODO
+        return
+
+
     explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
                  ngrams_test, test_x, test_y, LIME_FOLDER,
                  args.n_lime_features,

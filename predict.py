@@ -10,9 +10,11 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
-from keras.models import Sequential
-from keras.layers import Bidirectional, LSTM, Dense, Dropout
+from keras.models import Sequential, Model
+from keras.layers import Bidirectional, LSTM, Dense, Dropout, Input, GRU, Concatenate, TimeDistributed
+from attention import AttentionLayer
 
+from tensorflow.keras.utils import to_categorical
 
 def split_ngrams(joined_ngrams):
     # Used by the TfidfVectorizer, important for the modified LIME
@@ -73,28 +75,14 @@ def preprocess_and_vectorize(utterance, vectorizer):
     # return vectorizer.transform([preprocess(utterance)])
 
 
-def train(train_x, train_y, model_type, n_classes, linear_svc,
+def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
           class_weight=None, verbose=False):
     if model_type == 'nn':
-        model = Sequential()
-        print(train_x.shape)
-        print(train_x.shape[1:])
-        model.add(Bidirectional(LSTM(512, return_sequences=False),
-                                input_shape=train_x.shape[1:]))
-        model.add(Dropout(0.25))
-        model.add(Dense(n_classes,
-                        # activation='softmax' if n_classes > 2 else 'sigmoid'
-                        activation='softmax'))
-        model.compile(loss='sparse_categorical_crossentropy',
-            # loss='categorical_crossentropy' if n_classes > 2
-            #                else 'binary_crossentropy',
-                      optimizer='adam',
-                      metrics=['categorical_accuracy'])
-        model.summary()
-        history = model.fit(train_x, train_y, epochs=10,
-                            batch_size=128,
-                            class_weight=class_weight, verbose=1)
-        return model
+        return train_lstm(train_x, train_y, model_type, n_classes, linear_svc,
+                          class_weight, verbose)
+    if model_type == 'nn-attn':
+        return train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
+                          class_weight, verbose, log_file)
 
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
@@ -105,6 +93,75 @@ def train(train_x, train_y, model_type, n_classes, linear_svc,
                         verbose=verbose)
     model.fit(train_x, train_y)
     return model
+
+
+def train_lstm(train_x, train_y, model_type, n_classes, linear_svc,
+               class_weight, verbose):
+    model = Sequential()
+    print(train_x.shape)
+    print(train_x.shape[1:])
+    model.add(Bidirectional(LSTM(512, return_sequences=False),
+                            input_shape=train_x.shape[1:]))
+    model.add(Dropout(0.25))
+    model.add(Dense(n_classes,
+                    # activation='softmax' if n_classes > 2 else 'sigmoid'
+                    activation='softmax'))
+    model.compile(loss='sparse_categorical_crossentropy',
+        # loss='categorical_crossentropy' if n_classes > 2
+        #                else 'binary_crossentropy',
+                  optimizer='adam',
+                  metrics=['categorical_accuracy'])
+    model.summary()
+    history = model.fit(train_x, train_y, epochs=10,
+                        batch_size=128,
+                        class_weight=class_weight, verbose=1)
+    return model
+
+
+def train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
+                    class_weight, verbose, log_file, hidden_size=512, epochs=10, batch_size=128):
+    hidden_size=512
+    n_timesteps, embed_depth = train_x.shape[1], train_x.shape[2]
+    out_size = n_classes if n_classes > 2 else 1
+
+    batch_size = 1
+    encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
+    print(encoder_inputs)
+    decoder_inputs = Input(shape=(1, out_size), name='decoder_inputs')
+
+    # Encoder GRU
+    encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
+    encoder_out, encoder_state = encoder_gru(encoder_inputs)
+
+    # Set up the decoder GRU, using `encoder_states` as initial state.
+    # decoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='decoder_gru')
+    # decoder_out, decoder_state = decoder_gru(decoder_inputs, initial_state=encoder_state)
+    decoder = Dense(out_size, name='decoder')
+    decoder_out = decoder(decoder_inputs)
+
+    # Attention layer
+    attn_layer = AttentionLayer(name='attention_layer')
+    attn_out, attn_states = attn_layer([encoder_out, decoder_out])
+
+    # Concat attention input and decoder GRU output
+    decoder_concat_input = Concatenate(axis=-1, name='concat_layer')([decoder_out, attn_out])
+
+    # Dense layer
+    dense = Dense(out_size, activation='softmax', name='softmax_layer')
+    dense_time = TimeDistributed(dense, name='time_distributed_layer')
+    decoder_pred = dense_time(decoder_concat_input)
+
+    # Full model
+    full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
+    full_model.compile(optimizer='adam', loss='categorical_crossentropy')
+
+    full_model.summary()
+
+    history = full_model.fit([train_x, train_y], train_y, epochs=10,
+                        batch_size=128,
+                        class_weight=class_weight, verbose=1)
+
+    return full_model
 
 
 def predict(model, test_x):
@@ -157,6 +214,20 @@ def predict_proba_embeddings(model, data, flaubert, flaubert_tokenizer,
             probs[i] = exp / np.sum(exp)  # softmax
         else:
             probs[i] = model.predict_proba(x[0])
+    return probs
+
+
+def predict_proba_lstm(model, data, flaubert, flaubert_tokenizer,
+                       linear_svc, neural, max_len, n_labels):
+    # probs = np.zeros((len(data), n_labels))
+    token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
+                                           truncation=True,
+                                           padding='max_length')
+                 for utterance in data]
+    x = flaubert(torch.tensor(token_ids))[0]
+    probs = model.predict(x.detach().cpu().numpy())
+    print(len(data))
+    print(probs.shape)
     return probs
 
 
@@ -220,14 +291,17 @@ def explain_lime(classifier, vectorizer, label_encoder, n_labels, test_x_raw,
                                   bow=True, ngram_lvl=True,
                                   utterance2ngrams=split_ngrams,
                                   recalculate_ngrams=recalculate_ngrams)
-    if flaubert:
+    if neural:
+        predict_function = lambda z: predict_proba_lstm(
+            classifier, z, flaubert, flaubert_tokenizer,
+            linear_svc, neural, max_len, n_labels)
+    elif flaubert:
         predict_function = lambda z: predict_proba_embeddings(
             classifier, z, flaubert, flaubert_tokenizer,
             linear_svc, neural, max_len, n_labels)
     else:
         predict_function = lambda z: predict_proba(classifier, z, vectorizer,
-                                                   linear_svc, neural,
-                                                   n_labels)
+                                                   linear_svc, n_labels)
 
     for lab_raw in label_encoder.inverse_transform(labels):
         with open('{}/importance_values_{}.txt'.format(out_folder, lab_raw),

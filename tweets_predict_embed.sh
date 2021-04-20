@@ -32,5 +32,11 @@ screen -S tweets-embed -X stuff "python3 feature_correlation.py models/tweets-em
 screen -S tweets-embed -X stuff "python3 prepare_folds.py models/tweets-embed 10\n"
 
 screen -S tweets-embed -X stuff "python3 predict_fold.py models/tweets-embed tweets 0 --embed --mlm nn\n"
-...
+screen -S tweets-embed -X stuff "python3 predict_fold.py models/tweets-embed tweets 1 --embed --mlm nn\n"
 
+
+for i in $(seq 1 9); do
+    echo "Setting up fold $i"
+    screen -dmS tweets-embed-$i
+    screen -S tweets-embed-$i -X stuff "python3 predict_fold.py models/tweets-embed tweets $i --embed --mlm nn\n"
+done
