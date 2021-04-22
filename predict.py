@@ -13,6 +13,8 @@ import torch
 from keras.models import Sequential, Model
 from keras.layers import Bidirectional, LSTM, Dense, Dropout, Input, GRU, Concatenate, TimeDistributed
 from attention import AttentionLayer
+from keras import backend as K
+import tensorflow as tf
 
 from tensorflow.keras.utils import to_categorical
 
@@ -76,13 +78,13 @@ def preprocess_and_vectorize(utterance, vectorizer):
 
 
 def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
-          class_weight=None, verbose=False):
+          class_weight=None, verbose=False, hidden_size=512, epochs=10, batch_size=128):
     if model_type == 'nn':
         return train_lstm(train_x, train_y, model_type, n_classes, linear_svc,
                           class_weight, verbose)
     if model_type == 'nn-attn':
         return train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
-                          class_weight, verbose, log_file)
+                          class_weight, verbose, log_file, hidden_size, epochs, batch_size, log_file)
 
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
@@ -96,76 +98,153 @@ def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
 
 
 def train_lstm(train_x, train_y, model_type, n_classes, linear_svc,
-               class_weight, verbose):
+               class_weight, verbose, log_file, 
+               loss='sparse_categorical_crossentropy', metric='categorical_accuracy'):
     model = Sequential()
-    print(train_x.shape)
-    print(train_x.shape[1:])
-    model.add(Bidirectional(LSTM(512, return_sequences=False),
+    model.add(Bidirectional(GRU(512, return_sequences=False),
                             input_shape=train_x.shape[1:]))
     model.add(Dropout(0.25))
     model.add(Dense(n_classes,
                     # activation='softmax' if n_classes > 2 else 'sigmoid'
                     activation='softmax'))
-    model.compile(loss='sparse_categorical_crossentropy',
+    model.compile(loss=loss,
         # loss='categorical_crossentropy' if n_classes > 2
         #                else 'binary_crossentropy',
                   optimizer='adam',
-                  metrics=['categorical_accuracy'])
+                  metrics=[metric])
     model.summary()
     history = model.fit(train_x, train_y, epochs=10,
                         batch_size=128,
                         class_weight=class_weight, verbose=1)
+    with open(log_file, 'a', encoding='utf8') as f:
+        f.write('LOSS {}\n'.format(loss))
+        f.write(str(history.history['loss']) + '\n')
+        f.write('METRIC {}\n'.format(metric))
+        f.write(str(history.history[metric]) + '\n')
     return model
 
 
+# class Attention(tf.keras.layers.Layer):
+#     def __init__(self):    
+#         super(Attention, self).__init__()
+        
+#     def build(self, input_shape):
+#         hidden_size = input_shape[-1]
+#         n_timesteps = input_shape[-2]
+#         num_units = 1    
+#         self.W = self.add_weight(shape=(hidden_size, num_units),
+#                                     initializer='normal')
+#         self.b = self.add_weight(shape=(n_timesteps, num_units),
+#                                     initializer='zero')
+            
+#     def call(self, x):
+#         e = K.tanh(K.dot(x,self.W)+self.b)
+#         a = K.softmax(e, axis=1)
+#         output = x*a
+#         return a, K.sum(output, axis=1)
+
+
+class Attention(tf.keras.layers.Layer):
+    def __init__(self):    
+        super(Attention, self).__init__()
+        
+    def build(self, input_shape):
+        hidden_size = input_shape[-1]
+        n_timesteps = input_shape[-2]
+        num_units = 1    
+        output_size = 1
+        self.linear_1 = Dense(hidden_size, output_size)
+        self.W = self.add_weight(shape=(hidden_size, num_units),
+                                    initializer='normal')
+        self.b = self.add_weight(shape=(n_timesteps, num_units),
+                                    initializer='zero')
+            
+    def call(self, x):
+        e = K.tanh(K.dot(x,self.W)+self.b)
+        a = K.softmax(e, axis=1)
+        output = x*a
+        return a, K.sum(output, axis=1)
+
+
 def train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
-                    class_weight, verbose, log_file, hidden_size=512, epochs=10, batch_size=128):
-    hidden_size=512
-    n_timesteps, embed_depth = train_x.shape[1], train_x.shape[2]
+                    class_weight, verbose, log_file, hidden_size, epochs, batch_size):
+    n_timesteps, embed_depth = train_x.shape[-2], train_x.shape[-1]
     out_size = n_classes if n_classes > 2 else 1
 
-    batch_size = 1
     encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
-    print(encoder_inputs)
-    decoder_inputs = Input(shape=(1, out_size), name='decoder_inputs')
 
     # Encoder GRU
     encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
     encoder_out, encoder_state = encoder_gru(encoder_inputs)
 
-    # Set up the decoder GRU, using `encoder_states` as initial state.
-    # decoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='decoder_gru')
-    # decoder_out, decoder_state = decoder_gru(decoder_inputs, initial_state=encoder_state)
-    decoder = Dense(out_size, name='decoder')
-    decoder_out = decoder(decoder_inputs)
+    attn_layer = Attention()
+    a, attn_adjusted_op = attn_layer(encoder_out)
 
-    # Attention layer
-    attn_layer = AttentionLayer(name='attention_layer')
-    attn_out, attn_states = attn_layer([encoder_out, decoder_out])
-
-    # Concat attention input and decoder GRU output
-    decoder_concat_input = Concatenate(axis=-1, name='concat_layer')([decoder_out, attn_out])
-
-    # Dense layer
     dense = Dense(out_size, activation='softmax', name='softmax_layer')
-    dense_time = TimeDistributed(dense, name='time_distributed_layer')
-    decoder_pred = dense_time(decoder_concat_input)
+    dense_out = dense(attn_adjusted_op)
 
     # Full model
-    full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
-    full_model.compile(optimizer='adam', loss='categorical_crossentropy')
+    full_model = Model(inputs=encoder_inputs, outputs=dense_out)
+    full_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+                  metrics=['categorical_accuracy'])
 
     full_model.summary()
 
-    history = full_model.fit([train_x, train_y], train_y, epochs=10,
-                        batch_size=128,
+    history = full_model.fit(train_x, train_y, epochs=epochs,
+                        batch_size=batch_size,
                         class_weight=class_weight, verbose=1)
-
+    with open(log_file, 'a', encoding='utf8') as f:
+        f.write('LOSS {}\n'.format(loss))
+        f.write(str(history.history['loss']) + '\n')
+        f.write('METRIC {}\n'.format(metric))
+        f.write(str(history.history[metric]) + '\n')
     return full_model
 
 
-def predict(model, test_x):
-    return model.predict(test_x)
+# def train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
+#                     class_weight, verbose, log_file, hidden_size=512, epochs=10, batch_size=128):
+#     hidden_size=512
+#     n_timesteps, embed_depth = train_x.shape[1], train_x.shape[2]
+#     out_size = n_classes if n_classes > 2 else 1
+
+#     batch_size = 1
+#     encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
+#     print(encoder_inputs)
+#     decoder_inputs = Input(shape=(1, out_size), name='decoder_inputs')
+
+#     # Encoder GRU
+#     encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
+#     encoder_out, encoder_state = encoder_gru(encoder_inputs)
+
+#     # Set up the decoder GRU, using `encoder_states` as initial state.
+#     # decoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='decoder_gru')
+#     # decoder_out, decoder_state = decoder_gru(decoder_inputs, initial_state=encoder_state)
+#     decoder = Dense(out_size, name='decoder')
+#     decoder_out = decoder(decoder_inputs)
+
+#     # Attention layer
+#     attn_layer = AttentionLayer(name='attention_layer')
+#     attn_out, attn_states = attn_layer([encoder_out, decoder_out])
+
+#     # Concat attention input and decoder GRU output
+#     decoder_concat_input = Concatenate(axis=-1, name='concat_layer')([decoder_out, attn_out])
+
+#     # Dense layer
+#     dense = Dense(out_size, activation='softmax', name='softmax_layer')
+#     dense_time = TimeDistributed(dense, name='time_distributed_layer')
+#     decoder_pred = dense_time(decoder_concat_input)
+
+#     # Full model
+#     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
+#     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
+
+#     full_model.summary()
+
+#     history = full_model.fit([train_x, train_y], train_y, epochs=10,
+#                         batch_size=128,
+#                         class_weight=class_weight, verbose=1)
+#     print(history)
+#     return full_model
 
 
 def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):

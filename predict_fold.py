@@ -4,7 +4,7 @@ import numpy as np
 import argparse
 import datetime
 import pickle
-from predict import encode, encode_embeddings, predict, score, train, \
+from predict import encode, encode_embeddings, score, train, \
                     explain_lime
 from pathlib import Path
 from transformers import FlaubertModel, FlaubertTokenizer
@@ -51,6 +51,11 @@ if __name__ == "__main__":
     parser.add_argument('--v', dest='verbose', default=False,
                         action='store_true')
     parser.add_argument('--out', dest='output_subfolder', default='', type=str)
+    parser.add_argument('--h', dest='hidden', default=512, type=int)
+    parser.add_argument('--ep', dest='epochs', default=10, type=int)
+    parser.add_argument('--b', dest='batch_size', default=128, type=int)
+    parser.add_argument('--nolime', dest='fit_model_only', default=False,
+                        action='store_true')
     args = parser.parse_args()
 
     folder = '{}/fold-{}/'.format(args.model, args.fold)
@@ -106,10 +111,10 @@ if __name__ == "__main__":
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose, 
-                           log_file=folder + 'log.txt')
+                           log_file=folder + 'log.txt', hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size)
         done_time = datetime.datetime.now()
         print("Scoring the model")
-        pred = predict(classifier, test_x)
+        pred = classifier.predict(test_x)
         (acc, f1, conf) = score(pred, test_y,
                                 flatten_pred=args.model_type == 'nn')
         print('Accuracy', acc)
@@ -132,16 +137,17 @@ if __name__ == "__main__":
         with open(MODEL_FILES_FOLDER + 'classifier.pickle', 'wb') as file:
             pickle.dump(classifier, file)
 
-    print('Generating explanations')
-    if args.model_type == 'nn-attn':
-        # TODO
-        return
+    if not args.fit_model_only:
+        print('Generating explanations')
+        if args.model_type == 'nn-attn':
+            # TODO
+            pass
 
-
-    explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
-                 ngrams_test, test_x, test_y, LIME_FOLDER,
-                 args.n_lime_features,
-                 args.n_lime_samples, args.type == 'dialects',
-                 args.model_type == 'nn',
-                 args.recalculate_ngrams,
-                 flaubert, flaubert_tokenizer, args.n_bpe_toks)
+        else:
+            explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
+                         ngrams_test, test_x, test_y, LIME_FOLDER,
+                         args.n_lime_features,
+                         args.n_lime_samples, args.type == 'dialects',
+                         args.model_type == 'nn',
+                         args.recalculate_ngrams,
+                         flaubert, flaubert_tokenizer, args.n_bpe_toks)
