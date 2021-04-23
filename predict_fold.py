@@ -66,7 +66,7 @@ if __name__ == "__main__":
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
     with open(LIME_FOLDER + 'log.txt', 'w+', encoding='utf8') as f:
-        f.write('Arguments:\n')
+        f.write('{}\nArguments:\n'.format(datetime.datetime.now()))
         for arg, val in vars(args).items():
             f.write('{}: {}\n'.format(arg, val))
 
@@ -111,12 +111,12 @@ if __name__ == "__main__":
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose, 
-                           log_file=folder + 'log.txt', hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size)
+                           log_file=LIME_FOLDER + 'log.txt', hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size)
         done_time = datetime.datetime.now()
         print("Scoring the model")
         pred = classifier.predict(test_x)
         (acc, f1, conf) = score(pred, test_y,
-                                flatten_pred=args.model_type == 'nn')
+                                flatten_pred='nn' in args.model_type)
         print('Accuracy', acc)
         print('F1 macro', f1)
         print('Confusion matrix')
