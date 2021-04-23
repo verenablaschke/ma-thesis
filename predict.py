@@ -175,17 +175,17 @@ def train_gru_attn(train_x, train_y, model_type, n_classes,
     encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
 
     # Encoder GRU
+    encoder_gru = Bidirectional(GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru'),
+        name='encoder_bidi_gru')
     encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
-    # encoder_gru = GRU(hidden_size, return_sequences=False, return_state=True, name='encoder_gru')
     encoder_out, encoder_state = encoder_gru(encoder_inputs)
 
-    # attn_layer = Attention()
-    # a, attn_adjusted_op = attn_layer(encoder_out)
-    # # attn_adjusted_op = attn_layer(encoder_out)
+    attn_layer = Attention()
+    a, attn_adjusted_op = attn_layer(encoder_out)
+    # attn_adjusted_op = attn_layer(encoder_out)
 
     dense = Dense(out_size, activation='softmax', name='softmax_layer')
-    # dense_out = dense(attn_adjusted_op)
-    dense_out = dense(encoder_state)
+    dense_out = dense(attn_adjusted_op)
 
     # Full model
     full_model = Model(inputs=encoder_inputs, outputs=dense_out)
@@ -207,52 +207,6 @@ def train_gru_attn(train_x, train_y, model_type, n_classes,
         f.write('METRIC {}\n'.format(metric))
         f.write(str(history.history[metric]) + '\n')
     return full_model
-
-
-# def train_lstm_attn(train_x, train_y, model_type, n_classes, linear_svc,
-#                     class_weight, verbose, log_file, hidden_size=512, epochs=10, batch_size=128):
-#     hidden_size=512
-#     n_timesteps, embed_depth = train_x.shape[1], train_x.shape[2]
-#     out_size = n_classes if n_classes > 2 else 1
-
-#     batch_size = 1
-#     encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
-#     print(encoder_inputs)
-#     decoder_inputs = Input(shape=(1, out_size), name='decoder_inputs')
-
-#     # Encoder GRU
-#     encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
-#     encoder_out, encoder_state = encoder_gru(encoder_inputs)
-
-#     # Set up the decoder GRU, using `encoder_states` as initial state.
-#     # decoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='decoder_gru')
-#     # decoder_out, decoder_state = decoder_gru(decoder_inputs, initial_state=encoder_state)
-#     decoder = Dense(out_size, name='decoder')
-#     decoder_out = decoder(decoder_inputs)
-
-#     # Attention layer
-#     attn_layer = AttentionLayer(name='attention_layer')
-#     attn_out, attn_states = attn_layer([encoder_out, decoder_out])
-
-#     # Concat attention input and decoder GRU output
-#     decoder_concat_input = Concatenate(axis=-1, name='concat_layer')([decoder_out, attn_out])
-
-#     # Dense layer
-#     dense = Dense(out_size, activation='softmax', name='softmax_layer')
-#     dense_time = TimeDistributed(dense, name='time_distributed_layer')
-#     decoder_pred = dense_time(decoder_concat_input)
-
-#     # Full model
-#     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
-#     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
-
-#     full_model.summary()
-
-#     history = full_model.fit([train_x, train_y], train_y, epochs=10,
-#                         batch_size=128,
-#                         class_weight=class_weight, verbose=1)
-#     print(history)
-#     return full_model
 
 
 def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):
