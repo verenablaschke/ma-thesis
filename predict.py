@@ -80,15 +80,6 @@ def preprocess_and_vectorize(utterance, vectorizer):
 def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
           learning_rate, class_weight, verbose, hidden_size, epochs,
           batch_size):
-    if model_type == 'nn':
-        return train_gru(train_x, train_y, model_type, n_classes,
-                         class_weight, verbose, log_file, hidden_size, epochs,
-                         batch_size, learning_rate)
-    if model_type == 'nn-attn':
-        return train_gru_attn(train_x, train_y, model_type, n_classes,
-                              class_weight, verbose, log_file, hidden_size,
-                              epochs, batch_size, learning_rate)
-
     if 'nn' in model_type:
         return train_gru(train_x, train_y, 'attn' in model_type, n_classes,
                          class_weight, log_file, hidden_size, epochs,
@@ -102,37 +93,6 @@ def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
         model = svm.SVC(C=1.0, probability=True, class_weight=class_weight,
                         verbose=verbose)
     model.fit(train_x, train_y)
-    return model
-
-
-def train_gru2(train_x, train_y, model_type, n_classes,
-               class_weight, verbose, log_file, hidden_size, epochs, batch_size, learning_rate,
-               loss='sparse_categorical_crossentropy', metric='categorical_accuracy'):
-    model = Sequential()
-    model.add(Bidirectional(GRU(hidden_size, return_sequences=False),
-                            input_shape=train_x.shape[1:]))
-    model.add(Dropout(0.25))
-    model.add(Dense(n_classes,
-                    # activation='softmax' if n_classes > 2 else 'sigmoid'
-                    activation='softmax'))
-    optimizer = Adam(lr=learning_rate, decay=learning_rate / epochs)
-    model.compile(loss=loss,
-        # loss='categorical_crossentropy' if n_classes > 2
-        #                else 'binary_crossentropy',
-                  optimizer=optimizer,
-                  metrics=[metric])
-    model.summary(line_length=100)
-    print(train_x.shape)
-    print(train_y.shape, train_y[:10])
-    history = model.fit(train_x, train_y, epochs=epochs,
-                        batch_size=batch_size,
-                        class_weight=class_weight, verbose=1)
-    with open(log_file, 'a', encoding='utf8') as f:
-        model.summary(print_fn=lambda x: f.write(x + '\n'), line_length=100)
-        f.write('LOSS {}\n'.format(loss))
-        f.write(str(history.history['loss']) + '\n')
-        f.write('METRIC {}\n'.format(metric))
-        f.write(str(history.history[metric]) + '\n')
     return model
 
 
@@ -186,6 +146,8 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
     # gru_out, gru_fwd_state, gru_bwd_state = gru(inputs)
     gru_out = gru(inputs)
 
+    # TODO drop-out
+
     if attention_layer:
         attention = Attention()
         attn_scores, attn_out = attention(gru_out)
@@ -222,7 +184,7 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
         f.write('METRIC {}\n'.format(metric))
         f.write(str(history.history[metric]) + '\n')
 
-    if attn_model:
+    if attention_layer:
         return model, attn_model
     return model
 
