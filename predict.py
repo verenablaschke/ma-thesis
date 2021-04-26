@@ -1,6 +1,6 @@
 # coding: utf-8
 
-# called by kfold.py
+# called by predict_fold.py
 
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -10,9 +10,8 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
-from keras.models import Sequential, Model
-from keras.layers import Bidirectional, LSTM, Dense, Dropout, Input, GRU, Concatenate, TimeDistributed, Activation
-from attention import AttentionLayer
+from keras.models import Model
+from keras.layers import Bidirectional, Dense, Dropout, Input, GRU
 from keras import backend as K
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -78,12 +77,12 @@ def preprocess_and_vectorize(utterance, vectorizer):
 
 
 def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
-          learning_rate, class_weight, verbose, hidden_size, epochs,
-          batch_size):
+          learning_rate, dropout_rate, class_weight, verbose, hidden_size,
+          epochs, batch_size):
     if 'nn' in model_type:
         return train_gru(train_x, train_y, 'attn' in model_type, n_classes,
                          class_weight, log_file, hidden_size, epochs,
-                         batch_size, learning_rate, verbose)
+                         batch_size, learning_rate, dropout_rate, verbose)
 
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
@@ -97,18 +96,18 @@ def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
 
 
 class Attention(tf.keras.layers.Layer):
-    def __init__(self):    
+    def __init__(self):
         super(Attention, self).__init__()
-        
+
     def build(self, input_shape):
         hidden_size = input_shape[-1]
         n_timesteps = input_shape[-2]
-        num_units = 1    
+        num_units = 1
         self.W = self.add_weight(shape=(hidden_size, num_units),
-                                    initializer='normal')
+                                 initializer='normal')
         self.b = self.add_weight(shape=(n_timesteps, num_units),
-                                    initializer='zero')
-            
+                                 initializer='zero')
+
     def call(self, x):
         e = K.tanh(K.dot(x,self.W)+self.b)
         a = K.softmax(e, axis=1)
@@ -134,7 +133,8 @@ class Attention(tf.keras.layers.Layer):
 
 def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
               log_file, hidden_size, epochs, batch_size, learning_rate,
-              verbose, loss='sparse_categorical_crossentropy',
+              dropout_rate, verbose,
+              loss='sparse_categorical_crossentropy',
               metric='categorical_accuracy'):
     n_timesteps, embed_depth = train_x.shape[-2], train_x.shape[-1]
 
@@ -146,14 +146,16 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
     # gru_out, gru_fwd_state, gru_bwd_state = gru(inputs)
     gru_out = gru(inputs)
 
+    dropout = Dropout(dropout_rate, name='dropout')
+    dropout_out = dropout(gru_out)
     # TODO drop-out
 
     if attention_layer:
         attention = Attention()
-        attn_scores, attn_out = attention(gru_out)
+        attn_scores, attn_out = attention(dropout_out)
         dense_in = attn_out
     else:
-        dense_in = gru_out
+        dense_in = dropout_out
 
     dense = Dense(n_classes, activation='softmax', name='softmax')
     dense_out = dense(dense_in)
@@ -185,7 +187,7 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
         f.write(str(history.history[metric]) + '\n')
 
     if attention_layer:
-        return model, attn_model
+        return attn_model
     return model
 
 
@@ -252,9 +254,7 @@ def predict_proba_lstm(model, data, flaubert, flaubert_tokenizer,
     return probs
 
 
-def score(pred, test_y, flatten_pred):
-    if flatten_pred:
-        pred = np.argmax(pred, axis=1)
+def score(pred, test_y):
     return (accuracy_score(test_y, pred),
             f1_score(test_y, pred, average='macro'),
             confusion_matrix(test_y, pred))

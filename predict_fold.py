@@ -37,7 +37,8 @@ if __name__ == "__main__":
     parser.add_argument('--embmod', dest='embedding_model',
                         default='flaubert/flaubert_base_cased', type=str)
     parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
-    parser.add_argument('--embbatch', dest='batch_size', default=50, type=int)
+    parser.add_argument('--embbatch', dest='flaubert_batch_size', default=50,
+                        type=int)
     parser.add_argument('--limefeat', dest='n_lime_features', default=100,
                         type=int)
     parser.add_argument('--z', dest='n_lime_samples', default=1000, type=int)
@@ -54,10 +55,13 @@ if __name__ == "__main__":
     parser.add_argument('--h', dest='hidden', default=512, type=int)
     parser.add_argument('--ep', dest='epochs', default=10, type=int)
     parser.add_argument('--b', dest='batch_size', default=128, type=int)
-    parser.add_argument('--lr', dest='learning_rate', default=0.001, type=float)
+    parser.add_argument('--lr', dest='learning_rate', default=0.001,
+                        type=float)
+    parser.add_argument('--drop', dest='dropout_rate', default=0.2, type=float)
     parser.add_argument('--nolime', dest='fit_model_only', default=False,
                         action='store_true')
-    parser.add_argument('--log', dest='explicit_log', help='parameters in log file name', default=False,
+    parser.add_argument('--log', dest='explicit_log',
+                        help='add parameters to log file name', default=False,
                         action='store_true')
     args = parser.parse_args()
 
@@ -67,9 +71,9 @@ if __name__ == "__main__":
     Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
     LOG_FILE = LIME_FOLDER + 'log.txt'
     if args.explicit_log:
-        LOG_FILE = '{}log-{}-{}-{}-{}.txt'.format(
+        LOG_FILE = '{}log-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
             LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
-            args.epochs)
+            args.dropout_rate, args.epochs, args.n_bpe_toks)
 
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
@@ -99,7 +103,8 @@ if __name__ == "__main__":
             embedding_size = 1024
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
-            flaubert_tokenizer, flaubert, args.n_bpe_toks, args.batch_size,
+            flaubert_tokenizer, flaubert, args.n_bpe_toks,
+            args.flaubert_batch_size,
             embedding_size, flatten=args.model_type == 'svm')
         vectorizer = None
     else:
@@ -118,15 +123,21 @@ if __name__ == "__main__":
         classifier = train(train_x, train_y, model_type=args.model_type,
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
-                           class_weight=class_weight, verbose=args.verbose, 
-                           log_file=LOG_FILE, hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size, learning_rate=args.learning_rate)
-        if args.model_type == 'nn-attn':
-            model1, model2 = classifier
+                           class_weight=class_weight, verbose=args.verbose,
+                           log_file=LOG_FILE, hidden_size=args.hidden,
+                           epochs=args.epochs, batch_size=args.batch_size,
+                           learning_rate=args.learning_rate,
+                           dropout_rate=args.dropout_rate)
         done_time = datetime.datetime.now()
+
         print("Scoring the model")
-        pred = classifier.predict(test_x)
-        (acc, f1, conf) = score(pred, test_y,
-                                flatten_pred='nn' in args.model_type)
+        if args.model_type == 'nn-attn':
+            pred, attn_scores = classifier.predict(test_x)
+        else:
+            pred = classifier.predict(test_x)
+        if 'nn' in args.model_type:
+            pred = np.argmax(pred, axis=1)
+        (acc, f1, conf) = score(pred, test_y)
         print('Accuracy', acc)
         print('F1 macro', f1)
         print('Confusion matrix')
@@ -150,11 +161,34 @@ if __name__ == "__main__":
     if not args.fit_model_only:
         print('Generating explanations')
         if args.model_type == 'nn-attn':
-            # TODO
-            pass
+            with open('{}attention_scores-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
+                    LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
+                    args.dropout_rate, args.epochs, args.n_bpe_toks),
+                      'w+', encoding='utf8') as f:
+                f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
+                    '\t' * (args.n_bpe_toks - 1),
+                    '\t' * (args.n_bpe_toks - 1)))
+                for i, (x, y_true, y_pred, attn) in enumerate(
+                        zip(ngrams_test, test_y, pred, attn_scores)):
+                    x = x.split(' ')
+                    filler = (args.n_bpe_toks - len(x)) * '\t<FILLER>'
+                    tokens = '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]]) + filler
+                    attention_score = '\t'.join(str(a[0]) for a in attn)
+                    if i % 100 == 0:
+                        print(x)
+                        print(y_true, y_pred)
+                        print(attn)
+                        print(attention_score)
+                        print(tokens)
+                        print('{}\t{}\t{}\t{}\n'.format(
+                            y_true, y_pred, attention_score, tokens))
 
+                    f.write('{}\t{}\t{}\t{}\n'.format(
+                        y_true, y_pred, '\t'.join(str(a) for a in attn),
+                        '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]])))
         else:
-            explain_lime(classifier, vectorizer, label_encoder, n_labels, raw_test,
+            explain_lime(classifier, vectorizer, label_encoder, n_labels,
+                         raw_test,
                          ngrams_test, test_x, test_y, LIME_FOLDER,
                          args.n_lime_features,
                          args.n_lime_samples, args.type == 'dialects',
