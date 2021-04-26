@@ -15,8 +15,8 @@ from keras.layers import Bidirectional, LSTM, Dense, Dropout, Input, GRU, Concat
 from attention import AttentionLayer
 from keras import backend as K
 import tensorflow as tf
+from tensorflow.keras.optimizers import Adam
 
-from tensorflow.keras.utils import to_categorical
 
 def split_ngrams(joined_ngrams):
     # Used by the TfidfVectorizer, important for the modified LIME
@@ -78,13 +78,21 @@ def preprocess_and_vectorize(utterance, vectorizer):
 
 
 def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
-          class_weight=None, verbose=False, hidden_size=512, epochs=10, batch_size=128):
+          learning_rate, class_weight, verbose, hidden_size, epochs,
+          batch_size):
     if model_type == 'nn':
         return train_gru(train_x, train_y, model_type, n_classes,
-                          class_weight, verbose, log_file, hidden_size, epochs, batch_size)
+                         class_weight, verbose, log_file, hidden_size, epochs,
+                         batch_size, learning_rate)
     if model_type == 'nn-attn':
         return train_gru_attn(train_x, train_y, model_type, n_classes,
-                          class_weight, verbose, log_file, hidden_size, epochs, batch_size)
+                              class_weight, verbose, log_file, hidden_size,
+                              epochs, batch_size, learning_rate)
+
+    if 'nn' in model_type:
+        return train_gru(train_x, train_y, 'attn' in model_type, n_classes,
+                         class_weight, log_file, hidden_size, epochs,
+                         batch_size, learning_rate, verbose)
 
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
@@ -97,8 +105,8 @@ def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
     return model
 
 
-def train_gru(train_x, train_y, model_type, n_classes,
-               class_weight, verbose, log_file, hidden_size, epochs, batch_size,
+def train_gru2(train_x, train_y, model_type, n_classes,
+               class_weight, verbose, log_file, hidden_size, epochs, batch_size, learning_rate,
                loss='sparse_categorical_crossentropy', metric='categorical_accuracy'):
     model = Sequential()
     model.add(Bidirectional(GRU(hidden_size, return_sequences=False),
@@ -107,10 +115,11 @@ def train_gru(train_x, train_y, model_type, n_classes,
     model.add(Dense(n_classes,
                     # activation='softmax' if n_classes > 2 else 'sigmoid'
                     activation='softmax'))
+    optimizer = Adam(lr=learning_rate, decay=learning_rate / epochs)
     model.compile(loss=loss,
         # loss='categorical_crossentropy' if n_classes > 2
         #                else 'binary_crossentropy',
-                  optimizer='adam',
+                  optimizer=optimizer,
                   metrics=[metric])
     model.summary(line_length=100)
     print(train_x.shape)
@@ -163,50 +172,59 @@ class Attention(tf.keras.layers.Layer):
     #     return attn
 
 
-def train_gru_attn(train_x, train_y, model_type, n_classes,
-                    class_weight, verbose, log_file, hidden_size, epochs, batch_size,
-                    loss='sparse_categorical_crossentropy', 
-                    # loss='binary_crossentropy',
-                    metric='categorical_accuracy'):
+def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
+              log_file, hidden_size, epochs, batch_size, learning_rate,
+              verbose, loss='sparse_categorical_crossentropy',
+              metric='categorical_accuracy'):
     n_timesteps, embed_depth = train_x.shape[-2], train_x.shape[-1]
-    # out_size = n_classes if n_classes > 2 else 1
-    out_size = n_classes
 
-    encoder_inputs = Input(shape=(n_timesteps, embed_depth), name='encoder_inputs')
+    inputs = Input(shape=(n_timesteps, embed_depth), name='inputs')
 
-    # Encoder GRU
-    encoder_gru = Bidirectional(GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru'),
-        name='encoder_bidi_gru')
-    encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
-    encoder_out, encoder_state = encoder_gru(encoder_inputs)
+    gru = Bidirectional(GRU(hidden_size, return_sequences=attention_layer,
+                            return_state=False, name='gru'),
+                        name='bidi_gru')
+    # gru_out, gru_fwd_state, gru_bwd_state = gru(inputs)
+    gru_out = gru(inputs)
 
-    attn_layer = Attention()
-    a, attn_adjusted_op = attn_layer(encoder_out)
-    # attn_adjusted_op = attn_layer(encoder_out)
+    if attention_layer:
+        attention = Attention()
+        attn_scores, attn_out = attention(gru_out)
+        dense_in = attn_out
+    else:
+        dense_in = gru_out
 
-    dense = Dense(out_size, activation='softmax', name='softmax_layer')
-    dense_out = dense(attn_adjusted_op)
+    dense = Dense(n_classes, activation='softmax', name='softmax')
+    dense_out = dense(dense_in)
 
-    # Full model
-    full_model = Model(inputs=encoder_inputs, outputs=dense_out)
-    full_model.compile(optimizer='adam', loss=loss,
-                  metrics=[metric])
-
-    full_model.summary(line_length=100)
-
-    print(train_x.shape)
-    print(train_y.shape, train_y[:10])
-
-    history = full_model.fit(train_x, train_y, epochs=epochs,
-                        batch_size=batch_size,
+    optimizer = Adam(learning_rate=learning_rate)
+    model = Model(inputs=inputs, outputs=dense_out)
+    model.compile(optimizer=optimizer, loss=loss, metrics=[metric])
+    model.summary(line_length=100)
+    history = model.fit(train_x, train_y, epochs=epochs, batch_size=batch_size,
                         class_weight=class_weight, verbose=1)
+
+    if attention_layer:
+        # Is exactly the same as the model used for training, except that it
+        # also outputs the attention scores.
+        # Its weights are the weights learned by fitting the other model!
+        attn_model = Model(inputs=inputs,
+                           outputs=[dense_out, attn_scores])
+
     with open(log_file, 'a', encoding='utf8') as f:
-        full_model.summary(print_fn=lambda x: f.write(x + '\n'), line_length=100)
+        if attention_layer:
+            attn_model.summary(print_fn=lambda x: f.write(x + '\n'),
+                               line_length=100)
+        else:
+            model.summary(print_fn=lambda x: f.write(x + '\n'),
+                          line_length=100)
         f.write('LOSS {}\n'.format(loss))
         f.write(str(history.history['loss']) + '\n')
         f.write('METRIC {}\n'.format(metric))
         f.write(str(history.history[metric]) + '\n')
-    return full_model
+
+    if attn_model:
+        return model, attn_model
+    return model
 
 
 def predict_instance(model, utterance, label_encoder, vectorizer, linear_svc):

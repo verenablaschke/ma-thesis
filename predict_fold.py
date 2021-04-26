@@ -54,7 +54,10 @@ if __name__ == "__main__":
     parser.add_argument('--h', dest='hidden', default=512, type=int)
     parser.add_argument('--ep', dest='epochs', default=10, type=int)
     parser.add_argument('--b', dest='batch_size', default=128, type=int)
+    parser.add_argument('--lr', dest='learning_rate', default=0.001, type=float)
     parser.add_argument('--nolime', dest='fit_model_only', default=False,
+                        action='store_true')
+    parser.add_argument('--log', dest='explicit_log', help='parameters in log file name', default=False,
                         action='store_true')
     args = parser.parse_args()
 
@@ -62,10 +65,15 @@ if __name__ == "__main__":
     MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
     LIME_FOLDER = folder + args.output_subfolder + '/'
     Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
+    LOG_FILE = LIME_FOLDER + 'log.txt'
+    if args.explicit_log:
+        LOG_FILE = '{}log-{}-{}-{}-{}.txt'.format(
+            LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
+            args.epochs)
 
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
-    with open(LIME_FOLDER + 'log.txt', 'w+', encoding='utf8') as f:
+    with open(LOG_FILE, 'w+', encoding='utf8') as f:
         f.write('{}\nArguments:\n'.format(datetime.datetime.now()))
         for arg, val in vars(args).items():
             f.write('{}: {}\n'.format(arg, val))
@@ -111,7 +119,9 @@ if __name__ == "__main__":
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose, 
-                           log_file=LIME_FOLDER + 'log.txt', hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size)
+                           log_file=LOG_FILE, hidden_size=args.hidden, epochs=args.epochs, batch_size=args.batch_size, learning_rate=args.learning_rate)
+        if args.model_type == 'nn-attn':
+            model1, model2 = classifier
         done_time = datetime.datetime.now()
         print("Scoring the model")
         pred = classifier.predict(test_x)
@@ -121,7 +131,7 @@ if __name__ == "__main__":
         print('F1 macro', f1)
         print('Confusion matrix')
         print(conf)
-        with open(folder + 'log.txt', 'a', encoding='utf8') as f:
+        with open(LOG_FILE, 'a', encoding='utf8') as f:
             f.write('Train {} ({}, {}) / test {} ({}, {})\n'.format(
                 train_x.shape, len(raw_train), len(train_y),
                 test_x.shape, len(raw_test), len(test_y)))
