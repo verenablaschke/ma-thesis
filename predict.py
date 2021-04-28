@@ -11,7 +11,7 @@ from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
 from keras.models import Model
-from keras.layers import Bidirectional, Dense, Dropout, Input, GRU
+from keras.layers import Bidirectional, Dense, Dropout, Input, GRU, Activation
 from keras import backend as K
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -100,35 +100,15 @@ class Attention(tf.keras.layers.Layer):
         super(Attention, self).__init__()
 
     def build(self, input_shape):
-        hidden_size = input_shape[-1]
-        n_timesteps = input_shape[-2]
-        num_units = 1
-        self.W = self.add_weight(shape=(hidden_size, num_units),
-                                 initializer='normal')
-        self.b = self.add_weight(shape=(n_timesteps, num_units),
-                                 initializer='zero')
+        self.hidden_size = input_shape[-1]
+        self.Q = Dense(self.hidden_size)
+        self.softmax = Activation('softmax')
 
     def call(self, x):
-        e = K.tanh(K.dot(x,self.W)+self.b)
-        a = K.softmax(e, axis=1)
-        output = x*a
-        return a, K.sum(output, axis=1)
-
-
-# class Attention(tf.keras.layers.Layer):
-    # def __init__(self):    
-    #     super(Attention, self).__init__()
-        
-    # def build(self, input_shape):
-    #     self.hidden_size = input_shape[-1]
-    #     self.attention = Dense(self.hidden_size)
-    #     self.softmax = Activation('softmax')
-
-            
-    # def call(self, x):
-    #     attn1 = self.attention(x) / (self.hidden_size)**0.5
-    #     attn = self.softmax(attn1)
-    #     return attn
+        dot_similarity = self.Q(x) / (self.hidden_size ** 0.5)
+        attn = self.softmax(dot_similarity)
+        out = x * attn
+        return attn, K.sum(out, axis=1)
 
 
 def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
@@ -148,7 +128,6 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
 
     dropout = Dropout(dropout_rate, name='dropout')
     dropout_out = dropout(gru_out)
-    # TODO drop-out
 
     if attention_layer:
         attention = Attention()

@@ -70,10 +70,11 @@ if __name__ == "__main__":
     LIME_FOLDER = folder + args.output_subfolder + '/'
     Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
     LOG_FILE = LIME_FOLDER + 'log.txt'
+    dropout_percentage = int(100 * args.dropout_rate)
     if args.explicit_log:
         LOG_FILE = '{}log-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
             LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
-            args.dropout_rate, args.epochs, args.n_bpe_toks)
+            dropout_percentage, args.epochs, args.n_bpe_toks)
 
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
@@ -163,7 +164,7 @@ if __name__ == "__main__":
         if args.model_type == 'nn-attn':
             with open('{}attention_scores-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
                     LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
-                    args.dropout_rate, args.epochs, args.n_bpe_toks),
+                    dropout_percentage, args.epochs, args.n_bpe_toks),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
                     '\t' * (args.n_bpe_toks - 1),
@@ -175,17 +176,11 @@ if __name__ == "__main__":
                     tokens = '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]]) + filler
                     attention_score = '\t'.join(str(a[0]) for a in attn)
                     if i % 100 == 0:
-                        print(x)
-                        print(y_true, y_pred)
-                        print(attn)
-                        print(attention_score)
-                        print(tokens)
                         print('{}\t{}\t{}\t{}\n'.format(
                             y_true, y_pred, attention_score, tokens))
 
                     f.write('{}\t{}\t{}\t{}\n'.format(
-                        y_true, y_pred, '\t'.join(str(a) for a in attn),
-                        '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]])))
+                        y_true, y_pred, attention_score, tokens))
         else:
             explain_lime(classifier, vectorizer, label_encoder, n_labels,
                          raw_test,
