@@ -65,9 +65,10 @@ def predict_fold(
     Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
     LOG_FILE = LIME_FOLDER + 'log.txt'
     dropout_percentage = int(100 * dropout_rate)
+    lr_int = int(1000 * learning_rate)
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-em{}-lr{}'.format(
         args.model_type, hidden, batch_size,
-        dropout_percentage, epochs, args.n_bpe_toks, learning_rate)
+        dropout_percentage, epochs, args.n_bpe_toks, lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
