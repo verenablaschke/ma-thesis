@@ -58,7 +58,8 @@ def predict_fold(
                  flaubert_tokenizer, train_x, test_x, train_y, test_y,
                  label_encoder, vectorizer,
                  # specific initialization:
-                 hidden, epochs, batch_size, learning_rate, dropout_rate
+                 model_type, hidden, epochs, batch_size,
+                 learning_rate, dropout_rate
                  ):
     MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
     LIME_FOLDER = folder + args.output_subfolder + '/'
@@ -67,12 +68,13 @@ def predict_fold(
     dropout_percentage = int(100 * dropout_rate)
     lr_int = int(1000 * learning_rate)
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-em{}-lr{}'.format(
-        args.model_type, hidden, batch_size,
+        model_type, hidden, batch_size,
         dropout_percentage, epochs, args.n_bpe_toks, lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
     print('Current fold: {}'.format(fold))
+    print('Current model_type: {}'.format(model_type))
     print('Current hidden: {}'.format(hidden))
     print('Current epochs: {}'.format(epochs))
     print('Current batch_size: {}'.format(batch_size))
@@ -83,6 +85,7 @@ def predict_fold(
     with open(LOG_FILE, 'w+', encoding='utf8') as f:
         f.write('{}\nArguments:\n'.format(datetime.datetime.now()))
         f.write('Current fold: {}\n'.format(fold))
+        f.write('Current model_type: {}\n'.format(model_type))
         f.write('Current hidden: {}\n'.format(hidden))
         f.write('Current epochs: {}\n'.format(epochs))
         f.write('Current batch_size: {}\n'.format(batch_size))
@@ -99,7 +102,7 @@ def predict_fold(
     else:
         print("Training the model")
         start_time = datetime.datetime.now()
-        classifier = train(train_x, train_y, model_type=args.model_type,
+        classifier = train(train_x, train_y, model_type=model_type,
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose,
@@ -110,11 +113,11 @@ def predict_fold(
         done_time = datetime.datetime.now()
 
         print("Scoring the model")
-        if args.model_type == 'nn-attn':
+        if model_type == 'nn-attn':
             pred, attn_scores = classifier.predict(test_x)
         else:
             pred = classifier.predict(test_x)
-        if 'nn' in args.model_type:
+        if 'nn' in model_type:
             pred = np.argmax(pred, axis=1)
         (acc, f1, conf) = score(pred, test_y)
         print('Accuracy', acc)
@@ -139,7 +142,7 @@ def predict_fold(
 
     if not args.fit_model_only:
         print('Generating explanations')
-        if args.model_type == 'nn-attn':
+        if model_type == 'nn-attn':
             with open('{}attention_scores{}.txt'.format(LIME_FOLDER, FILE_SFX),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
@@ -163,7 +166,7 @@ def predict_fold(
                          ngrams_test, test_x, test_y, LIME_FOLDER,
                          args.n_lime_features,
                          args.n_lime_samples, args.type == 'dialects',
-                         args.model_type == 'nn',
+                         model_type == 'nn',
                          args.recalculate_ngrams,
                          flaubert, flaubert_tokenizer, args.n_bpe_toks)
 
@@ -176,7 +179,7 @@ if __name__ == "__main__":
     parser.add_argument('--mlm', dest='model_type',
                         help='type of the ML model',
                         choices=['svm', 'nn', 'nn-attn'],
-                        default='svm', type=str)
+                        default=['svm'], type=str, nargs='+')
     parser.add_argument('--embed', dest='use_embeddings', default=False,
                         action='store_true')
     parser.add_argument('--embmod', dest='embedding_model',
@@ -223,23 +226,24 @@ if __name__ == "__main__":
             train_x, test_x,
             train_y, test_y,
             label_encoder, vectorizer) = get_data_for_fold(args, folder)
-        for hidden in args.hidden:
-            for epochs in args.epochs:
-                for batch_size in args.batch_size:
-                    for learning_rate in args.learning_rate:
-                        for dropout_rate in args.dropout_rate:
-                            predict_fold(
-                                 # always the same:
-                                 args,
-                                 # the same for one fold:
-                                 fold, folder,
-                                 raw_train, ngrams_train, labels_train,
-                                 raw_test, ngrams_test, labels_test,
-                                 n_labels, class_weight,
-                                 flaubert, flaubert_tokenizer,
-                                 train_x, test_x,
-                                 train_y, test_y,
-                                 label_encoder, vectorizer,
-                                 # specific initialization:
-                                 hidden, epochs, batch_size, learning_rate,
-                                 dropout_rate)
+        for model_type in args.model_type:
+            for hidden in args.hidden:
+                for epochs in args.epochs:
+                    for batch_size in args.batch_size:
+                        for learning_rate in args.learning_rate:
+                            for dropout_rate in args.dropout_rate:
+                                predict_fold(
+                                     # always the same:
+                                     args,
+                                     # the same for one fold:
+                                     fold, folder,
+                                     raw_train, ngrams_train, labels_train,
+                                     raw_test, ngrams_test, labels_test,
+                                     n_labels, class_weight,
+                                     flaubert, flaubert_tokenizer,
+                                     train_x, test_x,
+                                     train_y, test_y,
+                                     label_encoder, vectorizer,
+                                     # specific initialization:
+                                     model_type, hidden, epochs, batch_size,
+                                     learning_rate, dropout_rate)
