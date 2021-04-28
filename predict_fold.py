@@ -5,84 +5,12 @@ import argparse
 import datetime
 import pickle
 from predict import encode, encode_embeddings, score, train, \
-                    explain_lime
+                    explain_lime, get_features
 from pathlib import Path
 from transformers import FlaubertModel, FlaubertTokenizer
 
 
-def get_features(filename):
-    raw, ngrams, labels = [], [], []
-    with open(filename, 'r', encoding='utf8') as f:
-        next(f)  # Skip header
-        for line in f:
-            cells = line.strip().split('\t')
-            # Utterance, label, various encoding levels
-            raw.append(cells[0])
-            labels.append(cells[1])
-            ngrams.append(' '.join(cells[2:]))
-    return np.array(raw), np.array(ngrams), np.array(labels)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('model', help='path to the model')
-    parser.add_argument('type', choices=['dialects', 'tweets'])
-    parser.add_argument('fold', help='fold number')
-    parser.add_argument('--mlm', dest='model_type',
-                        help='type of the ML model',
-                        choices=['svm', 'nn', 'nn-attn'],
-                        default='svm', type=str)
-    parser.add_argument('--embed', dest='use_embeddings', default=False,
-                        action='store_true')
-    parser.add_argument('--embmod', dest='embedding_model',
-                        default='flaubert/flaubert_base_cased', type=str)
-    parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
-    parser.add_argument('--embbatch', dest='flaubert_batch_size', default=50,
-                        type=int)
-    parser.add_argument('--limefeat', dest='n_lime_features', default=100,
-                        type=int)
-    parser.add_argument('--z', dest='n_lime_samples', default=1000, type=int)
-    parser.add_argument('--save', dest='save_model', default=False,
-                        action='store_true')
-    parser.add_argument('--load', dest='load_model', default=False,
-                        action='store_true')
-    parser.add_argument('--recalc', dest='recalculate_ngrams', default=False,
-                        help='no overlapping LIME features',
-                        action='store_true')
-    parser.add_argument('--v', dest='verbose', default=False,
-                        action='store_true')
-    parser.add_argument('--out', dest='output_subfolder', default='', type=str)
-    parser.add_argument('--h', dest='hidden', default=512, type=int)
-    parser.add_argument('--ep', dest='epochs', default=10, type=int)
-    parser.add_argument('--b', dest='batch_size', default=128, type=int)
-    parser.add_argument('--lr', dest='learning_rate', default=0.001,
-                        type=float)
-    parser.add_argument('--drop', dest='dropout_rate', default=0.2, type=float)
-    parser.add_argument('--nolime', dest='fit_model_only', default=False,
-                        action='store_true')
-    parser.add_argument('--log', dest='explicit_log',
-                        help='add parameters to log file name', default=False,
-                        action='store_true')
-    args = parser.parse_args()
-
-    folder = '{}/fold-{}/'.format(args.model, args.fold)
-    MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
-    LIME_FOLDER = folder + args.output_subfolder + '/'
-    Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
-    LOG_FILE = LIME_FOLDER + 'log.txt'
-    dropout_percentage = int(100 * args.dropout_rate)
-    if args.explicit_log:
-        LOG_FILE = '{}log-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
-            LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
-            dropout_percentage, args.epochs, args.n_bpe_toks)
-
-    for arg, val in vars(args).items():
-        print('{}: {}'.format(arg, val))
-    with open(LOG_FILE, 'w+', encoding='utf8') as f:
-        f.write('{}\nArguments:\n'.format(datetime.datetime.now()))
-        for arg, val in vars(args).items():
-            f.write('{}: {}\n'.format(arg, val))
-
+def get_data_for_fold(args, folder):
     print("Encoding the data.")
     raw_train, ngrams_train, labels_train = get_features(
         '{}/train_data.txt'.format(folder))
@@ -113,6 +41,55 @@ if __name__ == "__main__":
         train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
             ngrams_train, ngrams_test, labels_train, labels_test)
 
+    return raw_train, ngrams_train, labels_train, \
+        raw_test, ngrams_test, labels_test, \
+        n_labels, class_weight, flaubert, flaubert_tokenizer, \
+        train_x, test_x, train_y, test_y, label_encoder, vectorizer
+
+
+def predict_fold(
+                 # always the same:
+                 args,
+                 # the same for one fold:
+                 fold, folder,
+                 raw_train, ngrams_train, labels_train,
+                 raw_test, ngrams_test, labels_test,
+                 n_labels, class_weight, flaubert,
+                 flaubert_tokenizer, train_x, test_x, train_y, test_y,
+                 label_encoder, vectorizer,
+                 # specific initialization:
+                 hidden, epochs, batch_size, learning_rate, dropout_rate
+                 ):
+    MODEL_FILES_FOLDER = '{}/model-files/'.format(folder)
+    LIME_FOLDER = folder + args.output_subfolder + '/'
+    Path(LIME_FOLDER).mkdir(parents=True, exist_ok=True)
+    LOG_FILE = LIME_FOLDER + 'log.txt'
+    dropout_percentage = int(100 * dropout_rate)
+    FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-em{}-lr{}'.format(
+        args.model_type, hidden, batch_size,
+        dropout_percentage, epochs, args.n_bpe_toks, learning_rate)
+    if args.explicit_log:
+        LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
+
+    print('Current fold: {}'.format(fold))
+    print('Current hidden: {}'.format(hidden))
+    print('Current epochs: {}'.format(epochs))
+    print('Current batch_size: {}'.format(batch_size))
+    print('Current learning_rate: {}'.format(learning_rate))
+    print('Current dropout_rate: {}'.format(dropout_rate))
+    for arg, val in vars(args).items():
+        print('{}: {}'.format(arg, val))
+    with open(LOG_FILE, 'w+', encoding='utf8') as f:
+        f.write('{}\nArguments:\n'.format(datetime.datetime.now()))
+        f.write('Current fold: {}\n'.format(fold))
+        f.write('Current hidden: {}\n'.format(hidden))
+        f.write('Current epochs: {}\n'.format(epochs))
+        f.write('Current batch_size: {}\n'.format(batch_size))
+        f.write('Current learning_rate: {}\n'.format(learning_rate))
+        f.write('Current dropout_rate: {}\n'.format(dropout_rate))
+        for arg, val in vars(args).items():
+            f.write('{}: {}\n'.format(arg, val))
+
     print(datetime.datetime.now())
     if args.load_model:
         print("Loading the model")
@@ -125,10 +102,10 @@ if __name__ == "__main__":
                            n_classes=4 if args.type == 'dialects' else 2,
                            linear_svc=args.type == 'dialects',
                            class_weight=class_weight, verbose=args.verbose,
-                           log_file=LOG_FILE, hidden_size=args.hidden,
-                           epochs=args.epochs, batch_size=args.batch_size,
-                           learning_rate=args.learning_rate,
-                           dropout_rate=args.dropout_rate)
+                           log_file=LOG_FILE, hidden_size=hidden,
+                           epochs=epochs, batch_size=batch_size,
+                           learning_rate=learning_rate,
+                           dropout_rate=dropout_rate)
         done_time = datetime.datetime.now()
 
         print("Scoring the model")
@@ -162,9 +139,7 @@ if __name__ == "__main__":
     if not args.fit_model_only:
         print('Generating explanations')
         if args.model_type == 'nn-attn':
-            with open('{}attention_scores-{}-h{}-b{}-d{}-ep{}-em{}.txt'.format(
-                    LIME_FOLDER, args.model_type, args.hidden, args.batch_size,
-                    dropout_percentage, args.epochs, args.n_bpe_toks),
+            with open('{}attention_scores{}.txt'.format(LIME_FOLDER, FILE_SFX),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
                     '\t' * (args.n_bpe_toks - 1),
@@ -175,9 +150,9 @@ if __name__ == "__main__":
                     filler = (args.n_bpe_toks - len(x)) * '\t<FILLER>'
                     tokens = '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]]) + filler
                     attention_score = '\t'.join(str(a[0]) for a in attn)
-                    if i % 100 == 0:
-                        print('{}\t{}\t{}\t{}\n'.format(
-                            y_true, y_pred, attention_score, tokens))
+                    # if i % 100 == 0:
+                    #     print('{}\t{}\t{}\t{}\n'.format(
+                    #         y_true, y_pred, attention_score, tokens))
 
                     f.write('{}\t{}\t{}\t{}\n'.format(
                         y_true, y_pred, attention_score, tokens))
@@ -190,3 +165,80 @@ if __name__ == "__main__":
                          args.model_type == 'nn',
                          args.recalculate_ngrams,
                          flaubert, flaubert_tokenizer, args.n_bpe_toks)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('model', help='path to the model')
+    parser.add_argument('type', choices=['dialects', 'tweets'])
+    parser.add_argument('folds', help='fold numbers', nargs='+')
+    parser.add_argument('--mlm', dest='model_type',
+                        help='type of the ML model',
+                        choices=['svm', 'nn', 'nn-attn'],
+                        default='svm', type=str)
+    parser.add_argument('--embed', dest='use_embeddings', default=False,
+                        action='store_true')
+    parser.add_argument('--embmod', dest='embedding_model',
+                        default='flaubert/flaubert_base_cased', type=str)
+    parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
+    parser.add_argument('--embbatch', dest='flaubert_batch_size', default=50,
+                        type=int)
+    parser.add_argument('--limefeat', dest='n_lime_features', default=100,
+                        type=int)
+    parser.add_argument('--z', dest='n_lime_samples', default=1000, type=int)
+    parser.add_argument('--save', dest='save_model', default=False,
+                        action='store_true')
+    parser.add_argument('--load', dest='load_model', default=False,
+                        action='store_true')
+    parser.add_argument('--recalc', dest='recalculate_ngrams', default=False,
+                        help='no overlapping LIME features',
+                        action='store_true')
+    parser.add_argument('--v', dest='verbose', default=False,
+                        action='store_true')
+    parser.add_argument('--out', dest='output_subfolder', default='', type=str)
+    parser.add_argument('--h', dest='hidden', default=[512], type=int,
+                        nargs='+')
+    parser.add_argument('--ep', dest='epochs', default=[10], type=int,
+                        nargs='+')
+    parser.add_argument('--b', dest='batch_size', default=[128], type=int,
+                        nargs='+')
+    parser.add_argument('--lr', dest='learning_rate', default=[0.001],
+                        type=float, nargs='+')
+    parser.add_argument('--drop', dest='dropout_rate', default=[0.2], type=float,
+                        nargs='+')
+    parser.add_argument('--nolime', dest='fit_model_only', default=False,
+                        action='store_true')
+    parser.add_argument('--log', dest='explicit_log',
+                        help='add parameters to log file name', default=False,
+                        action='store_true')
+    args = parser.parse_args()
+
+    for fold in args.folds:
+        folder = '{}/fold-{}/'.format(args.model, fold)
+        (raw_train, ngrams_train, labels_train,
+            raw_test, ngrams_test, labels_test,
+            n_labels, class_weight,
+            flaubert, flaubert_tokenizer,
+            train_x, test_x,
+            train_y, test_y,
+            label_encoder, vectorizer) = get_data_for_fold(args, folder)
+        for hidden in args.hidden:
+            for epochs in args.epochs:
+                for batch_size in args.batch_size:
+                    for learning_rate in args.learning_rate:
+                        for dropout_rate in args.dropout_rate:
+                            predict_fold(
+                                 # always the same:
+                                 args,
+                                 # the same for one fold:
+                                 fold, folder,
+                                 raw_train, ngrams_train, labels_train,
+                                 raw_test, ngrams_test, labels_test,
+                                 n_labels, class_weight,
+                                 flaubert, flaubert_tokenizer,
+                                 train_x, test_x,
+                                 train_y, test_y,
+                                 label_encoder, vectorizer,
+                                 # specific initialization:
+                                 hidden, epochs, batch_size, learning_rate,
+                                 dropout_rate)

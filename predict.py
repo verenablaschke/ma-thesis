@@ -17,6 +17,19 @@ import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
 
+def get_features(filename):
+    raw, ngrams, labels = [], [], []
+    with open(filename, 'r', encoding='utf8') as f:
+        next(f)  # Skip header
+        for line in f:
+            cells = line.strip().split('\t')
+            # Utterance, label, various encoding levels
+            raw.append(cells[0])
+            labels.append(cells[1])
+            ngrams.append(' '.join(cells[2:]))
+    return np.array(raw), np.array(ngrams), np.array(labels)
+
+
 def split_ngrams(joined_ngrams):
     # Used by the TfidfVectorizer, important for the modified LIME
     return joined_ngrams.split(' ')
