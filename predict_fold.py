@@ -26,9 +26,9 @@ def get_data_for_fold(args, folder):
             args.embedding_model,
             do_lowercase='uncased' in args.embedding_model)
         embedding_size = 768
-        if '-small-' in args.embedding_model:
+        if '_small_' in args.embedding_model:
             embedding_size = 512
-        elif '-large-' in args.embedding_model:
+        elif '_large_' in args.embedding_model:
             embedding_size = 1024
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
@@ -67,9 +67,9 @@ def predict_fold(
     LOG_FILE = LIME_FOLDER + 'log.txt'
     dropout_percentage = int(100 * dropout_rate)
     lr_int = int(1000 * learning_rate)
-    FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-em{}-lr{}'.format(
-        model_type, hidden, batch_size,
-        dropout_percentage, epochs, args.n_bpe_toks, lr_int)
+    FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-T{}-em{}-lr{}'.format(
+        model_type, hidden, batch_size, dropout_percentage, epochs,
+        args.n_bpe_toks, raw_test.shape[-1], lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
@@ -80,6 +80,7 @@ def predict_fold(
     print('Current batch_size: {}'.format(batch_size))
     print('Current learning_rate: {}'.format(learning_rate))
     print('Current dropout_rate: {}'.format(dropout_rate))
+    print('Current input dimension: {}'.format(raw_test.shape))
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
     with open(LOG_FILE, 'w+', encoding='utf8') as f:
