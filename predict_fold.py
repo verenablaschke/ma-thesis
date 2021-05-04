@@ -18,13 +18,15 @@ def get_data_for_fold(args, folder):
         '{}/test_data.txt'.format(folder))
     n_labels = len(set(labels_train))
     class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
+    flaubert, flaubert_tokenizer = None, None
 
     if args.use_embeddings:
-        flaubert, _ = FlaubertModel.from_pretrained(args.embedding_model,
-                                                    output_loading_info=True)
-        flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
-            args.embedding_model,
-            do_lowercase='uncased' in args.embedding_model)
+        if not args.load_embeddings:
+            flaubert, _ = FlaubertModel.from_pretrained(
+                args.embedding_model, output_loading_info=True)
+            flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
+                args.embedding_model,
+                do_lowercase='uncased' in args.embedding_model)
         embedding_size = 768
         if '_small_' in args.embedding_model:
             embedding_size = 512
@@ -33,12 +35,12 @@ def get_data_for_fold(args, folder):
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
             flaubert_tokenizer, flaubert, args.n_bpe_toks,
+            args.n_samples_train, args.n_samples_test, args.load_embeddings,
             args.flaubert_micro_batch_size, args.flaubert_macro_batch_size,
             args.flaubert_macro_batch_start,
             folder, embedding_size, flatten=args.model_type == 'svm')
         vectorizer = None
     else:
-        flaubert, flaubert_tokenizer = None, None
         train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
             ngrams_train, ngrams_test, labels_train, labels_test)
 
@@ -202,6 +204,12 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--load', dest='load_model', default=False,
                         action='store_true')
+    parser.add_argument('--load_emb', dest='load_embeddings',
+                        default=False, action='store_true')
+    parser.add_argument('--n_tr', dest='n_samples_train', default=8698,
+                        type=int)
+    parser.add_argument('--n_te', dest='n_samples_test', default=966,
+                        type=int)
     parser.add_argument('--recalc', dest='recalculate_ngrams', default=False,
                         help='no overlapping LIME features',
                         action='store_true')
