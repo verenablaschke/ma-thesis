@@ -50,34 +50,47 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 
-def get_embeddings(utterances, max_len, embedding_size, batch_size,
+def get_embeddings(utterances, max_len, embedding_size, micro_batch_size,
+                   macro_batch_size, macro_batch_start, folder, test_or_train,
                    flaubert_tokenizer, flaubert, flatten):
     token_ids = [flaubert_tokenizer.encode(utterance, max_length=max_len,
                                            truncation=True,
                                            padding='max_length')
                  for utterance in utterances]
     n = len(token_ids)
-    x = torch.empty((n, max_len, embedding_size))
-    print(n, batch_size)
-    for i in range(0, n, batch_size):
-        print("- Batch {}--{}".format(i, i + batch_size))
-        batch = flaubert(torch.tensor(token_ids[i:i + batch_size]))[0]
-        x[i:i + batch_size] = batch
-    if flatten:
-        x = torch.flatten(x, start_dim=1)
-    x = x.detach().numpy()
-    if flatten:
-        assert x.shape == (n, max_len * embedding_size)
+    print(n, micro_batch_size, macro_batch_size)
+    for j in range(macro_batch_start, n, macro_batch_size):
+        tensor_len = macro_batch_size
+        if j + macro_batch_size > n:
+            tensor_len = n % macro_batch_size
+        x = torch.empty((tensor_len, max_len, embedding_size))
+        for i in range(0, tensor_len, micro_batch_size):
+            print("- {}--{} - Batch {}--{}".format(
+                j, j + macro_batch_size,
+                j + i, j + i + micro_batch_size))
+            batch = flaubert(torch.tensor(
+                token_ids[j + i:j + i + micro_batch_size]))[0]
+            x[i:i + micro_batch_size] = batch
+        if flatten:
+            x = torch.flatten(x, start_dim=1)
+        x = x.detach().numpy()
+        x.tofile('{}/embeddings_{}_{}--{}.npy'.format(
+            folder, test_or_train, j, j + tensor_len))
     return x
 
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       flaubert_tokenizer, flaubert, max_len,
-                      batch_size, embedding_size, flatten):
-    train_x = get_embeddings(toks_train, max_len, embedding_size, batch_size,
-                             flaubert_tokenizer, flaubert, flatten)
-    test_x = get_embeddings(toks_test, max_len, embedding_size, batch_size,
-                            flaubert_tokenizer, flaubert, flatten)
+                      micro_batch_size,  macro_batch_size, macro_batch_start,
+                      folder, embedding_size, flatten):
+    train_x = get_embeddings(toks_train, max_len, embedding_size,
+                             micro_batch_size,  macro_batch_size,
+                             macro_batch_start, folder,
+                             'train', flaubert_tokenizer, flaubert, flatten)
+    test_x = get_embeddings(toks_test, max_len, embedding_size,
+                            micro_batch_size,  macro_batch_size, 
+                            macro_batch_start, folder,
+                            'test', flaubert_tokenizer, flaubert, flatten)
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)

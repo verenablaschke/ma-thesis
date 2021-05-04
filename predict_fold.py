@@ -33,8 +33,9 @@ def get_data_for_fold(args, folder):
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
             flaubert_tokenizer, flaubert, args.n_bpe_toks,
-            args.flaubert_batch_size,
-            embedding_size, flatten=args.model_type == 'svm')
+            args.flaubert_micro_batch_size, args.flaubert_macro_batch_size,
+            args.flaubert_macro_batch_start,
+            folder, embedding_size, flatten=args.model_type == 'svm')
         vectorizer = None
     else:
         flaubert, flaubert_tokenizer = None, None
@@ -69,7 +70,7 @@ def predict_fold(
     lr_int = int(1000 * learning_rate)
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-T{}-em{}-lr{}'.format(
         model_type, hidden, batch_size, dropout_percentage, epochs,
-        args.n_bpe_toks, raw_test.shape[-1], lr_int)
+        args.n_bpe_toks, train_x.shape[-1], lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
@@ -80,7 +81,7 @@ def predict_fold(
     print('Current batch_size: {}'.format(batch_size))
     print('Current learning_rate: {}'.format(learning_rate))
     print('Current dropout_rate: {}'.format(dropout_rate))
-    print('Current input dimension: {}'.format(raw_test.shape))
+    print('Current input dimension: {}'.format(train_x.shape))
     for arg, val in vars(args).items():
         print('{}: {}'.format(arg, val))
     with open(LOG_FILE, 'w+', encoding='utf8') as f:
@@ -92,6 +93,7 @@ def predict_fold(
         f.write('Current batch_size: {}\n'.format(batch_size))
         f.write('Current learning_rate: {}\n'.format(learning_rate))
         f.write('Current dropout_rate: {}\n'.format(dropout_rate))
+        f.write('Current input dimension: {}\n'.format(train_x.shape))
         for arg, val in vars(args).items():
             f.write('{}: {}\n'.format(arg, val))
 
@@ -170,6 +172,7 @@ def predict_fold(
                          model_type == 'nn',
                          args.recalculate_ngrams,
                          flaubert, flaubert_tokenizer, args.n_bpe_toks)
+    return acc, f1, FILE_SFX
 
 
 if __name__ == "__main__":
@@ -186,8 +189,12 @@ if __name__ == "__main__":
     parser.add_argument('--embmod', dest='embedding_model',
                         default='flaubert/flaubert_base_cased', type=str)
     parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
-    parser.add_argument('--embbatch', dest='flaubert_batch_size', default=50,
-                        type=int)
+    parser.add_argument('--embbatch', dest='flaubert_micro_batch_size',
+                        default=50, type=int)
+    parser.add_argument('--embbmacro', dest='flaubert_macro_batch_size',
+                        default=2000, type=int)
+    parser.add_argument('--embbmacrostart', dest='flaubert_macro_batch_start',
+                        default=0, type=int)
     parser.add_argument('--limefeat', dest='n_lime_features', default=100,
                         type=int)
     parser.add_argument('--z', dest='n_lime_samples', default=1000, type=int)
@@ -227,13 +234,15 @@ if __name__ == "__main__":
             train_x, test_x,
             train_y, test_y,
             label_encoder, vectorizer) = get_data_for_fold(args, folder)
+        accuracies = []
+        f1_scores = []
         for model_type in args.model_type:
             for hidden in args.hidden:
                 for epochs in args.epochs:
                     for batch_size in args.batch_size:
                         for learning_rate in args.learning_rate:
                             for dropout_rate in args.dropout_rate:
-                                predict_fold(
+                                acc, f1, filename = predict_fold(
                                      # always the same:
                                      args,
                                      # the same for one fold:
@@ -248,3 +257,17 @@ if __name__ == "__main__":
                                      # specific initialization:
                                      model_type, hidden, epochs, batch_size,
                                      learning_rate, dropout_rate)
+                                accuracies.append((acc, filename))
+                                f1_scores.append((f1, filename))
+
+        with open(folder + 'log_acc.tsv', 'w+', encoding='utf8') as f:
+            for i, (acc, run) in enumerate(sorted(accuracies, reverse=True)):
+                if i < 5:
+                    print(acc, run)
+            f.write('{}\t{}\n'.format(acc, run))
+        with open(folder + 'log_f1.tsv', 'w+', encoding='utf8') as f:
+            for i, (f1, run) in enumerate(sorted(f1_scores, reverse=True)):
+                if i < 5:
+                    print(f1, run)
+            f.write('{}\t{}\n'.format(f1, run))
+

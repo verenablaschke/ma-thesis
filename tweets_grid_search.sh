@@ -32,15 +32,15 @@ done
 
 for i in $(seq 0 1); do
     echo "Setting up fold $i"
-    screen -dmS tweets-large$i
-    screen -S tweets-large$i -X stuff "python3 predict_fold.py models/tweets-embed tweets 0 1 2 3 4 5 6 7 8 9 --embed --log --nolime --mlm nn nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased\n"
+    screen -dmS tweets-large-40-$i
+    screen -S tweets-large-40-$i -X stuff "python3 predict_fold.py models/tweets-embed tweets $i --embed --log --nolime --mlm nn nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40\n"
     for h in 128 256 512; do
         for ep in 5 15 25 35; do
             for b in 128; do
                 for lr in 1 10; do
                     for d in 0 20 40; do
-                        screen -S tweets-large$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-attn-h${h}-b${b}-d${d}-ep${ep}-em20-lr${lr}.txt\n"
-                        screen -S tweets-large$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-h${h}-b${b}-d${d}-ep${ep}-em20-lr${lr}.txt\n"
+                        screen -S tweets-large-40-$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-attn-h${h}-b${b}-d${d}-ep${ep}-T-20em768-lr${lr}.txt\n"
+                        screen -S tweets-large-40-$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-h${h}-b${b}-d${d}-ep${ep}-em768-lr${lr}.txt\n"
                     done
                 done
             done
@@ -48,17 +48,17 @@ for i in $(seq 0 1); do
     done
 done
 
-for i in $(seq 0 1); do
+for i in $(seq 1 1); do
     echo "Setting up fold $i"
-    screen -dmS tweets$i
-    screen -S tweets$i -X stuff "python3 predict_fold.py models/tweets-embed tweets 0 1 2 3 4 5 6 7 8 9 --embed --log --nolime --mlm nn nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4\n"
+    screen -dmS tweets-large-40-$i
+    screen -S tweets-large-40-$i -X stuff "python3 predict_fold.py models/tweets-embed tweets $i --embed --log --nolime --mlm nn nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40\n"
     for h in 128 256 512; do
         for ep in 5 15 25 35; do
             for b in 128; do
                 for lr in 1 10; do
                     for d in 0 20 40; do
-                        screen -S tweets$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-attn-h${h}-b${b}-d${d}-ep${ep}-em20-lr${lr}.txt\n"
-                        screen -S tweets$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-h${h}-b${b}-d${d}-ep${ep}-em20-lr${lr}.txt\n"
+                        screen -S tweets-large-40-$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-attn-h${h}-b${b}-d${d}-ep${ep}-T-20em768-lr${lr}.txt\n"
+                        screen -S tweets-large-40-$i -X stuff "python3 average_model_performance.py models/tweets-embed log-nn-h${h}-b${b}-d${d}-ep${ep}-em768-lr${lr}.txt\n"
                     done
                 done
             done
@@ -67,5 +67,10 @@ for i in $(seq 0 1); do
 done
 
 
+taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 4 --embed --log --nolime --mlm nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40
 
-python3 predict_fold.py models/tweets-embed tweets 0 --embed --log --nolime --mlm nn-attn --h 512 --ep 35 --b 128 --lr 0.001 --drop 0.2 --embmod flaubert/flaubert_large_cased
+
+taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 5 --embed --log --nolime --mlm nn-attn --h 128 256 512 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40
+
+
+renice -n 15 -p 87193
