@@ -10,7 +10,7 @@ from pathlib import Path
 from transformers import FlaubertModel, FlaubertTokenizer
 
 
-def get_data_for_fold(args, folder):
+def get_data_for_fold(args, folder, n_bpe_toks):
     print("Encoding the data.")
     raw_train, ngrams_train, labels_train = get_features(
         '{}/train_data.txt'.format(folder))
@@ -34,8 +34,8 @@ def get_data_for_fold(args, folder):
             embedding_size = 1024
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
-            flaubert_tokenizer, flaubert, args.n_bpe_toks,
-            args.n_samples_train, args.n_samples_test, args.load_embeddings,
+            flaubert_tokenizer, flaubert, n_bpe_toks,
+            args.load_embeddings,
             args.flaubert_micro_batch_size, args.flaubert_macro_batch_size,
             args.flaubert_macro_batch_start,
             folder, embedding_size, flatten=args.model_type == 'svm')
@@ -190,7 +190,8 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--embmod', dest='embedding_model',
                         default='flaubert/flaubert_base_cased', type=str)
-    parser.add_argument('--emblen', dest='n_bpe_toks', default=20, type=int)
+    parser.add_argument('--emblen', dest='n_bpe_toks', default=[20], type=int,
+                        nargs='+')
     parser.add_argument('--embbatch', dest='flaubert_micro_batch_size',
                         default=50, type=int)
     parser.add_argument('--embbmacro', dest='flaubert_macro_batch_size',
@@ -206,10 +207,6 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--load_emb', dest='load_embeddings',
                         default=False, action='store_true')
-    parser.add_argument('--n_tr', dest='n_samples_train', default=8698,
-                        type=int)
-    parser.add_argument('--n_te', dest='n_samples_test', default=966,
-                        type=int)
     parser.add_argument('--recalc', dest='recalculate_ngrams', default=False,
                         help='no overlapping LIME features',
                         action='store_true')
@@ -234,39 +231,42 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for fold in args.folds:
-        folder = '{}/fold-{}/'.format(args.model, fold)
-        (raw_train, ngrams_train, labels_train,
-            raw_test, ngrams_test, labels_test,
-            n_labels, class_weight,
-            flaubert, flaubert_tokenizer,
-            train_x, test_x,
-            train_y, test_y,
-            label_encoder, vectorizer) = get_data_for_fold(args, folder)
-        accuracies = []
-        f1_scores = []
-        for model_type in args.model_type:
-            for hidden in args.hidden:
-                for epochs in args.epochs:
-                    for batch_size in args.batch_size:
-                        for learning_rate in args.learning_rate:
-                            for dropout_rate in args.dropout_rate:
-                                acc, f1, filename = predict_fold(
-                                     # always the same:
-                                     args,
-                                     # the same for one fold:
-                                     fold, folder,
-                                     raw_train, ngrams_train, labels_train,
-                                     raw_test, ngrams_test, labels_test,
-                                     n_labels, class_weight,
-                                     flaubert, flaubert_tokenizer,
-                                     train_x, test_x,
-                                     train_y, test_y,
-                                     label_encoder, vectorizer,
-                                     # specific initialization:
-                                     model_type, hidden, epochs, batch_size,
-                                     learning_rate, dropout_rate)
-                                accuracies.append((acc, filename))
-                                f1_scores.append((f1, filename))
+        for emblen in args.n_bpe_toks:
+            folder = '{}/fold-{}/'.format(args.model, fold)
+            (raw_train, ngrams_train, labels_train,
+                raw_test, ngrams_test, labels_test,
+                n_labels, class_weight,
+                flaubert, flaubert_tokenizer,
+                train_x, test_x,
+                train_y, test_y,
+                label_encoder, vectorizer) = get_data_for_fold(args, folder,
+                                                               emblen)
+            accuracies = []
+            f1_scores = []
+            for model_type in args.model_type:
+                for hidden in args.hidden:
+                    for epochs in args.epochs:
+                        for batch_size in args.batch_size:
+                            for learning_rate in args.learning_rate:
+                                for dropout_rate in args.dropout_rate:
+                                    acc, f1, filename = predict_fold(
+                                         # always the same:
+                                         args,
+                                         # the same for one fold:
+                                         fold, folder,
+                                         raw_train, ngrams_train, labels_train,
+                                         raw_test, ngrams_test, labels_test,
+                                         n_labels, class_weight,
+                                         flaubert, flaubert_tokenizer,
+                                         train_x, test_x,
+                                         train_y, test_y,
+                                         label_encoder, vectorizer,
+                                         # specific initialization:
+                                         model_type, hidden, epochs,
+                                         batch_size, learning_rate,
+                                         dropout_rate)
+                                    accuracies.append((acc, filename))
+                                    f1_scores.append((f1, filename))
 
         with open(folder + 'log_acc.tsv', 'w+', encoding='utf8') as f:
             for i, (acc, run) in enumerate(sorted(accuracies, reverse=True)):
@@ -278,4 +278,3 @@ if __name__ == "__main__":
                 if i < 5:
                     print(f1, run)
             f.write('{}\t{}\n'.format(f1, run))
-

@@ -51,10 +51,18 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 
-def load_embeddings(folder, n_samples_train, n_samples_test, seq_len,
-                    embedding_size):
-    train_x = np.empty([n_samples_train, seq_len, embedding_size])
-    test_x = np.empty([n_samples_test, seq_len, embedding_size])
+def load_embeddings(folder, seq_len, embedding_size):
+    train_size, test_size = -1, -1
+    for _, _, files in os.walk(folder):
+        for file in files:
+            if 'embedding' in file:
+                end_idx = int(file.split('--')[-1][:-4])
+                if 'train' in file and end_idx > train_size:
+                    train_size = end_idx
+                elif 'test' in file and end_idx > test_size:
+                    test_size = end_idx
+    train_x = np.empty([train_size, seq_len, embedding_size])
+    test_x = np.empty([test_size, seq_len, embedding_size])
     for _, _, files in os.walk(folder):
         for file in files:
             if 'embedding' in file:
@@ -100,14 +108,11 @@ def get_embeddings(utterances, seq_len, embedding_size, micro_batch_size,
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       flaubert_tokenizer, flaubert, seq_len,
-                      n_samples_train, n_samples_test,
                       load_embeddings_from_file,
                       micro_batch_size,  macro_batch_size, macro_batch_start,
                       folder, embedding_size, flatten):
     if load_embeddings_from_file:
-        train_x, test_x = load_embeddings(folder, n_samples_train,
-                                          n_samples_test, seq_len,
-                                          embedding_size)
+        train_x, test_x = load_embeddings(folder, seq_len, embedding_size)
     else:
         train_x = get_embeddings(toks_train, seq_len, embedding_size,
                                  micro_batch_size,  macro_batch_size,
@@ -121,9 +126,7 @@ def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                                 flatten)
         if macro_batch_size < len(toks_train) or \
                 macro_batch_size < len(toks_test):
-            train_x, test_x = load_embeddings(folder, n_samples_train,
-                                              n_samples_test, seq_len,
-                                              embedding_size)
+            train_x, test_x = load_embeddings(folder, seq_len, embedding_size)
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)
