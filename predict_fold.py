@@ -119,7 +119,7 @@ def predict_fold(
         done_time = datetime.datetime.now()
 
         print("Scoring the model")
-        if model_type == 'nn-attn':
+        if 'attn' in model_type:
             pred, attn_scores = classifier.predict(test_x)
         else:
             pred = classifier.predict(test_x)
@@ -148,7 +148,7 @@ def predict_fold(
 
     if not args.fit_model_only:
         print('Generating explanations')
-        if model_type == 'nn-attn':
+        if 'attn' in model_type:
             with open('{}attention_scores{}.txt'.format(LIME_FOLDER, FILE_SFX),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     parser.add_argument('folds', help='fold numbers', nargs='+')
     parser.add_argument('--mlm', dest='model_type',
                         help='type of the ML model',
-                        choices=['svm', 'nn', 'nn-attn'],
+                        choices=['svm', 'nn', 'nn-attn', 'ffnn', 'ffnn-attn'],
                         default=['svm'], type=str, nargs='+')
     parser.add_argument('--embed', dest='use_embeddings', default=False,
                         action='store_true')

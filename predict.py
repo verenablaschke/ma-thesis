@@ -69,10 +69,11 @@ def load_embeddings(folder, seq_len, embedding_size):
                 array_slice = np.load(folder + '/' + file)
                 start_idx = int(file.split('_')[-1].split('--')[0])
                 end_idx = int(file.split('--')[-1][:-4])
-                print(file, start_idx, end_idx)
                 if 'train_' + str(seq_len) in file:
+                    print(file, start_idx, end_idx)
                     train_x[start_idx:end_idx] = array_slice
                 elif 'test_' + str(seq_len) in file:
+                    print(file, start_idx, end_idx)
                     test_x[start_idx:end_idx] = array_slice
     return train_x, test_x
 
@@ -186,7 +187,7 @@ def train_gru(train_x, train_y, attention_layer, feedforward,
     inputs = Input(shape=(n_timesteps, embed_depth), name='inputs')
 
     if feedforward:
-        ff = Dense(hidden_size, activation='relu', name='feedforward')
+        ff = Dense(hidden_size, name='feedforward')
         encoder_out = ff(inputs)
     else:
         gru = Bidirectional(GRU(hidden_size, return_sequences=attention_layer,
