@@ -16,7 +16,7 @@ with open(args.file, encoding='utf8') as f:
     next(f)
     for line in f:
         scores = line.split('\t')[2:2 + n_toks]
-        entropy_scores.append(entropy([float(x) for x in scores], base=2))
+        entropy_scores.append(entropy([float(x) for x in scores]))
 
 print('mean', np.mean(entropy_scores))
 print('min', min(entropy_scores))

@@ -142,7 +142,8 @@ def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
           learning_rate, dropout_rate, class_weight, verbose, hidden_size,
           epochs, batch_size):
     if 'nn' in model_type:
-        return train_gru(train_x, train_y, 'attn' in model_type, n_classes,
+        return train_gru(train_x, train_y, 'attn' in model_type,
+                         'ffnn' in model_type, n_classes,
                          class_weight, log_file, hidden_size, epochs,
                          batch_size, learning_rate, dropout_rate, verbose)
 
@@ -164,16 +165,18 @@ class Attention(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.hidden_size = input_shape[-1]
         self.Q = Dense(self.hidden_size)
-        self.softmax = Activation('softmax')
+        # self.softmax = Activation('softmax')
 
     def call(self, x):
         dot_similarity = self.Q(x) / (self.hidden_size ** 0.5)
-        attn = self.softmax(dot_similarity)
+        # attn = self.softmax(dot_similarity)
+        attn = tf.keras.activations.softmax(dot_similarity, axis=1)
         out = x * attn
         return attn, K.sum(out, axis=1)
 
 
-def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
+def train_gru(train_x, train_y, attention_layer, feedforward,
+              n_classes, class_weight,
               log_file, hidden_size, epochs, batch_size, learning_rate,
               dropout_rate, verbose,
               loss='sparse_categorical_crossentropy',
@@ -182,14 +185,18 @@ def train_gru(train_x, train_y, attention_layer, n_classes, class_weight,
 
     inputs = Input(shape=(n_timesteps, embed_depth), name='inputs')
 
-    gru = Bidirectional(GRU(hidden_size, return_sequences=attention_layer,
-                            return_state=False, name='gru'),
-                        name='bidi_gru')
-    # gru_out, gru_fwd_state, gru_bwd_state = gru(inputs)
-    gru_out = gru(inputs)
+    if feedforward:
+        ff = Dense(hidden_size, activation='relu', name='feedforward')
+        encoder_out = ff(inputs)
+    else:
+        gru = Bidirectional(GRU(hidden_size, return_sequences=attention_layer,
+                                return_state=False, name='gru'),
+                            name='bidi_gru')
+        # gru_out, gru_fwd_state, gru_bwd_state = gru(inputs)
+        encoder_out = gru(inputs)
 
     dropout = Dropout(dropout_rate, name='dropout')
-    dropout_out = dropout(gru_out)
+    dropout_out = dropout(encoder_out)
 
     if attention_layer:
         attention = Attention()

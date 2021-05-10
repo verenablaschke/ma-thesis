@@ -70,9 +70,10 @@ def predict_fold(
     LOG_FILE = LIME_FOLDER + 'log.txt'
     dropout_percentage = int(100 * dropout_rate)
     lr_int = int(1000 * learning_rate)
+    n_bpe_toks = train_x.shape[-2]
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-T{}-em{}-lr{}'.format(
         model_type, hidden, batch_size, dropout_percentage, epochs,
-        train_x.shape[-2], train_x.shape[-1], lr_int)
+        n_bpe_toks, train_x.shape[-1], lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
@@ -151,13 +152,13 @@ def predict_fold(
             with open('{}attention_scores{}.txt'.format(LIME_FOLDER, FILE_SFX),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
-                    '\t' * (args.n_bpe_toks - 1),
-                    '\t' * (args.n_bpe_toks - 1)))
+                    '\t' * (n_bpe_toks - 1),
+                    '\t' * (n_bpe_toks - 1)))
                 for i, (x, y_true, y_pred, attn) in enumerate(
                         zip(ngrams_test, test_y, pred, attn_scores)):
                     x = x.split(' ')
-                    filler = (args.n_bpe_toks - len(x)) * '\t<FILLER>'
-                    tokens = '\t'.join(x[:args.n_bpe_toks - 1] + [x[-1]]) + filler
+                    filler = (n_bpe_toks - len(x)) * '\t<FILLER>'
+                    tokens = '\t'.join(x[:n_bpe_toks - 1] + [x[-1]]) + filler
                     attention_score = '\t'.join(str(a[0]) for a in attn)
                     # if i % 100 == 0:
                     #     print('{}\t{}\t{}\t{}\n'.format(
@@ -173,7 +174,7 @@ def predict_fold(
                          args.n_lime_samples, args.type == 'dialects',
                          model_type == 'nn',
                          args.recalculate_ngrams,
-                         flaubert, flaubert_tokenizer, args.n_bpe_toks)
+                         flaubert, flaubert_tokenizer, n_bpe_toks)
     return acc, f1, FILE_SFX
 
 
@@ -268,11 +269,14 @@ if __name__ == "__main__":
                                     accuracies.append((acc, filename))
                                     f1_scores.append((f1, filename))
 
+        print('Accuracy')
         with open(folder + 'log_acc.tsv', 'w+', encoding='utf8') as f:
             for i, (acc, run) in enumerate(sorted(accuracies, reverse=True)):
                 if i < 5:
                     print(acc, run)
             f.write('{}\t{}\n'.format(acc, run))
+
+        print('\nF1')
         with open(folder + 'log_f1.tsv', 'w+', encoding='utf8') as f:
             for i, (f1, run) in enumerate(sorted(f1_scores, reverse=True)):
                 if i < 5:
