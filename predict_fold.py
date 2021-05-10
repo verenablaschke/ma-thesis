@@ -53,7 +53,7 @@ def get_data_for_fold(args, folder, n_bpe_toks):
 def predict_fold(
                  # always the same:
                  args,
-                 # the same for one fold:
+                 # the same for one fold and data encoding setup:
                  fold, folder,
                  raw_train, ngrams_train, labels_train,
                  raw_test, ngrams_test, labels_test,
@@ -72,7 +72,7 @@ def predict_fold(
     lr_int = int(1000 * learning_rate)
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-T{}-em{}-lr{}'.format(
         model_type, hidden, batch_size, dropout_percentage, epochs,
-        args.n_bpe_toks, train_x.shape[-1], lr_int)
+        train_x.shape[-2], train_x.shape[-1], lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 

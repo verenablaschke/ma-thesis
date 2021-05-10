@@ -70,9 +70,9 @@ def load_embeddings(folder, seq_len, embedding_size):
                 start_idx = int(file.split('_')[-1].split('--')[0])
                 end_idx = int(file.split('--')[-1][:-4])
                 print(file, start_idx, end_idx)
-                if 'train' in file:
+                if 'train_' + str(seq_len) in file:
                     train_x[start_idx:end_idx] = array_slice
-                else:
+                elif 'test_' + str(seq_len) in file:
                     test_x[start_idx:end_idx] = array_slice
     return train_x, test_x
 
