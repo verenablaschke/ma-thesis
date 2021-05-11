@@ -1,6 +1,5 @@
 import argparse
 import os
-import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('fold')

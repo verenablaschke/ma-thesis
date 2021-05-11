@@ -67,7 +67,10 @@ for i in $(seq 1 1); do
 done
 
 
-taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 8 --embed --log --nolime --mlm nn-attn --h 128 256 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40 50 60
+taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 8 --embed --log --nolime --mlm nn-attn ffnn-attn --h 128 256 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40 50 60
+
+taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 9 --embed --log --nolime --mlm nn-attn ffnn-attn --h 128 256 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40 50 60
+taskset -c 0-19 python3 predict_fold.py models/tweets-embed tweets 7 --embed --log --nolime --mlm nn-attn ffnn-attn --h 128 256 --ep 5 15 25 35 --b 128 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod flaubert/flaubert_large_cased --emblen 40 50 60
 
 
 
