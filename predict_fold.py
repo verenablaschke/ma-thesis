@@ -185,7 +185,9 @@ if __name__ == "__main__":
     parser.add_argument('folds', help='fold numbers', nargs='+')
     parser.add_argument('--mlm', dest='model_type',
                         help='type of the ML model',
-                        choices=['svm', 'nn', 'nn-attn', 'ffnn', 'ffnn-attn'],
+                        choices=['svm',
+                                 'rnn', 'rnn-attn', 'rnn-uniform-attn',
+                                 'ffnn', 'ffnn-attn', 'ffnn-uniform-attn'],
                         default=['svm'], type=str, nargs='+')
     parser.add_argument('--embed', dest='use_embeddings', default=False,
                         action='store_true')

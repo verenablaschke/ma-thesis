@@ -12,7 +12,7 @@ from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
 from keras.models import Model
-from keras.layers import Bidirectional, Dense, Dropout, Input, GRU, Activation
+from keras.layers import Bidirectional, Dense, Dropout, Input, GRU
 from keras import backend as K
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -136,17 +136,17 @@ def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
 
 def preprocess_and_vectorize(utterance, vectorizer):
     return vectorizer.transform([utterance])
-    # return vectorizer.transform([preprocess(utterance)])
 
 
 def train(train_x, train_y, model_type, n_classes, linear_svc, log_file,
           learning_rate, dropout_rate, class_weight, verbose, hidden_size,
           epochs, batch_size):
     if 'nn' in model_type:
-        return train_gru(train_x, train_y, 'attn' in model_type,
-                         'ffnn' in model_type, n_classes,
-                         class_weight, log_file, hidden_size, epochs,
-                         batch_size, learning_rate, dropout_rate, verbose)
+        return train_nn(train_x, train_y, 'attn' in model_type,
+                        'uniform' in model_type,
+                        'ffnn' in model_type, n_classes,
+                        class_weight, log_file, hidden_size, epochs,
+                        batch_size, learning_rate, dropout_rate, verbose)
 
     if linear_svc:
         model = svm.LinearSVC(C=1.0, class_weight=class_weight,
@@ -166,22 +166,31 @@ class Attention(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.hidden_size = input_shape[-1]
         self.Q = Dense(self.hidden_size)
-        # self.softmax = Activation('softmax')
 
     def call(self, x):
         dot_similarity = self.Q(x) / (self.hidden_size ** 0.5)
-        # attn = self.softmax(dot_similarity)
         attn = tf.keras.activations.softmax(dot_similarity, axis=1)
         out = x * attn
         return attn, K.sum(out, axis=1)
 
 
-def train_gru(train_x, train_y, attention_layer, feedforward,
-              n_classes, class_weight,
-              log_file, hidden_size, epochs, batch_size, learning_rate,
-              dropout_rate, verbose,
-              loss='sparse_categorical_crossentropy',
-              metric='categorical_accuracy'):
+class UniformAttention(tf.keras.layers.Layer):
+    def __init__(self):
+        super(UniformAttention, self).__init__()
+
+    def build(self, input_shape):
+        self.seq_len = input_shape[-2]
+
+    def call(self, x):
+        return K.sum(x / self.seq_len, axis=1)
+
+
+def train_nn(train_x, train_y, attention_layer, uniform_attn, feedforward,
+             n_classes, class_weight,
+             log_file, hidden_size, epochs, batch_size, learning_rate,
+             dropout_rate, verbose,
+             loss='sparse_categorical_crossentropy',
+             metric='categorical_accuracy'):
     n_timesteps, embed_depth = train_x.shape[-2], train_x.shape[-1]
 
     inputs = Input(shape=(n_timesteps, embed_depth), name='inputs')
@@ -199,7 +208,11 @@ def train_gru(train_x, train_y, attention_layer, feedforward,
     dropout = Dropout(dropout_rate, name='dropout')
     dropout_out = dropout(encoder_out)
 
-    if attention_layer:
+    if uniform_attn:
+        attention = UniformAttention()
+        attn_out = attention(dropout_out)
+        dense_in = attn_out
+    elif attention_layer:
         attention = Attention()
         attn_scores, attn_out = attention(dropout_out)
         dense_in = attn_out
@@ -216,7 +229,7 @@ def train_gru(train_x, train_y, attention_layer, feedforward,
     history = model.fit(train_x, train_y, epochs=epochs, batch_size=batch_size,
                         class_weight=class_weight, verbose=1)
 
-    if attention_layer:
+    if attention_layer and not uniform_attn:
         # Is exactly the same as the model used for training, except that it
         # also outputs the attention scores.
         # Its weights are the weights learned by fitting the other model!
@@ -235,7 +248,7 @@ def train_gru(train_x, train_y, attention_layer, feedforward,
         f.write('METRIC {}\n'.format(metric))
         f.write(str(history.history[metric]) + '\n')
 
-    if attention_layer:
+    if attention_layer and not uniform_attn:
         return attn_model
     return model
 
