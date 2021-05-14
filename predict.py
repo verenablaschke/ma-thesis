@@ -75,6 +75,9 @@ def load_embeddings(folder, seq_len, embedding_size, embedding_name):
                 elif 'test_' + str(seq_len) + '-' in file:
                     print(file, start_idx, end_idx)
                     test_x[start_idx:end_idx] = array_slice
+    print("Loaded embeddings")
+    print("train_x", train_x.shape, train_x.dtype)
+    print("test_x", test_x.shape, test_x.dtype)
     return train_x, test_x
 
 
@@ -115,6 +118,7 @@ def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       load_embeddings_from_file,
                       micro_batch_size,  macro_batch_size, macro_batch_start,
                       folder, embedding_size, embedding_name, flatten):
+    embedding_name = embedding_name.split('/')[-1]
     if load_embeddings_from_file:
         train_x, test_x = load_embeddings(folder, seq_len, embedding_size,
                                           embedding_name)
