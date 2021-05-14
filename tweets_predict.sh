@@ -9,6 +9,11 @@
 # python3 feature_correlation.py models/tweets
 # python3 prepare_folds.py models/tweets 10
 
+python3 extract_features.py tweets models/tweets-multi --embmod bert-base-multilingual-cased
+python3 feature_correlation.py models/tweets-multi
+python3 prepare_folds.py models/tweets-multi 10
+
+
 # for i in $(seq 0 9); do
 #     echo "Setting up fold $i"
 #     screen -dmS tweets$i

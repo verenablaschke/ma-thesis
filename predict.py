@@ -51,11 +51,11 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 
-def load_embeddings(folder, seq_len, embedding_size):
+def load_embeddings(folder, seq_len, embedding_size, embedding_name):
     train_size, test_size = -1, -1
     for _, _, files in os.walk(folder):
         for file in files:
-            if 'embedding' in file:
+            if 'embedding' in file and embedding_name in file:
                 end_idx = int(file.split('--')[-1][:-4])
                 if 'train' in file and end_idx > train_size:
                     train_size = end_idx
@@ -65,7 +65,7 @@ def load_embeddings(folder, seq_len, embedding_size):
     test_x = np.empty([test_size, seq_len, embedding_size])
     for _, _, files in os.walk(folder):
         for file in files:
-            if 'embedding' in file:
+            if 'embedding' in file and embedding_name in file:
                 array_slice = np.load(folder + '/' + file)
                 start_idx = int(file.split('_')[-1].split('--')[0])
                 end_idx = int(file.split('--')[-1][:-4])
@@ -78,12 +78,13 @@ def load_embeddings(folder, seq_len, embedding_size):
     return train_x, test_x
 
 
-def get_embeddings(utterances, seq_len, embedding_size, micro_batch_size,
+def get_embeddings(utterances, seq_len, embedding_size, embedding_name,
+                   micro_batch_size,
                    macro_batch_size, macro_batch_start, folder, test_or_train,
-                   flaubert_tokenizer, flaubert, flatten):
-    token_ids = [flaubert_tokenizer.encode(utterance, max_length=seq_len,
-                                           truncation=True,
-                                           padding='max_length')
+                   tokenizer, bert_model, flatten):
+    token_ids = [tokenizer.encode(utterance, max_length=seq_len,
+                                  truncation=True,
+                                  padding='max_length')
                  for utterance in utterances]
     n = len(token_ids)
     print(n, micro_batch_size, macro_batch_size)
@@ -96,38 +97,48 @@ def get_embeddings(utterances, seq_len, embedding_size, micro_batch_size,
             print("- {}--{} - Batch {}--{}".format(
                 j, j + macro_batch_size,
                 j + i, j + i + micro_batch_size))
-            batch = flaubert(torch.tensor(
+            b1 = bert_model(torch.tensor(
+                token_ids[j + i:j + i + micro_batch_size]))[0]
+            print(len(b1))
+            print(b1.shape)
+            x[i:i + micro_batch_size] = b1
+            batch = bert_model(torch.tensor(
                 token_ids[j + i:j + i + micro_batch_size]))[0]
             x[i:i + micro_batch_size] = batch
         if flatten:
             x = torch.flatten(x, start_dim=1)
         x = x.detach().numpy()
-        np.save('{}/embeddings_{}_{}_{}--{}.npy'.format(
-            folder, test_or_train, seq_len, j, j + tensor_len), x)
+        np.save('{}/embeddings_{}_{}_{}_{}--{}.npy'.format(
+            folder, test_or_train, embedding_name, seq_len,
+            j, j + tensor_len), x)
     return x
 
 
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
-                      flaubert_tokenizer, flaubert, seq_len,
+                      tokenizer, bert_model, seq_len,
                       load_embeddings_from_file,
                       micro_batch_size,  macro_batch_size, macro_batch_start,
-                      folder, embedding_size, flatten):
+                      folder, embedding_size, embedding_name, flatten):
     if load_embeddings_from_file:
-        train_x, test_x = load_embeddings(folder, seq_len, embedding_size)
+        train_x, test_x = load_embeddings(folder, seq_len, embedding_size,
+                                          embedding_name)
     else:
         train_x = get_embeddings(toks_train, seq_len, embedding_size,
+                                 embedding_name,
                                  micro_batch_size,  macro_batch_size,
                                  macro_batch_start, folder,
-                                 'train', flaubert_tokenizer, flaubert,
+                                 'train', tokenizer, bert_model,
                                  flatten)
         test_x = get_embeddings(toks_test, seq_len, embedding_size,
+                                embedding_name,
                                 micro_batch_size,  macro_batch_size,
                                 macro_batch_start, folder,
-                                'test', flaubert_tokenizer, flaubert,
+                                'test', tokenizer, bert_model,
                                 flatten)
         if macro_batch_size < len(toks_train) or \
                 macro_batch_size < len(toks_test):
-            train_x, test_x = load_embeddings(folder, seq_len, embedding_size)
+            train_x, test_x = load_embeddings(folder, seq_len, embedding_size,
+                                              embedding_name)
     label_encoder = LabelEncoder()
     train_y = label_encoder.fit_transform(labels_train)
     test_y = label_encoder.transform(labels_test)

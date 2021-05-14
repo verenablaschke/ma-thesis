@@ -6,7 +6,7 @@ import re
 import sys
 import argparse
 from collections import Counter
-from transformers import FlaubertTokenizer
+from transformers import FlaubertTokenizer, BertTokenizer
 
 ESCAPE_TOKS = ['<URL>', '<USERNAME>', '<HASHTAG>', '<NUMBER>']
 
@@ -166,7 +166,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
     return ngrams_flat
 
 
-def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
+def utterance2bpe_toks(tokenizer, utterance, label, outfile,
                        featuremap, verbose=False):
     toks = []
     initial_tokens = re.split("([^\w<>]+)", utterance)
@@ -185,7 +185,7 @@ def utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
         if token in ESCAPE_TOKS:
             subtokens = [token]
         else:
-            subtokens = [t for t in flaubert_tokenizer.bpe(token).split(" ")]
+            subtokens = [t for t in tokenizer.bpe(token).split(" ")]
         for subtok in subtokens:
             update_featuremap(featuremap, label, subtok, token)
         toks.extend(subtokens)
@@ -213,7 +213,12 @@ if __name__ == "__main__":
                         help='BPE tokenization (for Flaubert embeddings)',
                         action='store_true')
     parser.add_argument('--embmod', dest='embedding_model',
-                        default='flaubert/flaubert_base_cased', type=str)
+                        default='flaubert/flaubert_base_cased',
+                        choices=['flaubert/flaubert_base_cased',
+                                 'flaubert/flaubert_small_cased',
+                                 'flaubert/flaubert_large_cased',
+                                 'bert-base-multilingual-cased'],
+                        type=str)
     # python3 extract_features.py tweets '' --utt "test utterance here"
     parser.add_argument('--utt', dest='single_utterance', default=None, type=str)
     args = parser.parse_args()
@@ -259,10 +264,16 @@ if __name__ == "__main__":
     featuremap = {}
     if args.single_utterance:
         if args.bpe:
-            flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
-                args.embedding_model, do_lowercase=False)
-            flaubert_tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
-            utterance2bpe_toks(flaubert_tokenizer, args.single_utterance, '',
+            if 'flaubert' in args.embedding_model:
+                tokenizer = FlaubertTokenizer.from_pretrained(
+                    args.embedding_model,
+                    do_lowercase='uncased' in args.embedding_model)
+            else:
+                tokenizer = BertTokenizer.from_pretrained(
+                    args.embedding_model,
+                    do_lowercase='uncased' in args.embedding_model)
+            tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
+            utterance2bpe_toks(tokenizer, args.single_utterance, '',
                                None, featuremap, verbose=True)
         else:
             utterance2ngrams(args.single_utterance, None, None, WORD_NS,
@@ -288,11 +299,17 @@ if __name__ == "__main__":
     if args.bpe:
         with open(outfile, 'w+', encoding='utf8') as f:
             f.write('utterance\tlabel\tBPE tokens\n')
-        flaubert_tokenizer = FlaubertTokenizer.from_pretrained(
-            args.embedding_model, do_lowercase=False)
-        # TODO: embeddings for special toks!
+        if 'flaubert' in args.embedding_model:
+            tokenizer = FlaubertTokenizer.from_pretrained(
+                args.embedding_model,
+                do_lowercase='uncased' in args.embedding_model)
+        else:
+            tokenizer = BertTokenizer.from_pretrained(
+                args.embedding_model,
+                do_lowercase='uncased' in args.embedding_model)
+        tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
         for utterance, label in zip(data['utterances'], data['labels']):
-            utterance2bpe_toks(flaubert_tokenizer, utterance, label, outfile,
+            utterance2bpe_toks(tokenizer, utterance, label, outfile,
                                featuremap)
     else:
         with open(outfile, 'w+', encoding='utf8') as f:
