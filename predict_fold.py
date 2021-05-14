@@ -30,11 +30,12 @@ def get_data_for_fold(args, folder, n_bpe_toks):
                     args.embedding_model,
                     do_lowercase='uncased' in args.embedding_model)
             else:
-                bert_model = BertModel.from_pretrained(
+                bert_model, _ = BertModel.from_pretrained(
                     args.embedding_model, output_loading_info=True)
                 tokenizer = BertTokenizer.from_pretrained(
                     args.embedding_model,
                     do_lowercase='uncased' in args.embedding_model)
+        bert_model.eval()
         embedding_size = 768
         if '_small_' in args.embedding_model:
             embedding_size = 512

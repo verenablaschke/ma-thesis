@@ -88,29 +88,25 @@ def get_embeddings(utterances, seq_len, embedding_size, embedding_name,
                  for utterance in utterances]
     n = len(token_ids)
     print(n, micro_batch_size, macro_batch_size)
-    for j in range(macro_batch_start, n, macro_batch_size):
-        tensor_len = macro_batch_size
-        if j + macro_batch_size > n:
-            tensor_len = n % macro_batch_size
-        x = torch.empty((tensor_len, seq_len, embedding_size))
-        for i in range(0, tensor_len, micro_batch_size):
-            print("- {}--{} - Batch {}--{}".format(
-                j, j + macro_batch_size,
-                j + i, j + i + micro_batch_size))
-            b1 = bert_model(torch.tensor(
-                token_ids[j + i:j + i + micro_batch_size]))[0]
-            print(len(b1))
-            print(b1.shape)
-            x[i:i + micro_batch_size] = b1
-            batch = bert_model(torch.tensor(
-                token_ids[j + i:j + i + micro_batch_size]))[0]
-            x[i:i + micro_batch_size] = batch
-        if flatten:
-            x = torch.flatten(x, start_dim=1)
-        x = x.detach().numpy()
-        np.save('{}/embeddings_{}_{}_{}_{}--{}.npy'.format(
-            folder, test_or_train, embedding_name, seq_len,
-            j, j + tensor_len), x)
+    with torch.no_grad():
+        for j in range(macro_batch_start, n, macro_batch_size):
+            tensor_len = macro_batch_size
+            if j + macro_batch_size > n:
+                tensor_len = n % macro_batch_size
+            x = torch.empty((tensor_len, seq_len, embedding_size))
+            for i in range(0, tensor_len, micro_batch_size):
+                print("- {}--{} - Batch {}--{}".format(
+                    j, j + macro_batch_size,
+                    j + i, j + i + micro_batch_size))
+                batch = bert_model(torch.tensor(
+                    token_ids[j + i:j + i + micro_batch_size]))[0]
+                x[i:i + micro_batch_size] = batch
+            if flatten:
+                x = torch.flatten(x, start_dim=1)
+            x = x.detach().numpy()
+            np.save('{}/embeddings_{}_{}_{}_{}--{}.npy'.format(
+                folder, test_or_train, embedding_name, seq_len,
+                j, j + tensor_len), x)
     return x
 
 
