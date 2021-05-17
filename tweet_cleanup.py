@@ -5,7 +5,7 @@ import argparse
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
-from html.client import RemoteDisconnected
+from http.client import RemoteDisconnected
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--i', dest='infile', default='data/tweets.tsv')
@@ -24,19 +24,24 @@ url_regex = '((?<=^)|(?<=\W))((https?://|www\d{0,3}\.)' \
 
 def replace_url(tweet):
     match = re.search(url_regex, tweet)
+    retrieved = False
     while match:
         url = match.group(0)
         title = ''
         try:
             soup = BeautifulSoup(urlopen(url), features="lxml")
             title = soup.title.string
-            if not title:
-                title = ''
         except (AttributeError, ValueError, HTTPError, URLError,
                 RemoteDisconnected):
             pass
+        if title:
+            retrieved = True
+        else:
+            title = ''
         tweet = tweet[:match.start(0)] + title + tweet[match.end(0):]
         match = re.search(url_regex, tweet)
+    if retrieved:
+        print(tweet)
     return tweet
 
 
@@ -58,6 +63,11 @@ with open(args.infile, 'r', encoding='utf8') as f_in:
                     pass
 
             tweet = fields[2] if new_tweet else line
+            # URLs: of the form abc.de; start with http(s):// or www or contain a /
+            if args.fetch_website_titles:
+                tweet = replace_url(tweet)
+            else:
+                tweet = re.sub(url_regex, '<URL>', tweet)
             # Replace non-breaking spaces etc.
             tweet = unicodedata.normalize("NFKC", tweet)
             # Replace, e.g., &gt with >
@@ -72,11 +82,6 @@ with open(args.infile, 'r', encoding='utf8') as f_in:
             # Twitter usernames
             tweet = re.sub('((?<=^)|(?<=\W))@[a-zA-Z0-9_]+',
                            '<USERNAME>', tweet)
-            # URLs: of the form abc.de; start with http(s):// or www or contain a /
-            if args.fetch_website_titles:
-                tweet = replace_url(tweet)
-            else:
-                tweet = re.sub(url_regex, '<URL>', tweet)
             # Hashtags, numbers
             if not args.leave_hashtags:
                 tweet = re.sub('#\w+', '<HASHTAG>', tweet)

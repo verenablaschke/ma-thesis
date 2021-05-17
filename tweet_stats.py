@@ -25,7 +25,7 @@ with open('data/tweets_cleaned.tsv', encoding='utf8') as f:
             print(len(tweet_wo_esc))
             print(tweet_wo_esc)
         word_len.append(len(tweet.split(' ')))
-        bpe_toks = utterance2bpe_toks(flaubert_tokenizer, tweet, '', None, None)
+        bpe_toks, _ = utterance2bpe_toks(flaubert_tokenizer, tweet, '', None, None)
         bpe_tok_len.append(len(bpe_toks))
         if len(flaubert_tokenizer.encode(tweet)) > 280:
             print(len(flaubert_tokenizer.encode(tweet)))
