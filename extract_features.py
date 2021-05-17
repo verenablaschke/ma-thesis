@@ -23,12 +23,14 @@ def add_ngram(featuremap, label, ngram, context):
             featuremap[label][ngram] = [context]
         except KeyError:
             featuremap[label] = {ngram: [context]}
+    return featuremap
 
 
 def update_featuremap(featuremap, label, ngram, context):
-    if featuremap:
-        add_ngram(featuremap, label, ngram, context)
-        add_ngram(featuremap, 'all', ngram, context)
+    if featuremap is not None:
+        featuremap = add_ngram(featuremap, label, ngram, context)
+        featuremap = add_ngram(featuremap, 'all', ngram, context)
+    return featuremap
 
 
 # U0329, U030D are the combining lines for marking syllabic consonants
@@ -37,7 +39,8 @@ char_pattern = re.compile(r'(\w[\u0329\u030D]*|\.\w)',
 
 
 def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
-                     featuremap, verbose=False):
+                     featuremap, verbose=False,
+                     utterance_lvl_featuremap=True):
     utterance = utterance.strip().replace('\n', ' ')
     if DIALECTS:
         words = utterance.split(' ')
@@ -84,14 +87,14 @@ def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
                 if args.uncased_only:
                     uncased_ngram = '<SOS>{}<EOS>'.format(sep.join(tmp_tokens))
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label, uncased_ngram,
+                    featuremap = update_featuremap(featuremap, label, uncased_ngram,
                                       '<SOS>' + ngram + '<EOS>')
                 else:
                     if not only_escaped:
                         uncased_ngram = 'UNCASED:<SOS>{}<EOS>'.format(
                             sep.join(tmp_tokens))
                         cur_ngrams.append(uncased_ngram)
-                        update_featuremap(featuremap, label, uncased_ngram,
+                        featuremap = update_featuremap(featuremap, label, uncased_ngram,
                                           '<SOS>' + ngram + '<EOS>')
             if not args.uncased_only:
                 ngram = '<SOS>' + ngram + '<EOS>'
@@ -110,40 +113,40 @@ def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
                 pfx = chars[:char_n - 1]
                 ngram = sep + ''.join(pfx)
                 cur_ngrams.append(ngram)
-                update_featuremap(featuremap, label, ngram, context)
+                featuremap = update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
                     if args.uncased_only:
                         uncased_ngram = ngram.lower()
                     else:
                         uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label,
+                    featuremap = update_featuremap(featuremap, label,
                                       uncased_ngram, context)
             for i in range(len(chars) + 1 - char_n):
                 ngram = ''.join(chars[i:i + char_n])
                 cur_ngrams.append(ngram)
-                update_featuremap(featuremap, label, ngram, context)
+                featuremap = update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
                     if args.uncased_only:
                         uncased_ngram = ngram.lower()
                     else:
                         uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label,
+                    featuremap = update_featuremap(featuremap, label,
                                       uncased_ngram, context)
 
             if char_n > 1:
                 sfx = chars[word_len + 1 - char_n:]
                 ngram = ''.join(sfx) + sep
                 cur_ngrams.append(ngram)
-                update_featuremap(featuremap, label, ngram, context)
+                featuremap = update_featuremap(featuremap, label, ngram, context)
                 if args.add_uncased:
                     if args.uncased_only:
                         uncased_ngram = ngram.lower()
                     else:
                         uncased_ngram = 'UNCASED:' + ngram.lower()
                     cur_ngrams.append(uncased_ngram)
-                    update_featuremap(featuremap, label,
+                    featuremap = update_featuremap(featuremap, label,
                                       uncased_ngram, context)
         ngrams.append(cur_ngrams)
     if verbose:
@@ -152,7 +155,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
             print(lvl_ngrams)
 
     if not outfile:
-        return
+        return None, featuremap
 
     ngrams_flat = []
     with open(outfile, 'a', encoding='utf8') as f:
@@ -163,7 +166,7 @@ def utterance2ngrams(utterance, label, outfile, word_ns, char_ns,
             f.write('\t')
             f.write(' '.join(lvl_ngrams))
         f.write('\n')
-    return ngrams_flat
+    return ngrams_flat, featuremap
 
 
 def utterance2bpe_toks(tokenizer, utterance, label, outfile,
@@ -187,7 +190,7 @@ def utterance2bpe_toks(tokenizer, utterance, label, outfile,
         else:
             subtokens = [t for t in tokenizer.bpe(token).split(" ")]
         for subtok in subtokens:
-            update_featuremap(featuremap, label, subtok, token)
+            featuremap = update_featuremap(featuremap, label, subtok, token)
         toks.extend(subtokens)
     if verbose:
         print(utterance)
@@ -195,7 +198,7 @@ def utterance2bpe_toks(tokenizer, utterance, label, outfile,
     if outfile:
         with open(outfile, 'a', encoding='utf8') as f:
             f.write("{}\t{}\t{}\n".format(utterance, label, ' '.join(toks)))
-    return toks
+    return toks, featuremap
 
 
 if __name__ == "__main__":
@@ -205,6 +208,9 @@ if __name__ == "__main__":
     parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
     parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
                         type=str)
+    parser.add_argument('--perc', dest='percentage', default=False,
+                        action='store_true',
+                        help='use ratios in the featuremap file')
     parser.add_argument('--lower', dest='add_uncased', default=False,
                         action='store_true')
     parser.add_argument('--loweronly', dest='uncased_only', default=False,
@@ -295,7 +301,7 @@ if __name__ == "__main__":
     outfile = args.model + '/features.tsv'
     Path(args.model).mkdir(parents=True, exist_ok=True)
 
-    # Extract and save the features.
+    print("Extracting and saving the features.")
     if args.bpe:
         with open(outfile, 'w+', encoding='utf8') as f:
             f.write('utterance\tlabel\tBPE tokens\n')
@@ -309,7 +315,7 @@ if __name__ == "__main__":
                 do_lowercase='uncased' in args.embedding_model)
         tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
         for utterance, label in zip(data['utterances'], data['labels']):
-            utterance2bpe_toks(tokenizer, utterance, label, outfile,
+            _, featuremap = utterance2bpe_toks(tokenizer, utterance, label, outfile,
                                featuremap)
     else:
         with open(outfile, 'w+', encoding='utf8') as f:
@@ -320,17 +326,21 @@ if __name__ == "__main__":
                 f.write('\tchar-' + str(n))
             f.write('\n')
         for utterance, label in zip(data['utterances'], data['labels']):
-            utterance2ngrams(utterance, label, outfile, WORD_NS, CHAR_NS,
+            _, featuremap = utterance2ngrams(utterance, label, outfile, WORD_NS, CHAR_NS,
                              featuremap)
 
-    # Save the feature->context map.
+    print("Saving the feature->context maps.")
     threshold = 10
     for label, feature2context in featuremap.items():
+        print("Writing featuremap for", label)
         with open('{}/featuremap-{}.tsv'.format(args.model, label), 'w+',
                   encoding='utf8') as f:
             for feature, context in feature2context.items():
                 f.write(feature)
-                filtered_context = ['{}({})'.format(c, nr)
+                div = 1
+                if args.percentage:
+                    div = len(context)
+                filtered_context = ['{}({})'.format(c, nr / div)
                                     for c, nr in Counter(context).most_common()
                                     if nr >= threshold]
                 if filtered_context:

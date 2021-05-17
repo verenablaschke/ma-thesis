@@ -14,8 +14,12 @@ import torch
 from keras.models import Model
 from keras.layers import Bidirectional, Dense, Dropout, Input, GRU
 from keras import backend as K
-import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
+import tensorflow as tf
+gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+for device in gpu_devices:
+    tf.config.experimental.set_visible_devices(devices=device, device_type='GPU')
+    tf.config.experimental.set_memory_growth(device, True)
 
 
 def get_features(filename):

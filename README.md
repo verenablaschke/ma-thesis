@@ -8,6 +8,7 @@ bash dialects_analyze.sh
 # Wait until this has finished running in all screens!
 python3 representativeness_specificity.py models/dialects
 python3 feature_context.py models/dialects dialects --scores
+python3 feature_context.py models/dialects dialects --scores --comb mean
 
 
 

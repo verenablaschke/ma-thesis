@@ -19,7 +19,7 @@ def get_data_for_fold(args, folder, n_bpe_toks):
         '{}/test_data.txt'.format(folder))
     n_labels = len(set(labels_train))
     class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
-    flaubert, flaubert_tokenizer = None, None
+    bert_model, tokenizer = None, None
 
     if args.use_embeddings:
         if not args.load_embeddings:
@@ -35,7 +35,7 @@ def get_data_for_fold(args, folder, n_bpe_toks):
                 tokenizer = BertTokenizer.from_pretrained(
                     args.embedding_model,
                     do_lowercase='uncased' in args.embedding_model)
-        bert_model.eval()
+            bert_model.eval()
         embedding_size = 768
         if '_small_' in args.embedding_model:
             embedding_size = 512
@@ -56,7 +56,7 @@ def get_data_for_fold(args, folder, n_bpe_toks):
 
     return raw_train, ngrams_train, labels_train, \
         raw_test, ngrams_test, labels_test, \
-        n_labels, class_weight, flaubert, flaubert_tokenizer, \
+        n_labels, class_weight, bert_model, tokenizer, \
         train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 

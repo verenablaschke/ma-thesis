@@ -14,7 +14,7 @@ parser.add_argument('--i', dest='min_corr_merge',
                     help="min NPMI correlation score for considering two "
                          "features as identical",
                     default=1.0, type=float)
-parser.add_argument('--comb', dest='combination_method',
+parser.add_argument('--comb', dest='combination_method', choices=['sqrt', 'mean'],
                     help='options: sqrt (square root of sums), mean',
                     default='sqrt', type=str)
 parser.add_argument('--m', dest='mode',

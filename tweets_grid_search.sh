@@ -85,4 +85,4 @@ taskset -c 20-29 python3 predict_fold.py models/tweets-embed tweets 7 --embed --
 
 renice -n 15 -p 87193
 
-taskset -c 0-19 python3 predict_fold.py models/tweets-multi tweets 5 --embed --log --nolime --mlm rnn-attn --h 128 --ep 5 15 25 35 --b 32 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod bert-base-multilingual-cased --emblen 60
+taskset -c 0-19 python3 predict_fold.py models/tweets-multi tweets 5 --embed --log --nolime --mlm rnn-attn --h 128 --ep 5 15 25 35 --b 16 --lr 0.001 0.01 --drop 0.0 0.2 0.4 --embmod bert-base-multilingual-cased --emblen 60 --load_emb
