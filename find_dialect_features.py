@@ -24,9 +24,6 @@ nouns = ['tida', 'sida', 'bygda', 'klokka', 'klassa',
 
 rs, sl = [], []
 
-infinitives = []
-infinitive_realizations = {}
-
 word2list = {'ikke': ikke, 'noe': noe, 'noen': noen, 'mye': mye,
              'jeg': jeg, 'hun': hun, 'vi': vi, 'dere': dere, 'de': de,
              'hva': hva, 'hvem': hvem, 'hvorfor': hvorfor, 'når': når,
@@ -47,6 +44,10 @@ noun2list = {'tida': tid, 'sida': side, 'bygda': bygd, 'klokka': klokke,
              'elven': elv, 'søsteren': søster, 'kirken': kirke,
              'påsken': påske, 'stuen': stue, 'konen': kone, 'gaten': gate,
              'grensen': grense}
+
+# this only finds infinitives if they are preceded by 'å'
+infinitives = []
+infinitive_realizations = {}
 
 with open(IN_FILE_BOKMAAL_PHONO, 'r', encoding='utf8') as f:
     for line in f:

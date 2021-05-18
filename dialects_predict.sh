@@ -4,6 +4,7 @@
 # sed -i 's/\r$//' dialects.sh
 
 taskset -c 0-19 python3 extract_features.py dialects models/dialects --word "[1,2]" --char "[1,2,3,4,5]"
+python extract_features.py dialects models/dialects --word "[1,2]" --char "[1,2,3,4,5]" --perc
 taskset -c 0-19 python3 feature_correlation.py models/dialects
 taskset -c 0-19 python3 prepare_folds.py models/dialects 10
 

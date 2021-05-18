@@ -25,3 +25,13 @@ done
 screen -S ${run_name}-${label} -X stuff "python3 representativeness_specificity.py models/${run_name}\n"
 screen -S ${run_name}-${label} -X stuff "python3 feature_context.py models/${run_name} tweets --scores --comb sqrt\n"
 screen -S ${run_name}-${label} -X stuff "python3 feature_context.py models/${run_name} tweets --scores --comb mean\n"
+
+
+run_name="tweets-website"
+screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 representativeness_specificity.py models/${run_name}\n"
+screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt\n"
+screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean\n"
+
+taskset -c 0-19 python3 representativeness_specificity.py models/${run_name}
+taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt
+taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean

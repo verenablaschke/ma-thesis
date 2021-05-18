@@ -15,8 +15,8 @@ parser.add_argument('--scale', dest='scale_by_model_score',
                     default=False, action='store_true')
 parser.add_argument('--label', dest='per_label',
                     default=False, action='store_true')
-parser.add_argument('--top', dest='top100',
-                    default=False, action='store_true')
+parser.add_argument('--top', dest='top_n_features',
+                    default=None, type=int)
 args = parser.parse_args()
 
 # Produced by feature_context.py
@@ -26,14 +26,14 @@ in_file = '{}/importance-spec-rep-{}-{}-{}scaled.tsv' \
 out_file = '{}/figures/importance-{{}}-{}-{}-{}scaled{}.png' \
                       .format(args.model, args.mode, args.combination_method,
                               '' if args.scale_by_model_score else 'un',
-                              '-100' if args.top100 else '')
+                              '-' + str(args.top_n_features) if args.top_n_features else '')
 Path('{}/figures/'.format(args.model)).mkdir(parents=True, exist_ok=True)
 
 labels = ['nordnorsk', 'oestnorsk', 'troendersk', 'vestnorsk'] \
     if args.type == 'dialects' else ['0', '1']
 
 label2features = {}
-if args.top100:
+if args.top_n_features:
     for label in labels:
         label2features[label] = []
         top100_file = '{}/importance_values_{}_{}_{}_{}scaled_sorted_100_context.tsv' \
@@ -52,7 +52,7 @@ with open(in_file, 'r', encoding='utf8') as f:
     for line in f:
         cells = line.strip().split('\t')
         feature, label = cells[0], cells[1]
-        if args.top100 and feature not in label2features[label]:
+        if args.top_n_features and feature not in label2features[label]:
             continue
         imp, rep, spec = float(cells[2]), float(cells[3]), float(cells[4])
         try:
@@ -65,8 +65,8 @@ with open(in_file, 'r', encoding='utf8') as f:
             rep_scores[label] = [rep]
 
 
-label2col = {'nordnorsk': 'green', 'troendersk': 'blue',
-             'vestnorsk': 'yellow', 'oestnorsk': 'red',
+label2col = {'nordnorsk': '#74A36F', 'troendersk': '#97BADE',
+             'vestnorsk': '#F5EFC6', 'oestnorsk': '#AD4545',
              '0': 'gray', '1': 'red'}
 if not args.per_label:
     label2col = {label: 'blue' for label in label2col}
@@ -74,22 +74,50 @@ if not args.per_label:
 for label in imp_scores.keys():
     imp = np.array(imp_scores[label])
     rep = np.array(rep_scores[label])
-    plt.scatter(imp, rep, color=label2col[label], s=3)
+    if args.top_n_features:
+        imp = imp[:args.top_n_features]
+        rep = rep[:args.top_n_features]
+
+    plt.scatter(imp, rep, color=label2col[label],
+                s=5 if args.top_n_features else 3,
+                label=label if args.per_label else None)
 
 importance_label = "Importance ({}, {}, {}scaled by model error)".format(
     args.combination_method, args.mode,
     '' if args.scale_by_model_score else 'un')
 plt.xlabel(importance_label)
 plt.ylabel("Representativeness")
+if args.per_label:
+    plt.legend(loc="upper right")
 plt.savefig(out_file.format('rep'))
 plt.show()
 
 for label in imp_scores.keys():
     imp = np.array(imp_scores[label])
     spec = np.array(spec_scores[label])
-    plt.scatter(imp, spec, color=label2col[label], s=3)
+    if args.top_n_features:
+        imp = imp[:args.top_n_features]
+        spec = spec[:args.top_n_features]
+    plt.scatter(imp, spec, color=label2col[label],
+                s=5 if args.top_n_features else 3,
+                label=label if args.per_label else None)
 
 plt.xlabel(importance_label)
 plt.ylabel("Specificity")
+if args.per_label:
+    plt.legend(loc="lower right")
 plt.savefig(out_file.format('spec'))
 plt.show()
+
+if args.top_n_features:
+    plt.axvline(x=args.top_n_features, color='gray', linewidth=1)
+    for label in imp_scores.keys():
+        imp = np.array(imp_scores[label])
+        plt.plot(range(1, len(imp) + 1), imp, color=label2col[label],
+                 label=label if args.per_label else None)
+    plt.xlabel("Rank")
+    plt.ylabel("Importance")
+    if args.per_label:
+        plt.legend(loc="upper right")
+    plt.savefig(out_file.format('rank'))
+    plt.show()

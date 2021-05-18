@@ -4,7 +4,7 @@ import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('model')
-parser.add_argument('logfile')  # e.g. 'log.txt', 'log-nn-attn-h200-b128-d20-ep20-em20.txt'
+parser.add_argument('--log', dest='logfile', default='log.txt')  # e.g. 'log.txt', 'log-nn-attn-h200-b128-d20-ep20-em20.txt'
 args = parser.parse_args()
 
 model_dir = args.model

@@ -9,9 +9,12 @@
 # python3 feature_correlation.py models/tweets
 # python3 prepare_folds.py models/tweets 10
 
-python3 extract_features.py tweets models/tweets-multi --embmod bert-base-multilingual-cased
-taskset -c 0-19 python3 feature_correlation.py models/tweets-multi
-python3 prepare_folds.py models/tweets-multi 10
+# python3 extract_features.py tweets models/tweets-multi --embmod bert-base-multilingual-cased
+
+# python3 tweet_cleanup.py --o data/tweets_cleaned_websites.tsv --url
+taskset -c 0-19 python3 extract_features.py tweets models/tweets-website --i data/tweets_cleaned_websites.tsv --lower --bpe
+taskset -c 0-19 python3 feature_correlation.py models/tweets-website
+python3 prepare_folds.py models/tweets-website 10
 
 
 # for i in $(seq 0 9); do
@@ -60,8 +63,8 @@ python3 prepare_folds.py models/tweets-cased-recalc 10
 
 for i in $(seq 0 9); do
     echo "Setting up fold $i"
-    screen -dmS tweets-cased-recalc$i
-    screen -S tweets-cased-recalc$i -X stuff "python3 predict_fold.py models/tweets-cased-recalc tweets $i --z 2000
+    screen -dmS tweets$i
+    screen -S tweets$i -X stuff "taskset -c 0-19 python3 predict_fold.py models/tweets-website tweets $i --z 2000
 "
 done
 

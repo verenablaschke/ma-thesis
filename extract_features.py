@@ -203,7 +203,7 @@ def utterance2bpe_toks(tokenizer, utterance, label, outfile,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('type', type=str, help="'dialects' or 'tweets'")
+    parser.add_argument('type', type=str, choices=['dialects', 'tweets'])
     parser.add_argument('model')
     parser.add_argument('--word', dest='word_ngrams', default='[1,2]', type=str)
     parser.add_argument('--char', dest='char_ngrams', default='[2,3,4,5]',
@@ -215,6 +215,10 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--loweronly', dest='uncased_only', default=False,
                         action='store_true')
+    parser.add_argument('--i', dest='input_file', default=None,
+                        help='path to the input file if not '
+                             'data/bokmaal+phon_cleaned.tsv or '
+                             'data/tweets_cleaned.tsv')
     parser.add_argument('--bpe', dest='bpe', default=False,
                         help='BPE tokenization (for Flaubert embeddings)',
                         action='store_true')
@@ -232,17 +236,7 @@ if __name__ == "__main__":
     if args.uncased_only:
         args.add_uncased = True
 
-    if args.type == 'dialects':
-        DIALECTS = True
-    elif args.type == 'tweets':
-        DIALECTS = False
-    else:
-        print("Expected 'dialects' or 'tweets'")
-        sys.exit()
-
-    if not args.model:
-        print("You need to provide a path to the model to save or load it")
-        sys.exit()
+    DIALECTS = args.type == 'dialects'
 
     args.word_ngrams = args.word_ngrams.strip()
     args.char_ngrams = args.char_ngrams.strip()
@@ -300,6 +294,7 @@ if __name__ == "__main__":
 
     outfile = args.model + '/features.tsv'
     Path(args.model).mkdir(parents=True, exist_ok=True)
+    print("Writing features to", outfile)
 
     print("Extracting and saving the features.")
     if args.bpe:
@@ -332,18 +327,22 @@ if __name__ == "__main__":
     print("Saving the feature->context maps.")
     threshold = 10
     for label, feature2context in featuremap.items():
-        print("Writing featuremap for", label)
-        with open('{}/featuremap-{}.tsv'.format(args.model, label), 'w+',
-                  encoding='utf8') as f:
+        filename = '{}/featuremap-{}.tsv'.format(args.model, label)
+        print("Writing", filename)
+        with open(filename, 'w+', encoding='utf8') as f:
             for feature, context in feature2context.items():
                 f.write(feature)
                 div = 1
+                n_appearances = len(context)
                 if args.percentage:
-                    div = len(context)
-                filtered_context = ['{}({})'.format(c, nr / div)
-                                    for c, nr in Counter(context).most_common()
-                                    if nr >= threshold]
-                if filtered_context:
+                    div = n_appearances
+                n_common = 0
+                for c, nr in Counter(context).most_common():
+                    if nr < threshold:
+                        break
+                    n_common += nr
+                    f.write('\t{}({:.1f})'.format(c, nr / div))
+                if n_common > 0:
                     f.write('\t')
-                    f.write('\t'.join(filtered_context))
-                f.write('\n')
+                f.write('below_threshold({:.1f})\n'.format(
+                    (n_appearances - n_common) / n_appearances))
