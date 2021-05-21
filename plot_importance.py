@@ -74,7 +74,13 @@ label2col = {'nordnorsk': '#74A36F', 'troendersk': '#97BADE',
 if not args.per_label:
     label2col = {label: 'blue' for label in label2col}
 
-for label in imp_scores.keys():
+keys = list(imp_scores.keys())
+keys.sort()
+
+label2printlabel = {'0': 'no sexist content', '1': 'sexist content'}
+
+for label in keys:
+    print(label)
     imp = np.array(imp_scores[label])
     rep = np.array(rep_scores[label])
     if args.top_n_features:
@@ -82,8 +88,9 @@ for label in imp_scores.keys():
         rep = rep[:args.top_n_features]
 
     plt.scatter(imp, rep, color=label2col[label],
-                s=5 if args.top_n_features else 3,
-                label=label if args.per_label else None)
+                s=5 if args.top_n_features else 3,  # size of dot
+                label=label2printlabel.get(label, label)
+                if args.per_label else None)
 
 importance_label = "Importance ({}, {}, {}scaled by model error)".format(
     args.combination_method, args.mode,
@@ -95,7 +102,7 @@ if args.per_label:
 plt.savefig(out_file.format('rep'))
 plt.show()
 
-for label in imp_scores.keys():
+for label in keys:
     imp = np.array(imp_scores[label])
     spec = np.array(spec_scores[label])
     if args.top_n_features:
@@ -103,7 +110,8 @@ for label in imp_scores.keys():
         spec = spec[:args.top_n_features]
     plt.scatter(imp, spec, color=label2col[label],
                 s=5 if args.top_n_features else 3,
-                label=label if args.per_label else None)
+                label=label2printlabel.get(label, label)
+                if args.per_label else None)
 
 plt.xlabel(importance_label)
 plt.ylabel("Specificity")
@@ -114,10 +122,11 @@ plt.show()
 
 if args.top_n_features:
     plt.axvline(x=args.top_n_features, color='gray', linewidth=1)
-    for label in imp_scores.keys():
+    for label in keys:
         imp = np.array(imp_scores[label])
         plt.plot(range(1, len(imp) + 1), imp, color=label2col[label],
-                 label=label if args.per_label else None)
+                 label=label2printlabel.get(label, label)
+                 if args.per_label else None)
     plt.xlabel("Rank")
     plt.ylabel("Importance")
     if args.per_label:

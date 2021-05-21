@@ -18,7 +18,10 @@ features = []
 with open(args.importance_file, 'r', encoding='utf8') as f:
     next(f)  # Skip header
     for line in f:
-        feature, val, _ = line.strip().split('\t')
+        try:
+            feature, val, _ = line.strip().split('\t')
+        except ValueError:
+            continue
         importance_values[feature] = val
         if float(val) < args.min_imp:
             continue

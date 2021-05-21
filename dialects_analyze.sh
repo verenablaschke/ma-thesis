@@ -18,6 +18,9 @@ for label in nordnorsk vestnorsk oestnorsk troendersk; do
     done
 done
 
+screen -S nordnorsk -X stuff "python3 representativeness_specificity.py models/dialects\n"
+screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --comb mean --scores\n"
 screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 200 --comb mean --r\n"
+screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 200 --comb sqrt --r\n"
 screen -S nordnorsk -X stuff "python3 plot_importance.py models/dialects dialects --comb mean --top 50 --topinput 200 --label\n"
 screen -S nordnorsk -X stuff "python3 plot_importance.py models/dialects dialects --comb mean\n"

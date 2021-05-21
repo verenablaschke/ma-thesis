@@ -1,11 +1,10 @@
 #!/bin/sh
 
 # In the case of line ending problems (Windows vs. UNIX encodings), run:
-# sed -i 's/\r$//' dialects.sh
+# sed -i 's/\r$//' tweets_analyze.sh
 
 run_name="tweets"
-# run_name="tweets-cased"
-# run_name="tweets-bpe"
+run_name="tweets-may"
 
 for label in 0 1; do
     echo "$label"
@@ -22,23 +21,9 @@ for label in 0 1; do
     done
 done
 
-screen -S ${run_name}-${label} -X stuff "python3 representativeness_specificity.py models/${run_name}\n"
-screen -S ${run_name}-${label} -X stuff "python3 feature_context.py models/${run_name} tweets --scores --comb sqrt\n"
-screen -S ${run_name}-${label} -X stuff "python3 feature_context.py models/${run_name} tweets --scores --comb mean\n"
-
-
-run_name="tweets-website"
-screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 representativeness_specificity.py models/${run_name}\n"
-screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt\n"
-screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean\n"
-
-run_name="tweets-website"
-taskset -c 0-19 python3 representativeness_specificity.py models/${run_name}
-taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt
-taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean
-
-
-python3 parse_results.py models/tweets-website 0 all 10 --comb mean
-python3 parse_results.py models/tweets-website 1 all 10 --comb mean
-python3 parse_results.py models/tweets-website 0 all 10 --comb sqrt
-python3 parse_results.py models/tweets-website 1 all 10 --comb sqrt
+screen -S ${run_name}-0 -X stuff "python3 representativeness_specificity.py models/${run_name}\n"
+screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --comb mean --scores\n"
+screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --t 200 --comb mean --r\n"
+screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --t 200 --comb sqrt --r\n"
+screen -S ${run_name}-0 -X stuff "python3 plot_importance.py models/${run_name} tweets --comb mean --top 50 --topinput 200 --label\n"
+screen -S ${run_name}-0 -X stuff "python3 plot_importance.py models/${run_name} tweets --comb mean\n"
