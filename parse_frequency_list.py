@@ -36,9 +36,11 @@ with open(OUT_FILE, 'w+', encoding='utf8') as f:
 
 noun2count = {noun: 0 for noun, _ in fem_nouns}
 infl2lemma = {}
+uninflected = {}
 for lemma, (infl_a, infl_en) in fem_nouns:
     infl2lemma[infl_a] = lemma
     infl2lemma[infl_en] = lemma
+    uninflected[lemma] = 0
 
 with open(IN_FILE_BOKMAAL, encoding='utf8') as f:
     for line in f:
@@ -48,10 +50,18 @@ with open(IN_FILE_BOKMAAL, encoding='utf8') as f:
                 noun2count[infl2lemma[token.lower()]] += 1
             except KeyError:
                 pass
+            try:
+                uninflected[token.lower()] += 1
+            except KeyError:
+                pass
 
-counted_nouns = list(noun2count.items())
-counted_nouns.sort(key=lambda x: x[1], reverse=True)
+counted_nouns_indef = list(noun2count.items())
+counted_nouns_indef.sort(key=lambda x: x[1], reverse=True)
+counted_nouns_def = list(uninflected.items())
+counted_nouns_def.sort(key=lambda x: x[1], reverse=True)
 
 with open(OUT_FILE, 'a', encoding='utf8') as f:
-    f.write('\n\nMOST COMMON FEMININE NOUNS IN SCANDIASYN\n')
-    f.write('\n'.join(['{} ({})'.format(*n) for n in counted_nouns[:50]]))
+    f.write('\n\nMOST COMMON FEMININE NOUNS IN SCANDIASYN (DEF)\n')
+    f.write('\n'.join(['{} ({})'.format(*n) for n in counted_nouns_indef[:50]]))
+    f.write('\n\nMOST COMMON FEMININE NOUNS IN SCANDIASYN (INDEF)\n')
+    f.write('\n'.join(['{} ({})'.format(*n) for n in counted_nouns_def[:50]]))

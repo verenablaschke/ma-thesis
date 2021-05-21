@@ -4,8 +4,6 @@ import unicodedata
 import argparse
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
-from http.client import RemoteDisconnected, IncompleteRead
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--i', dest='infile', default='data/tweets.tsv')
@@ -31,9 +29,9 @@ def replace_url(tweet):
         try:
             soup = BeautifulSoup(urlopen(url), features="lxml")
             title = soup.title.string
+            title = title.replace('\n', ' ')
+            title = title.replace('\t', ' ')
         except Exception as e:
-        # except (AttributeError, ValueError, HTTPError, URLError,
-                # RemoteDisconnected, IncompleteRead):
             pass
         if title:
             retrieved = True

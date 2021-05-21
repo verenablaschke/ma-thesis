@@ -26,6 +26,8 @@ parser.add_argument('--scores', dest='spec_rep_all', default=False,
                     action='store_true')
 parser.add_argument('--scale', dest='scale_by_model_score',
                     default=False, action='store_true')
+parser.add_argument('--r', dest='reduced',
+                    default=False, action='store_true')
 args = parser.parse_args()
 
 threshold = args.top
@@ -138,6 +140,8 @@ for label in labels:
         header = next(f_in).strip()
         idx = 0
         for line in f_in:
+            if len(line.strip().split('\t')) < 3:
+                continue
             feature, imp, count = line.strip().split('\t')[0:3]
             details = (idx, feature, float(imp), count,
                        feature2context.get(feature, ''),
@@ -182,10 +186,14 @@ for label in labels:
 
     with open('{}_{}_context.tsv' .format(filename_template, threshold),
               'w+', encoding='utf8') as f_out:
-        f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
-                    'REPRESENTATIVENESS\tSPECIFICITY\t'
-                    'N_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\t'
-                    'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
+        if args.reduced:
+            f_out.write('INDEX\tFEATURE\tIMPORTANCE\t'
+                        'REPRESENTATIVENESS\tSPECIFICITY\tCONTEXT\n')
+        else:
+            f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
+                        'REPRESENTATIVENESS\tSPECIFICITY\t'
+                        'N_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\t'
+                        'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
         for result in top_results:
             (idx, feature, imp, count, context,
@@ -196,49 +204,59 @@ for label in labels:
 
             n_occ, rep, spec = distribution[feature]
 
-            f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
-                idx, feature, imp, count, context,
-                n_occ, rep, spec))
-            imp_scores_top.append(imp)
-            n_utt_scores_top.append(n_occ)
-            rep_scores_top.append(rep)
-            spec_scores_top.append(spec)
+            if args.reduced:
+                f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}'.format(
+                    idx, feature, imp, round(100 * rep), round(100 * spec),
+                    context))
+                imp_scores_top.append(imp)
+                n_utt_scores_top.append(n_occ)
+                rep_scores_top.append(rep)
+                spec_scores_top.append(spec)
+            else:
+                f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
+                    idx, feature, imp, count, context,
+                    n_occ, rep, spec))
+                imp_scores_top.append(imp)
+                n_utt_scores_top.append(n_occ)
+                rep_scores_top.append(rep)
+                spec_scores_top.append(spec)
 
-            mirror_list = []
-            n_identical_top = 0
-            if identical:
-                for mirror in identical:
-                    try:
-                        (idx2, feature2, mean2,
-                         count2, _, _, _) = feature2results[mirror]
-                        if idx2 < threshold and idx2 > idx:
-                            n_identical_top += 1
-                            skip.add(idx2)
-                            print(feature, mirror)
-                            print('Moved ' + str(idx2))
-                        mirror_list.append('{}/{}/{:.2f}/{}'.format(
-                            idx2, feature2, mean2, count2))
-                    except KeyError:
-                        mirror_list.append('--/{}/--/--/--'.format(mirror))
-            f_out.write('{}\t{}\t'.format(n_identical_top,
-                                          ', '.join(mirror_list)))
+            if not args.reduced:
+                mirror_list = []
+                n_identical_top = 0
+                if identical:
+                    for mirror in identical:
+                        try:
+                            (idx2, feature2, mean2,
+                             count2, _, _, _) = feature2results[mirror]
+                            if idx2 < threshold and idx2 > idx:
+                                n_identical_top += 1
+                                skip.add(idx2)
+                                print(feature, mirror)
+                                print('Moved ' + str(idx2))
+                            mirror_list.append('{}/{}/{:.2f}/{}'.format(
+                                idx2, feature2, mean2, count2))
+                        except KeyError:
+                            mirror_list.append('--/{}/--/--/--'.format(mirror))
+                f_out.write('{}\t{}\t'.format(n_identical_top,
+                                              ', '.join(mirror_list)))
 
-            corr_list = []
-            if correlated:
-                for corr in correlated:
-                    npmi = feature2corr[feature][corr]
-                    try:
-                        (idx2, feature2, mean2,
-                         count2, _, _, _) = feature2results[corr]
-                        corr_list.append(
-                            (npmi, '{}/{}/{:.2f}/{:.2f}/{}'.format(
-                                idx2, feature2, npmi, mean2, count2)))
-                    except KeyError:
-                        corr_list.append(
-                            (npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
-                corr_list = [entry for (_, entry) in sorted(
-                    corr_list, key=lambda x: x[0], reverse=True)]
-            f_out.write(', '.join(corr_list))
+                corr_list = []
+                if correlated:
+                    for corr in correlated:
+                        npmi = feature2corr[feature][corr]
+                        try:
+                            (idx2, feature2, mean2,
+                             count2, _, _, _) = feature2results[corr]
+                            corr_list.append(
+                                (npmi, '{}/{}/{:.2f}/{:.2f}/{}'.format(
+                                    idx2, feature2, npmi, mean2, count2)))
+                        except KeyError:
+                            corr_list.append(
+                                (npmi, '--/{}/{:.2f}/--/--/--'.format(corr, npmi)))
+                    corr_list = [entry for (_, entry) in sorted(
+                        corr_list, key=lambda x: x[0], reverse=True)]
+                f_out.write(', '.join(corr_list))
             f_out.write('\n')
 
     with open(log_file, 'a', encoding='utf8') as f_log:

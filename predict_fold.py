@@ -17,8 +17,9 @@ def get_data_for_fold(args, folder, n_bpe_toks):
         '{}/train_data.txt'.format(folder))
     raw_test, ngrams_test, labels_test = get_features(
         '{}/test_data.txt'.format(folder))
-    n_labels = len(set(labels_train))
-    class_weight = {0: 1, 1: 2} if args.type == 'tweets' else None
+    label_set = set(labels_train)
+    print(label_set)
+    n_labels = len(label_set)
     bert_model, tokenizer = None, None
 
     if args.use_embeddings:
@@ -54,6 +55,9 @@ def get_data_for_fold(args, folder, n_bpe_toks):
         train_x, test_x, train_y, test_y, label_encoder, vectorizer = encode(
             ngrams_train, ngrams_test, labels_train, labels_test)
 
+    class_weight = {label_encoder.transform(['0'])[0]: 1,
+                    label_encoder.transform(['1'])[0]: 2} \
+        if args.type == 'tweets' else None
     return raw_train, ngrams_train, labels_train, \
         raw_test, ngrams_test, labels_test, \
         n_labels, class_weight, bert_model, tokenizer, \

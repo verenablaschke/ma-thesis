@@ -52,6 +52,8 @@ def encode(ngrams_train, ngrams_test, labels_train, labels_test,
     train_x = vectorizer.fit_transform(ngrams_train)
     test_x = vectorizer.transform(ngrams_test)
 
+    print(train_x.shape)
+    print(test_x.shape)
     return train_x, test_x, train_y, test_y, label_encoder, vectorizer
 
 

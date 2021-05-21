@@ -15,6 +15,7 @@ gjøre, komme, bruke, skrive, legge = [], [], [], [], []
 
 tid, side, bygd, klokke, klasse = [], [], [], [], []
 uke, hytte, helg, elv, søster = [], [], [], [], []
+side_sg, klokke_sg, klasse_sg, uke_sg, hytte_sg = [], [], [], [], []
 # more ending in -e:
 kirke, påske, stue, kone, gate, grense = [], [], [], [], [], []
 nouns = ['tida', 'sida', 'bygda', 'klokka', 'klassa',
@@ -32,6 +33,8 @@ word2list = {'ikke': ikke, 'noe': noe, 'noen': noen, 'mye': mye,
              'ville': ville, 'måtte': måtte,
              'gjøre': gjøre, 'komme': komme, 'bruke': bruke,
              'skrive': skrive, 'legge': legge,
+             'side': side_sg, 'klokke': klokke_sg, 'klasse': klasse_sg,
+             'uke': uke_sg, 'hytte': hytte_sg
              }
 
 noun2list = {'tida': tid, 'sida': side, 'bygda': bygd, 'klokka': klokke,

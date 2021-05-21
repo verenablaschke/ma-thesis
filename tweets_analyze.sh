@@ -32,6 +32,13 @@ screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 representativen
 screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt\n"
 screen -S ${run_name}-${label} -X stuff "taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean\n"
 
+run_name="tweets-website"
 taskset -c 0-19 python3 representativeness_specificity.py models/${run_name}
 taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb sqrt
 taskset -c 0-19 python3 feature_context.py models/${run_name} tweets --scores --comb mean
+
+
+python3 parse_results.py models/tweets-website 0 all 10 --comb mean
+python3 parse_results.py models/tweets-website 1 all 10 --comb mean
+python3 parse_results.py models/tweets-website 0 all 10 --comb sqrt
+python3 parse_results.py models/tweets-website 1 all 10 --comb sqrt

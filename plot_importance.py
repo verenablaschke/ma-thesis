@@ -17,6 +17,8 @@ parser.add_argument('--label', dest='per_label',
                     default=False, action='store_true')
 parser.add_argument('--top', dest='top_n_features',
                     default=None, type=int)
+parser.add_argument('--topinput', dest='top_n_features_in_input',
+                    default=200, type=int)
 args = parser.parse_args()
 
 # Produced by feature_context.py
@@ -36,10 +38,11 @@ label2features = {}
 if args.top_n_features:
     for label in labels:
         label2features[label] = []
-        top100_file = '{}/importance_values_{}_{}_{}_{}scaled_sorted_100_context.tsv' \
+        top100_file = '{}/importance_values_{}_{}_{}_{}scaled_sorted_{}_context.tsv' \
                       .format(args.model, args.combination_method, label,
                               args.mode,
-                              '' if args.scale_by_model_score else 'un')
+                              '' if args.scale_by_model_score else 'un',
+                              args.top_n_features_in_input)
         with open(top100_file, 'r', encoding='utf8') as f:
             next(f)
             for line in f:

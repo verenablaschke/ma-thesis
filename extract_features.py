@@ -280,8 +280,11 @@ if __name__ == "__main__":
                              CHAR_NS, featuremap, verbose=True)
         sys.exit()
 
-    infile = 'data/bokmaal+phon_cleaned.tsv' \
-             if DIALECTS else 'data/tweets_cleaned.tsv'
+    if args.input_file:
+        infile = args.input_file
+    else:
+        infile = 'data/bokmaal+phon_cleaned.tsv' \
+                 if DIALECTS else 'data/tweets_cleaned.tsv'
     label_col = 0 if DIALECTS else 1
     data_col = 4 if DIALECTS else 2
     data = pd.read_csv(infile, encoding='utf8', delimiter='\t',
