@@ -5,7 +5,7 @@
 
 python3 get_tweets.py
 python3 tweet_cleanup.py
-python3 extract_features.py tweets models/tweet --bpe --i data/tweets_cleaned_websites.tsv --embmod flaubert/flaubert_large_cased
+python3 extract_features.py tweets models/tweet --bpe --i data/tweets_cleaned_websites.tsv --embmod flaubert/flaubert_large_cased --perc
 python3 feature_correlation.py models/tweets
 python3 prepare_folds.py models/tweets 10
 

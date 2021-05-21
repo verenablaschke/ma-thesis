@@ -28,7 +28,8 @@ in_file = '{}/importance-spec-rep-{}-{}-{}scaled.tsv' \
 out_file = '{}/figures/importance-{{}}-{}-{}-{}scaled{}.png' \
                       .format(args.model, args.mode, args.combination_method,
                               '' if args.scale_by_model_score else 'un',
-                              '-' + str(args.top_n_features) if args.top_n_features else '')
+                              '-' + str(args.top_n_features)
+                              if args.top_n_features else '')
 Path('{}/figures/'.format(args.model)).mkdir(parents=True, exist_ok=True)
 
 labels = ['nordnorsk', 'oestnorsk', 'troendersk', 'vestnorsk'] \
