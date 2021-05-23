@@ -1,6 +1,12 @@
 import numpy as np
+import argparse
 from transformers import FlaubertTokenizer
 from extract_features import utterance2bpe_toks, get_escape_toks
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--i', dest='infile', default='data/tweets_cleaned.tsv')
+args = parser.parse_args()
+
 
 ESCAPE_TOKS = get_escape_toks()
 
@@ -11,7 +17,7 @@ flaubert_tokenizer.add_tokens(ESCAPE_TOKS, special_tokens=True)
 
 char_len, word_len, bpe_tok_len = [], [], []
 
-with open('data/tweets_cleaned.tsv', encoding='utf8') as f:
+with open(args.infile, encoding='utf8') as f:
     for line in f:
         line = line.strip()
         if not line:

@@ -22,7 +22,7 @@ parser.add_argument('--topinput', dest='top_n_features_in_input',
 args = parser.parse_args()
 
 # Produced by feature_context.py
-in_file = '{}/importance-spec-rep-{}-{}-{}scaled.tsv' \
+in_file = '{}/importance-dist-rep-{}-{}-{}scaled.tsv' \
                       .format(args.model, args.mode, args.combination_method,
                               '' if args.scale_by_model_score else 'un')
 out_file = '{}/figures/importance-{{}}-{}-{}-{}scaled{}.png' \
@@ -50,7 +50,7 @@ if args.top_n_features:
                 feature = line.split('\t')[1]
                 label2features[label].append(feature)
 
-imp_scores, spec_scores, rep_scores = {}, {}, {}
+imp_scores, dist_scores, rep_scores = {}, {}, {}
 with open(in_file, 'r', encoding='utf8') as f:
     next(f)  # header
     for line in f:
@@ -58,19 +58,19 @@ with open(in_file, 'r', encoding='utf8') as f:
         feature, label = cells[0], cells[1]
         if args.top_n_features and feature not in label2features[label]:
             continue
-        imp, rep, spec = float(cells[2]), float(cells[3]), float(cells[4])
+        imp, rep, dist = float(cells[2]), float(cells[3]), float(cells[4])
         try:
             imp_scores[label].append(imp)
-            spec_scores[label].append(spec)
+            dist_scores[label].append(dist)
             rep_scores[label].append(rep)
         except KeyError:
             imp_scores[label] = [imp]
-            spec_scores[label] = [spec]
+            dist_scores[label] = [dist]
             rep_scores[label] = [rep]
 
 
 label2col = {'nordnorsk': '#74A36F', 'troendersk': '#97BADE',
-             'vestnorsk': '#F5EFC6', 'oestnorsk': '#AD4545',
+             'vestnorsk': '#B5aC6D', 'oestnorsk': '#AD4545',
              '0': 'gray', '1': 'red'}
 if not args.per_label:
     label2col = {label: 'blue' for label in label2col}
@@ -105,20 +105,20 @@ plt.show()
 
 for label in keys:
     imp = np.array(imp_scores[label])
-    spec = np.array(spec_scores[label])
+    dist = np.array(dist_scores[label])
     if args.top_n_features:
         imp = imp[:args.top_n_features]
-        spec = spec[:args.top_n_features]
-    plt.scatter(imp, spec, color=label2col[label],
+        dist = dist[:args.top_n_features]
+    plt.scatter(imp, dist, color=label2col[label],
                 s=5 if args.top_n_features else 3,
                 label=label2printlabel.get(label, label)
                 if args.per_label else None)
 
 plt.xlabel(importance_label)
-plt.ylabel("Specificity")
+plt.ylabel("Distinctiveness")
 if args.per_label:
     plt.legend(loc="lower right")
-plt.savefig(out_file.format('spec'))
+plt.savefig(out_file.format('dist'))
 plt.show()
 
 if args.top_n_features:

@@ -27,15 +27,18 @@ with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:
                 except KeyError:
                     feature2labels[feature] = {label: 1}
 
-print("Calculating representativeness/specificity.")
+print("Calculating representativeness/distinctiveness.")
+n_instances = len(labels)
 label_counter = Counter(labels)
 labels = list(label_counter.keys())
+
+label2rel_size = {label: label_counter[label] / n_instances for label in labels}
 
 with open(args.model + '/feature-distribution.tsv',
           'w+', encoding='utf8') as f:
     f.write("FEATURE")
     for label in labels:
-        f.write('\t{}\t{}-REP\t{}-SPEC'.format(label, label, label))
+        f.write('\t{}\t{}-REP\t{}-DIST'.format(label, label, label))
     f.write("\n<ALL>")
     for label in labels:
         f.write("\t{}\t--\t--".format(label_counter[label]))
@@ -45,9 +48,12 @@ with open(args.model + '/feature-distribution.tsv',
         total = sum(label_counts.values())
         for label in labels:
             count = label_counts.get(label, 0)
+            rel_occ = count / total
+            rel_size = label2rel_size[label]
+            dist = (rel_occ - rel_size) / (1 - rel_size)
             f.write("\t{}\t{:.6f}\t{:.6f}".format(count,
                                                   count / label_counter[label],
-                                                  count / total))
+                                                  dist))
         f.write("\n")
 
 print("Wrote output to " + args.model + '/feature-distribution.tsv')

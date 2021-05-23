@@ -2,6 +2,7 @@
 
 from sklearn import model_selection
 import argparse
+import random
 from pathlib import Path
 
 
@@ -16,7 +17,7 @@ with open(args.model + '/features.tsv', 'r', encoding='utf8') as f:
     next(f)  # Skip header
     for line in f:
         instances.append(line)
-
+random.shuffle(instances)
 
 kfold = model_selection.KFold(args.k, shuffle=True)
 

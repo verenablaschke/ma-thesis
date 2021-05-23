@@ -1,201 +1,201 @@
-INDEX	FEATURE	IMPORTANCE	REPRESENTATIVENESS	SPECIFICITY	CONTEXT
-0	<SOS>da/ra<EOS>	0.27	2	97	
-1	<SEP>tte	0.24	1	98	ikke/tte(1.0) below_threshold(0.0)
-2	<SOS>ikke/itte<EOS>	0.24	6	96	
-3	çi<SEP>	0.22	1	73	ikke/çi(0.6) ikke/iççi(0.2) mye/myçi(0.1) mye/myççi(0.1) below_threshold(0.1)
-4	sø<SEP>	0.20	1	96	så/sø(0.9) below_threshold(0.1)
-5	<SEP>upp	0.20	1	97	opp/upp(0.4) oppi/uppi(0.2) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) below_threshold(0.1)
-6	<SOS>jeg/je<EOS>	0.19	7	89	
-7	<SOS>jeg/jæ<EOS>	0.17	12	98	
-8	<SOS>var/var<EOS>	0.16	8	85	
-9	<SOS>er/ær<EOS>	0.15	10	98	
-10	<SEP>jæi	0.15	2	93	jeg/jæi(1.0) below_threshold(0.0)
-11	øɽɽ	0.15	1	77	folk/føɽɽk(0.2) mjølk/mjøɽɽk(0.1) hjelpe/jøɽɽpe(0.1) hjelp/jøɽɽp(0.0) sjølve/ʂøɽɽve(0.0) følge/føɽɽje(0.0) vel/vøɽɽ(0.0) sjøl/ʂøɽɽve(0.0) golvet/gøɽɽve(0.0) below_threshold(0.5)
-12	<SOS>er/æ<EOS>	0.13	17	72	
-13	ræ<SEP>	0.13	1	72	det/ræ(0.9) deg/ræ(0.1) below_threshold(0.0)
-14	<SOS>att/att<EOS>	0.12	1	65	
-15	<SEP>re	0.12	10	62	det/re(0.9) de/remm(0.0) rett/rett(0.0) regel/regel(0.0) deg/re(0.0) den/renn(0.0) rettogslett/rettåʂlett(0.0) redd/redd(0.0) dem/remm(0.0) resten/resstn̩(0.0) reise/reise(0.0) riktig/rekkti(0.0) reiste/resste(0.0) rette/rette(0.0) dere/re(0.0) reise/rese(0.0) de/re(0.0) regne/reŋŋne(0.0) below_threshold(0.1)
-16	<SEP>bɽe	0.11	1	88	ble/bɽe(0.8) blei/bɽei(0.1) ble/bɽei(0.0) below_threshold(0.0)
-17	jæ<SEP>	0.11	12	96	jeg/jæ(1.0) gjør/jæ(0.0) below_threshold(0.0)
-18	<SOS>ved/ve<EOS>	0.11	1	55	
-19	<SEP>ræi	0.10	1	41	de/ræi(0.4) reise/ræise(0.1) dem/ræi(0.1) reiste/ræiste(0.0) reiser/ræiser(0.0) rein/ræin(0.0) reiser/ræise(0.0) reiste/ræisste(0.0) reist/ræist(0.0) below_threshold(0.2)
-20	nok	0.10	1	65	noe/nokko(0.4) noe/noko(0.2) noen/nokkon(0.1) nok/nokk(0.1) noen/nokon(0.1) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
-21	<SOS>det/re<EOS>	0.10	7	95	
-22	<SEP>tie	0.10	0	48	tida/tie(0.7) tiende/tiene(0.1) tider/tier(0.1) below_threshold(0.2)
-23	<SEP>up	0.10	1	95	oppi/uppi(0.3) opp/upp(0.3) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) below_threshold(0.2)
-24	<SEP>er	0.10	1	79	er/er(1.0) below_threshold(0.0)
-25	<SOS>hva/va<EOS>	0.09	1	79	
-26	<SOS>noe/no<EOS>	0.09	4	65	
-27	çy	0.09	1	57	mye/myççy(0.4) kyr/çyr(0.1) kyr/çy(0.1) mye/myçy(0.1) kyrne/çyn(0.0) below_threshold(0.3)
-28	<SOS>er/er<EOS>	0.09	1	88	
-29	<SOS>da/a<EOS>	0.09	3	58	
-30	<SOS>vet/vett<SEP>du/du<EOS>	0.08	1	56	
-31	vør	0.08	2	55	vært/vøre(0.2) vært/vøri(0.2) blitt/vørrte(0.1) blitt/vørrti(0.1) være/vørå(0.1) være/vørrå(0.1) vært/vørr(0.1) vært/vør(0.0) være/vørr(0.0) vært/vørri(0.0) vært/vørre(0.0) være/vør(0.0) blitt/vørrt(0.0) vært/vørrt(0.0) below_threshold(0.0)
-32	<SEP>ru	0.08	3	58	du/ru(0.8) rundt/runnt(0.1) runde/runnde(0.0) below_threshold(0.1)
-33	ɽæi	0.08	1	91	blei/bɽæi(0.7) flere/fɽæire(0.1) ålreit/åɽæit(0.1) pleier/pɽæier(0.0) fler/fɽæir(0.0) pleier/pɽæie(0.0) below_threshold(0.1)
-34	mæi<SEP>	0.08	1	76	meg/mæi(0.9) mer/mæi(0.1) below_threshold(0.1)
-35	æra<SEP>	0.08	1	60	være/væra(0.7) gjøre/jæra(0.1) below_threshold(0.1)
-36	<SOS>det/de<SEP>er/ær<EOS>	0.08	5	99	
-37	dærre	0.07	1	55	derre/dærre(0.8) der/dærre(0.2) below_threshold(0.0)
-38	dømm<SEP>	0.07	2	98	de/dømm(0.8) dem/dømm(0.1) below_threshold(0.0)
-39	ømm<SEP>	0.07	3	88	de/dømm(0.6) de/rømm(0.1) dem/dømm(0.1) dem/rømm(0.0) de/ømm(0.0) kommer/çømm(0.0) below_threshold(0.0)
-40	<SEP>çue	0.07	0	52	tjue/çue(0.9) below_threshold(0.1)
-41	<SEP>oɽ	0.07	0	69	ord/oɽ(0.9) below_threshold(0.1)
+INDEX	FEATURE	IMPORTANCE	REPRESENTATIVENESS	DISTINCTIVENESS	CONTEXT
+0	<SOS>da/ra<EOS>	0.27	2	95	
+1	<SEP>tte	0.24	1	97	ikke/tte(1.0) below_threshold(0.0)
+2	<SOS>ikke/itte<EOS>	0.24	6	95	
+3	çi<SEP>	0.22	1	63	ikke/çi(0.6) ikke/iççi(0.2) mye/myçi(0.1) mye/myççi(0.1) below_threshold(0.1)
+4	sø<SEP>	0.20	1	94	så/sø(0.9) below_threshold(0.1)
+5	<SEP>upp	0.20	1	96	opp/upp(0.4) oppi/uppi(0.2) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) below_threshold(0.1)
+6	<SOS>jeg/je<EOS>	0.19	7	85	
+7	<SOS>jeg/jæ<EOS>	0.17	12	97	
+8	<SOS>var/var<EOS>	0.16	8	79	
+9	<SOS>er/ær<EOS>	0.15	10	97	
+10	<SEP>jæi	0.15	2	91	jeg/jæi(1.0) below_threshold(0.0)
+11	øɽɽ	0.15	1	68	folk/føɽɽk(0.2) mjølk/mjøɽɽk(0.1) hjelpe/jøɽɽpe(0.1) hjelp/jøɽɽp(0.0) sjølve/ʂøɽɽve(0.0) følge/føɽɽje(0.0) vel/vøɽɽ(0.0) sjøl/ʂøɽɽve(0.0) golvet/gøɽɽve(0.0) below_threshold(0.5)
+12	<SOS>er/æ<EOS>	0.13	17	61	
+13	ræ<SEP>	0.13	1	60	det/ræ(0.9) deg/ræ(0.1) below_threshold(0.0)
+14	<SOS>att/att<EOS>	0.12	1	51	
+15	<SEP>re	0.12	10	46	det/re(0.9) de/remm(0.0) rett/rett(0.0) regel/regel(0.0) deg/re(0.0) den/renn(0.0) rettogslett/rettåʂlett(0.0) redd/redd(0.0) dem/remm(0.0) resten/resstn̩(0.0) reise/reise(0.0) riktig/rekkti(0.0) reiste/resste(0.0) rette/rette(0.0) dere/re(0.0) reise/rese(0.0) de/re(0.0) regne/reŋŋne(0.0) below_threshold(0.1)
+16	<SEP>bɽe	0.11	1	84	ble/bɽe(0.8) blei/bɽei(0.1) ble/bɽei(0.0) below_threshold(0.0)
+17	jæ<SEP>	0.11	12	94	jeg/jæ(1.0) gjør/jæ(0.0) below_threshold(0.0)
+18	<SOS>ved/ve<EOS>	0.11	1	38	
+19	<SEP>ræi	0.10	1	17	de/ræi(0.4) reise/ræise(0.1) dem/ræi(0.1) reiste/ræiste(0.0) reiser/ræiser(0.0) rein/ræin(0.0) reiser/ræise(0.0) reiste/ræisste(0.0) reist/ræist(0.0) below_threshold(0.2)
+20	nok	0.10	1	52	noe/nokko(0.4) noe/noko(0.2) noen/nokkon(0.1) nok/nokk(0.1) noen/nokon(0.1) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
+21	<SOS>det/re<EOS>	0.10	7	93	
+22	<SEP>tie	0.10	0	27	tida/tie(0.7) tiende/tiene(0.1) tider/tier(0.1) below_threshold(0.2)
+23	<SEP>up	0.10	1	94	oppi/uppi(0.3) opp/upp(0.3) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) below_threshold(0.2)
+24	<SEP>er	0.10	1	71	er/er(1.0) below_threshold(0.0)
+25	<SOS>hva/va<EOS>	0.09	1	71	
+26	<SOS>noe/no<EOS>	0.09	4	51	
+27	çy	0.09	1	39	mye/myççy(0.4) kyr/çyr(0.1) kyr/çy(0.1) mye/myçy(0.1) kyrne/çyn(0.0) below_threshold(0.3)
+28	<SOS>er/er<EOS>	0.09	1	83	
+29	<SOS>da/a<EOS>	0.09	3	42	
+30	<SOS>vet/vett<SEP>du/du<EOS>	0.08	1	38	
+31	vør	0.08	2	37	vært/vøre(0.2) vært/vøri(0.2) blitt/vørrte(0.1) blitt/vørrti(0.1) være/vørå(0.1) være/vørrå(0.1) vært/vørr(0.1) vært/vør(0.0) være/vørr(0.0) vært/vørri(0.0) vært/vørre(0.0) være/vør(0.0) blitt/vørrt(0.0) vært/vørrt(0.0) below_threshold(0.0)
+32	<SEP>ru	0.08	3	41	du/ru(0.8) rundt/runnt(0.1) runde/runnde(0.0) below_threshold(0.1)
+33	ɽæi	0.08	1	87	blei/bɽæi(0.7) flere/fɽæire(0.1) ålreit/åɽæit(0.1) pleier/pɽæier(0.0) fler/fɽæir(0.0) pleier/pɽæie(0.0) below_threshold(0.1)
+34	mæi<SEP>	0.08	1	67	meg/mæi(0.9) mer/mæi(0.1) below_threshold(0.1)
+35	æra<SEP>	0.08	1	44	være/væra(0.7) gjøre/jæra(0.1) below_threshold(0.1)
+36	<SOS>det/de<SEP>er/ær<EOS>	0.08	5	98	
+37	dærre	0.07	1	37	derre/dærre(0.8) der/dærre(0.2) below_threshold(0.0)
+38	dømm<SEP>	0.07	2	97	de/dømm(0.8) dem/dømm(0.1) below_threshold(0.0)
+39	ømm<SEP>	0.07	3	83	de/dømm(0.6) de/rømm(0.1) dem/dømm(0.1) dem/rømm(0.0) de/ømm(0.0) kommer/çømm(0.0) below_threshold(0.0)
+40	<SEP>çue	0.07	0	33	tjue/çue(0.9) below_threshold(0.1)
+41	<SEP>oɽ	0.07	0	56	ord/oɽ(0.9) below_threshold(0.1)
 42	<SOS>så/så<SEP>er/ær<EOS>	0.07	1	99	
-43	gå<SEP>	0.07	2	31	gå/gå(0.7) går/gå(0.2) noe/någgå(0.0) dager/dåggå(0.0) below_threshold(0.0)
-44	mor	0.07	2	47	moro/morro(0.3) mor/mor(0.3) moro/moro(0.1) bestemor/besstemor(0.1) mora/morra(0.1) mora/mora(0.0) bestemor/bæsstemor(0.0) below_threshold(0.2)
-45	<SOS>mest/messt<EOS>	0.07	1	49	
-46	kø	0.07	1	49	kommet/kømmi(0.1) skal/skø(0.1) kø/kø(0.1) korn/kønn(0.1) below_threshold(0.7)
-47	ræd	0.07	0	30	tretti/træddve(0.5) below_threshold(0.5)
-48	øri	0.07	1	60	vært/vøri(0.6) kjøring/çøriŋ(0.1) below_threshold(0.3)
-49	<SEP>var	0.07	10	60	var/var(0.9) ble/varrt(0.1) være/vara(0.0) vare/vare(0.0) ble/vart(0.0) varmt/varrnt(0.0) varer/varer(0.0) varm/varrm(0.0) varme/varrme(0.0) below_threshold(0.0)
-50	<SOS>trur/tru<SEP>jeg/e<EOS>	0.07	1	45	
-51	ysste	0.06	0	48	første/fysste(0.7) søster/sysster(0.1) below_threshold(0.3)
-52	dere	0.06	1	47	dere/dere(0.6) videre/videre(0.1) studere/studere(0.1) below_threshold(0.3)
-53	joɽ	0.06	1	65	gjorde/joɽe(0.4) ifjor/ifjoɽ(0.2) gjorde/joɽ(0.1) jordet/joɽe(0.0) jorda/joɽa(0.0) jord/joɽ(0.0) jordbruk/joɽbruk(0.0) below_threshold(0.2)
-54	<SOS>da/da<EOS>	0.06	22	45	
-55	<SEP>aan	0.06	1	67	annen/aan(0.5) annet/aant(0.3) annet/aan(0.0) below_threshold(0.1)
-56	ɽ	0.06	25	55	blir/bɽi(0.1) folk/fåɽɽk(0.1) blir/bɽir(0.0) blei/bɽæi(0.0) bli/bɽi(0.0) sjøl/ʂøɽ(0.0) blitt/bɽitt(0.0) gamle/gammɽe(0.0) skole/skoɽe(0.0) gjorde/joɽe(0.0) glad/gɽa(0.0) folk/føɽɽk(0.0) ble/bɽe(0.0) plass/pɽass(0.0) flere/fɽere(0.0) skolen/skuɽa(0.0) vel/væɽ(0.0) skole/skuɽe(0.0) ifjor/ifjoɽ(0.0) ord/oɽ(0.0) helga/hæɽɽja(0.0) dårlig/dåɽi(0.0) jul/juɽ(0.0) gard/gaɽ(0.0) flink/fɽiŋŋk(0.0) flytta/fɽøtta(0.0) mjølk/mjøɽɽk(0.0) gård/gåɽ(0.0) fleste/fɽesste(0.0) elg/æɽɽj(0.0) gjorde/joɽ(0.0) blei/bɽei(0.0) helg/hæɽɽj(0.0) elva/æɽɽva(0.0) hjelpe/jøɽɽpe(0.0) klokka/kɽåkka(0.0) vel/veɽ(0.0) klart/kɽart(0.0) hjelpe/jæɽɽpe(0.0) flinke/fɽiŋŋke(0.0) galt/gæɽi(0.0) bokmål/bokmåɽ(0.0) hjelp/jøɽɽp(0.0) flere/fɽæire(0.0) ålreit/åɽæit(0.0) folka/fåɽɽka(0.0) klasse/kɽasse(0.0) flytte/fɽøtta(0.0) sjølve/ʂøɽɽve(0.0) mål/måɽ(0.0) flytte/fɽøtte(0.0) flytta/fɽøtt(0.0) flytta/fɽøtte(0.0) fly/fɽy(0.0) elg/æɽɽg(0.0) folk/fæɽɽk(0.0) fleste/fɽeste(0.0) samla/sammɽa(0.0) hjelp/jæɽɽp(0.0) folkehøyskole/fåɽɽkehøyskoɽe(0.0) glatt/gɽatt(0.0) følge/føɽɽje(0.0) blant/bɽannt(0.0) golvet/gåɽɽve(0.0) fler/fɽer(0.0) blantannet/bɽanntaant(0.0) spørsmål/spøʂʂmåɽ(0.0) vel/vøɽɽ(0.0) pleier/pɽæier(0.0) vel/veɽɽ(0.0) sjøl/ʂøɽɽve(0.0) ordentlig/åŋŋkɽi(0.0) golvet/gøɽɽve(0.0) barneskole/barneskoɽe(0.0) jordet/joɽe(0.0) mjølka/mjøɽɽka(0.0) nord/noɽ(0.0) nordover/noɽåver(0.0) folketallet/fåɽɽketaɽe(0.0) melk/mjæɽɽk(0.0) velge/væɽɽja(0.0) ålreit/åɽeit(0.0) flytter/fɽøtt(0.0) jorda/joɽa(0.0) skolen/skoɽa(0.0) pluss/pɽuss(0.0) elgen/æɽɽjen(0.0) fler/fɽæir(0.0) plasser/pɽasser(0.0) flytte/fɽytte(0.0) vel/vøɽ(0.0) kjæledyr/çæɽedyr(0.0) klassa/kɽassa(0.0) problem/probbɽem(0.0) skoler/skoɽer(0.0) mjølkeproduksjon/mjøɽɽkeprodukʂon(0.0) plassen/pɽassn̩(0.0) allikevel/alikkavæɽ(0.0) sjøl/ʂæɽ(0.0) følger/føɽɽje(0.0) slik/ʂɽik(0.0) folkeskolen/fåɽɽkeskoorn(0.0) fjerde/fjæɽe(0.0) betale/betaɽe(0.0) jord/joɽ(0.0) plasser/pɽassa(0.0) avgårde/agåɽe(0.0) flytta/fɽytta(0.0) jordbruk/joɽbruk(0.0) sekstitallet/sekkstitaɽe(0.0) hull/høɽ(0.0) elgjakt/æɽɽjakkt(0.0) mjølke/mjøɽɽke(0.0) kvinnfolk/kvinnfåɽɽk(0.0) ålreit/åɽræit(0.0) hjalp/jaɽɽp(0.0) glemt/gɽømmt(0.0) tolv/tåɽɽv(0.0) halv/hæɽɽv(0.0) ble/bɽei(0.0) helgene/hæɽɽjene(0.0) plukka/pɽokka(0.0) jula/juɽa(0.0) plukke/pɽokke(0.0) sol/soɽ(0.0) blantanna/bɽanntanna(0.0) flytter/fɽytter(0.0) fæl/fæɽ(0.0) sola/soɽa(0.0) ungdomsskole/oŋŋdåmskoɽe(0.0) nordi/noɽi(0.0) ble/bɽæ(0.0) flytter/fɽøtter(0.0) galt/gaɽe(0.0) taler/taɽa(0.0) flott/fɽått(0.0) pleier/pɽæie(0.0) riksmål/rikksmåɽ(0.0) problem/probɽem(0.0) bord/boɽ(0.0) fæle/fæɽe(0.0) fløy/fɽøy(0.0) ulv/uɽɽv(0.0) byfolk/byfåɽɽk(0.0) blå/bɽå(0.0) jordbær/joɽɽbær(0.0) tolv/tøɽɽv(0.0) mjølk/mjæɽɽk(0.0) glass/gɽass(0.0) fløtinga/fɽøtiŋa(0.0) elver/æɽɽver(0.0) below_threshold(0.4)
-57	<SEP>åpp	0.06	2	53	opp/åpp(0.7) oppi/åppi(0.1) oppe/åppe(0.0) oppå/åppå(0.0) oppvokst/åppvåkkst(0.0) oppover/åppåver(0.0) below_threshold(0.1)
-58	fe<SEP>	0.06	1	46	for/fe(0.7) får/fe(0.1) vel/fe(0.1) kaffe/kaffe(0.0) treffe/treffe(0.0) tøffe/tøffe(0.0) below_threshold(0.1)
-59	æu<SEP>	0.06	2	43	au/æu(0.8) jo/jæu(0.1) sau/sæu(0.0) below_threshold(0.0)
-60	<SEP>kke	0.06	4	49	ikke/kke(1.0) below_threshold(0.0)
-61	<SOS>du/ru<EOS>	0.06	2	93	
-62	ʂʂ<SEP>	0.06	0	41	spørs/spøʂʂ(0.3) oss/våʂʂ(0.1) æsj/uʂʂ(0.1) tvers/tvæʂʂ(0.1) mars/maʂʂ(0.1) below_threshold(0.3)
-63	<SEP>juɽ	0.06	0	60	jul/juɽ(0.6) jula/juɽa(0.0) below_threshold(0.4)
-64	<SEP>nok	0.06	1	66	noe/nokko(0.4) noe/noko(0.2) noen/nokkon(0.1) nok/nokk(0.1) noen/nokon(0.1) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
-65	kæ	0.06	2	59	kan/kænn(0.2) kanskje/kænnʂe(0.1) skauen/skævven(0.1) skal/skæ(0.1) kan/kæinn(0.1) snakker/snakkær(0.0) skøyt/skæut(0.0) liker/likær(0.0) bruker/brukær(0.0) onkelen/oŋŋkærn(0.0) hva/kæ(0.0) skauen/skæuen(0.0) skal/skær(0.0) below_threshold(0.4)
-66	ikkt<SEP>	0.06	1	48	slikt/ʂlikkt(0.3) likt/likkt(0.3) utsikt/utsikkt(0.1) artig/arrtikkt(0.1) below_threshold(0.2)
-67	ukk	0.06	1	39	husker/hukksa(0.2) brukt/brukkt(0.2) brukte/brukkte(0.2) nok/nukk(0.1) husker/hukkse(0.0) husker/hukksar(0.0) huske/hukkse(0.0) below_threshold(0.3)
-68	åmmå	0.06	1	52	sommeren/såmmårn(0.3) sommer/såmmår(0.2) komme/kåmmå(0.2) samme/såmmå(0.1) below_threshold(0.2)
-69	leg	0.06	1	36	legge/legge(0.1) tillegg/tillegg(0.1) legger/legg(0.1) legger/legger(0.0) egentlig/egentleg(0.0) anlegg/annlegg(0.0) legge/legga(0.0) below_threshold(0.6)
-70	rer<SEP>	0.06	1	65	lærer/lærer(0.1) kjører/çører(0.1) hører/hører(0.1) turer/turer(0.1) klarer/klarer(0.1) varer/varer(0.0) below_threshold(0.5)
-71	prøve	0.06	1	47	prøve/prøve(0.6) prøver/prøver(0.2) prøver/prøve(0.1) below_threshold(0.1)
-72	aa	0.06	1	55	annet/aant(0.3) annen/aan(0.2) faren/faarn(0.1) ja/jaa(0.1) garden/gaarn(0.0) blantannet/bɽanntaant(0.0) faen/faan(0.0) dager/daar(0.0) below_threshold(0.3)
-73	<SOS>jeg/jæi<EOS>	0.06	2	96	
-74	dan<SEP>	0.06	1	43	dagen/dan(0.2) hvordan/vorrdan(0.1) lørdag/lørdan(0.1) lørdagen/lørdan(0.1) fredagen/fredan(0.1) søndagen/sønndan(0.1) below_threshold(0.4)
-75	<SOS>nesten/nesstn̩<EOS>	0.06	1	59	
-76	<SEP>rå	0.06	1	39	da/rå(0.6) råd/rå(0.1) rådyr/rådyr(0.0) below_threshold(0.2)
-77	ssom	0.06	1	62	lissom/lissom(0.4) lissom/lissomm(0.2) messom/mæssomm(0.2) messom/messomm(0.1) below_threshold(0.1)
-78	<SOS>du/u<EOS>	0.06	1	44	
-79	<SOS>lenge/leŋŋe<EOS>	0.06	0	47	
-80	upp	0.06	1	71	oppi/uppi(0.3) opp/upp(0.2) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) gruppe/gruppe(0.0) below_threshold(0.3)
-81	somm<SEP>	0.06	3	48	som/somm(0.8) liksom/likksomm(0.1) lissom/lissomm(0.1) messom/mæssomm(0.0) messom/messomm(0.0) below_threshold(0.0)
-82	ykkt	0.06	1	43	fryktelig/frykktli(0.3) fryktelig/frykktle(0.2) trygt/trykkt(0.2) bygd/bykkt(0.1) tykte/tykkte(0.1) below_threshold(0.2)
-83	<SOS>like/like<EOS>	0.06	1	46	
-84	<SOS>veit/væit<SEP>du/du<EOS>	0.06	1	59	
-85	lik<SEP>	0.06	2	55	slik/ʂlik(0.8) slik/slik(0.1) slik/lik(0.0) like/lik(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
-86	domm<SEP>	0.06	2	80	de/domm(0.7) dem/domm(0.3) below_threshold(0.0)
-87	<SOS>si/si<EOS>	0.05	1	46	
-88	<SOS>av/ta<EOS>	0.05	1	54	
-89	<SEP>væra	0.05	1	64	være/væra(0.8) hverandre/væranndre(0.1) below_threshold(0.0)
-90	drive	0.05	1	70	drive/drive(0.4) driver/drive(0.2) driver/driver(0.2) drevet/drive(0.1) below_threshold(0.0)
-91	rem	0.05	1	57	de/remm(0.6) dem/remm(0.1) below_threshold(0.3)
-92	<SEP>bɽ	0.05	7	68	blir/bɽi(0.3) blir/bɽir(0.2) blei/bɽæi(0.1) bli/bɽi(0.1) blitt/bɽitt(0.1) ble/bɽe(0.1) blei/bɽei(0.0) blant/bɽannt(0.0) blantannet/bɽanntaant(0.0) ble/bɽei(0.0) blantanna/bɽanntanna(0.0) ble/bɽæ(0.0) blå/bɽå(0.0) below_threshold(0.1)
-93	æitt	0.05	1	44	veit/væitt(0.3) greit/græitt(0.2) ett/æitt(0.2) vet/væitt(0.1) et/æitt(0.1) het/hæitte(0.1) heter/hæitte(0.0) below_threshold(0.1)
-94	<SOS>ja/ja<SEP>da/då<EOS>	0.05	0	17	
-95	ug	0.05	1	42	tjue/çuge(0.1) ihug/ihug(0.1) ihug/ihæug(0.1) dugnad/dugnad(0.0) below_threshold(0.7)
-96	<SEP>åt	0.05	1	38	åt/åt(0.8) åtte/åtte(0.1) åtti/åtti(0.0) åt/ått(0.0) åttende/åttn̩e(0.0) below_threshold(0.1)
-97	<SEP>jæu	0.05	0	37	jo/jæu(0.9) below_threshold(0.1)
-98	<SOS>de/domm<EOS>	0.05	1	83	
-99	feri	0.05	0	28	ferie/ferie(0.3) ferie/feri(0.1) below_threshold(0.6)
-100	ŋer<SEP>	0.05	2	56	lenger/leŋŋer(0.2) ganger/gaŋŋer(0.1) unger/oŋŋer(0.1) lenger/læŋŋer(0.1) penger/peŋŋer(0.1) trenger/treŋŋer(0.0) ganger/gåŋŋer(0.0) ganger/goŋŋer(0.0) below_threshold(0.3)
-101	ru<SEP>	0.05	5	46	du/ru(0.5) trur/tru(0.4) tru/tru(0.0) bru/bru(0.0) below_threshold(0.0)
-102	<SEP>æit	0.05	0	47	et/æit(0.8) ett/æitt(0.1) ett/æit(0.1) et/æitt(0.0) below_threshold(0.0)
-103	ʂʂe	0.05	1	33	forskjell/fåʂʂell(0.2) fiska/fiʂʂe(0.1) forskjell/fåʂʂel(0.1) prosjekt/proʂʂekt(0.0) below_threshold(0.6)
-104	rde<SEP>	0.05	1	49	gjorde/jorde(0.2) kjørte/çørrde(0.1) fordi/fårde(0.1) kjørte/çørde(0.1) hørte/hørrde(0.1) burde/burrde(0.1) hørte/hørde(0.1) fordi/fårrde(0.0) gjorde/jorrde(0.0) lærte/lærrde(0.0) below_threshold(0.3)
-105	detta	0.05	1	64	dette/detta(1.0) dette/dettan(0.0) below_threshold(0.0)
-106	ner<SEP>	0.05	3	43	ned/ner(0.1) under/unner(0.1) skjønner/ʂønner(0.1) kjenner/çenner(0.1) venner/venner(0.0) begynner/byner(0.0) begynner/bynner(0.0) kroner/kroner(0.0) høner/høner(0.0) måneder/måner(0.0) mener/mener(0.0) minner/minner(0.0) finner/finner(0.0) henne/henner(0.0) savner/savvner(0.0) hender/henner(0.0) below_threshold(0.4)
-107	<SEP>gø	0.05	1	60	godt/gøtt(0.4) gøy/gøy(0.3) gang/gøŋŋ(0.0) golvet/gøɽɽve(0.0) below_threshold(0.2)
-108	<SOS>de/dømm<EOS>	0.05	2	98	
-109	øpe	0.05	1	43	kjøpe/çøpe(0.5) løpet/løpe(0.1) kjøper/çøper(0.1) below_threshold(0.3)
-110	<SOS>så/så<SEP>var/var<EOS>	0.05	1	87	
-111	<SEP>jæ	0.05	14	66	jeg/jæ(0.9) jeg/jæi(0.0) jo/jæu(0.0) gjør/jær(0.0) gjøre/jæra(0.0) jævlig/jævli(0.0) gjerne/jærne(0.0) hjelpe/jæɽɽpe(0.0) gjør/jæ(0.0) jæklig/jækli(0.0) jækla/jækla(0.0) hjelp/jæɽɽp(0.0) gjøre/jærra(0.0) gjøre/jær(0.0) jævla/jævla(0.0) below_threshold(0.0)
-112	enna<SEP>	0.05	1	38	denne/denna(0.6) denne/enna(0.2) below_threshold(0.3)
-113	kko	0.05	1	34	noe/nokko(0.4) akkurat/akkorat(0.2) akkurat/akkoratt(0.2) noen/nokkon(0.1) noe/nåkko(0.0) noen/nokko(0.0) below_threshold(0.1)
-114	iŋŋk	0.05	1	45	flink/fɽiŋŋk(0.4) flinke/fɽiŋŋke(0.2) below_threshold(0.4)
-115	nåkk<SEP>	0.05	2	43	nok/nåkk(1.0) below_threshold(0.0)
-116	yç	0.05	2	28	mye/myçe(0.3) mye/myççe(0.2) mye/myççy(0.2) mye/myçi(0.1) mye/myççi(0.1) stykker/styççe(0.0) mye/myçy(0.0) below_threshold(0.1)
-117	<SEP>mye	0.05	4	50	mye/mye(1.0) below_threshold(0.0)
-118	gaŋŋe	0.05	1	60	gangen/gaŋŋen(0.5) ganger/gaŋŋer(0.4) below_threshold(0.1)
-119	anne<SEP>	0.05	0	29	vannet/vanne(0.3) landet/lanne(0.2) litegrann/litteranne(0.1) below_threshold(0.4)
-120	væɽ	0.05	1	35	vel/væɽ(0.5) allikevel/alikkavæɽ(0.1) below_threshold(0.4)
-121	<SOS>sikkert/sikkert<EOS>	0.05	1	40	
-122	<SOS>det/de<SEP>er/æ<EOS>	0.05	9	76	
-123	<SEP>nø	0.05	1	42	nok/nøkk(0.2) nødt/nøtt(0.1) noen/nøørn(0.1) nøye/nøye(0.1) når/nørr(0.1) below_threshold(0.5)
-124	gø	0.05	1	57	godt/gøtt(0.4) gøy/gøy(0.3) gang/gøŋŋ(0.0) golvet/gøɽɽve(0.0) below_threshold(0.2)
-125	<SEP>dag	0.05	2	29	dag/dag(0.8) dagen/dagen(0.1) dager/dager(0.0) dager/daga(0.0) below_threshold(0.1)
-126	<SEP>ʂlik	0.05	2	71	slik/ʂlik(0.7) slikt/ʂlikkt(0.1) slike/ʂlike(0.1) slik/ʂlikk(0.1) slike/ʂlikke(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
-127	ʂlik	0.05	2	71	slik/ʂlik(0.7) slikt/ʂlikkt(0.1) slike/ʂlike(0.1) slik/ʂlikk(0.1) slike/ʂlikke(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
-128	<SEP>ær	0.05	10	91	er/ær(1.0) der/ær(0.0) her/ær(0.0) arbeid/ærrbe(0.0) below_threshold(0.0)
-129	ærre<SEP>	0.05	2	27	bare/bærre(0.3) derre/dærre(0.3) herre/hærre(0.1) der/dærre(0.1) verre/værre(0.1) dessverre/desværre(0.0) her/hærre(0.0) below_threshold(0.0)
-130	ʂl	0.05	6	51	slik/ʂlik(0.2) slik/ʂlek(0.1) slutt/ʂlutt(0.0) slik/ʂlekk(0.0) slikt/ʂlikkt(0.0) koselig/koʂli(0.0) slike/ʂlike(0.0) slik/ʂlikk(0.0) slutta/ʂlutta(0.0) slo/ʂlo(0.0) slå/ʂlå(0.0) slags/ʂlakks(0.0) rettogslett/rettåʂlett(0.0) slutten/ʂluttn̩(0.0) slike/ʂleke(0.0) slått/ʂlått(0.0) slike/ʂlikke(0.0) slapp/ʂlapp(0.0) slakta/ʂlakkta(0.0) slike/ʂlekke(0.0) slutte/ʂlutte(0.0) slag/ʂlag(0.0) slår/ʂlår(0.0) stusselig/stuʂʂli(0.0) slakting/ʂlakktiŋ(0.0) slåtten/ʂlåttn̩(0.0) slikt/ʂlekkt(0.0) annerledes/annʂless(0.0) slikt/ʂlik(0.0) below_threshold(0.3)
-131	ɽer	0.05	1	76	flere/fɽere(0.4) fler/fɽer(0.1) skoler/skoɽer(0.0) below_threshold(0.5)
-132	ʂle	0.05	1	66	slik/ʂlek(0.3) slik/ʂlekk(0.1) rettogslett/rettåʂlett(0.1) slike/ʂleke(0.0) slike/ʂlekke(0.0) slikt/ʂlekkt(0.0) annerledes/annʂless(0.0) below_threshold(0.4)
-133	<SEP>ute	0.04	1	31	ute/ute(0.9) below_threshold(0.1)
-134	etta<SEP>	0.04	1	61	dette/detta(0.8) dette/etta(0.1) sette/setta(0.0) below_threshold(0.1)
-135	<SOS>synes/synns<EOS>	0.04	2	40	
-136	mi<SEP>	0.04	1	23	mi/mi(0.4) vi/mi(0.4) kommet/kåmmi(0.0) kommet/kømmi(0.0) heime/hæimi(0.0) below_threshold(0.1)
-137	<SEP>domm	0.04	2	73	de/domm(0.6) dem/domm(0.3) dumt/dommt(0.0) below_threshold(0.0)
-138	<SOS>nok/nåkk<EOS>	0.04	2	43	
-139	ɽi<SEP>	0.04	4	58	blir/bɽi(0.6) bli/bɽi(0.2) dårlig/dåɽi(0.1) galt/gæɽi(0.0) ordentlig/åŋŋkɽi(0.0) nordi/noɽi(0.0) below_threshold(0.0)
-140	sert<SEP>	0.04	0	34	interessert/inntresert(0.3) interessert/intresert(0.1) below_threshold(0.6)
-141	<SEP>iv	0.04	1	46	ihvertfall/iværrtfall(0.8) below_threshold(0.2)
-142	go	0.04	1	32	god/go(0.4) gode/goe(0.1) gang/goŋŋ(0.1) gangen/goŋŋen(0.0) ganger/goŋŋer(0.0) imorgen/imårrgo(0.0) below_threshold(0.3)
-143	låv	0.04	0	29	lov/låv(0.6) låven/låven(0.1) below_threshold(0.3)
-144	ær<SEP>	0.04	23	39	er/ær(0.6) der/dær(0.2) her/hær(0.1) får/fær(0.0) hver/vær(0.0) gjør/jær(0.0) husker/husær(0.0) være/vær(0.0) vær/vær(0.0) jobber/jåbbær(0.0) penger/peŋŋær(0.0) unger/oŋŋær(0.0) snakker/snakkær(0.0) sommer/såmmær(0.0) der/ær(0.0) nær/nær(0.0) svær/ʂvær(0.0) prater/pratær(0.0) gutter/guttær(0.0) hver/kvær(0.0) her/ær(0.0) liker/likær(0.0) bruker/brukær(0.0) biler/bilær(0.0) svær/svær(0.0) mer/mær(0.0) gjøre/jær(0.0) skal/skær(0.0) below_threshold(0.1)
-145	<SEP>let	0.04	1	47	lett/lett(0.4) lettvint/lettvinnt(0.1) lettere/lettere(0.1) litt/lett(0.1) below_threshold(0.3)
-146	<SOS>det/dæ<EOS>	0.04	7	41	
-147	ro<SEP>	0.04	1	47	moro/morro(0.5) moro/moro(0.1) ro/ro(0.1) dro/dro(0.1) tror/tro(0.1) below_threshold(0.1)
-148	<SOS>sett/sett<EOS>	0.04	1	36	
-149	<SEP>ette	0.04	2	56	etter/ette(0.4) etter/etter(0.3) ikke/ette(0.1) etterpå/ettepå(0.1) etterat/etteratt(0.0) etterhvert/etteværrt(0.0) below_threshold(0.1)
-150	<SEP>lett	0.04	1	47	lett/lett(0.4) lettvint/lettvinnt(0.1) lettere/lettere(0.1) litt/lett(0.1) below_threshold(0.3)
-151	mal	0.04	0	35	gammal/gammal(0.3) gammalt/gammalt(0.2) gammel/gammal(0.1) gammal/gamal(0.1) below_threshold(0.3)
-152	<SOS>vi/me<SEP>var/va<EOS>	0.04	0	32	
-153	emm	0.04	7	47	de/demm(0.3) fem/femm(0.1) de/remm(0.1) dem/demm(0.0) kommer/çemm(0.0) hjemme/jemme(0.0) hjem/jemm(0.0) foreksempel/fårreksemmpel(0.0) de/emm(0.0) hvem/vemm(0.0) stemmer/stemmer(0.0) femti/femmti(0.0) femten/femmtn̩(0.0) hjem/hemm(0.0) dem/remm(0.0) femte/femmte(0.0) stemmer/stemme(0.0) kjempefint/çemmpefint(0.0) bestemt/bestemmt(0.0) foreksempel/fårresemmpel(0.0) foreksempel/førreksemmpel(0.0) kjempebra/çemmpebra(0.0) hjemme/hemme(0.0) kjempefin/çemmpefin(0.0) below_threshold(0.2)
-154	åvi	0.04	0	36	såvidt/såvitt(0.3) forsåvidt/fårrsåvitt(0.2) påvirka/påvirrka(0.1) below_threshold(0.4)
-155	<SEP>itte	0.04	6	84	ikke/itte(1.0) below_threshold(0.0)
-156	<SEP>veit	0.04	0	18	veit/veit(0.8) veit/veitt(0.2) below_threshold(0.0)
+43	gå<SEP>	0.07	2	4	gå/gå(0.7) går/gå(0.2) noe/någgå(0.0) dager/dåggå(0.0) below_threshold(0.0)
+44	mor	0.07	2	26	moro/morro(0.3) mor/mor(0.3) moro/moro(0.1) bestemor/besstemor(0.1) mora/morra(0.1) mora/mora(0.0) bestemor/bæsstemor(0.0) below_threshold(0.2)
+45	<SOS>mest/messt<EOS>	0.07	1	29	
+46	kø	0.07	1	29	kommet/kømmi(0.1) skal/skø(0.1) kø/kø(0.1) korn/kønn(0.1) below_threshold(0.7)
+47	ræd	0.07	0	2	tretti/træddve(0.5) below_threshold(0.5)
+48	øri	0.07	1	44	vært/vøri(0.6) kjøring/çøriŋ(0.1) below_threshold(0.3)
+49	<SEP>var	0.07	10	45	var/var(0.9) ble/varrt(0.1) være/vara(0.0) vare/vare(0.0) ble/vart(0.0) varmt/varrnt(0.0) varer/varer(0.0) varm/varrm(0.0) varme/varrme(0.0) below_threshold(0.0)
+50	<SOS>trur/tru<SEP>jeg/e<EOS>	0.07	1	24	
+51	ysste	0.06	0	28	første/fysste(0.7) søster/sysster(0.1) below_threshold(0.3)
+52	dere	0.06	1	27	dere/dere(0.6) videre/videre(0.1) studere/studere(0.1) below_threshold(0.3)
+53	joɽ	0.06	1	51	gjorde/joɽe(0.4) ifjor/ifjoɽ(0.2) gjorde/joɽ(0.1) jordet/joɽe(0.0) jorda/joɽa(0.0) jord/joɽ(0.0) jordbruk/joɽbruk(0.0) below_threshold(0.2)
+54	<SOS>da/da<EOS>	0.06	22	23	
+55	<SEP>aan	0.06	1	55	annen/aan(0.5) annet/aant(0.3) annet/aan(0.0) below_threshold(0.1)
+56	ɽ	0.06	25	37	blir/bɽi(0.1) folk/fåɽɽk(0.1) blir/bɽir(0.0) blei/bɽæi(0.0) bli/bɽi(0.0) sjøl/ʂøɽ(0.0) blitt/bɽitt(0.0) gamle/gammɽe(0.0) skole/skoɽe(0.0) gjorde/joɽe(0.0) glad/gɽa(0.0) folk/føɽɽk(0.0) ble/bɽe(0.0) plass/pɽass(0.0) flere/fɽere(0.0) skolen/skuɽa(0.0) vel/væɽ(0.0) skole/skuɽe(0.0) ifjor/ifjoɽ(0.0) ord/oɽ(0.0) helga/hæɽɽja(0.0) dårlig/dåɽi(0.0) jul/juɽ(0.0) gard/gaɽ(0.0) flink/fɽiŋŋk(0.0) flytta/fɽøtta(0.0) mjølk/mjøɽɽk(0.0) gård/gåɽ(0.0) fleste/fɽesste(0.0) elg/æɽɽj(0.0) gjorde/joɽ(0.0) blei/bɽei(0.0) helg/hæɽɽj(0.0) elva/æɽɽva(0.0) hjelpe/jøɽɽpe(0.0) klokka/kɽåkka(0.0) vel/veɽ(0.0) klart/kɽart(0.0) hjelpe/jæɽɽpe(0.0) flinke/fɽiŋŋke(0.0) galt/gæɽi(0.0) bokmål/bokmåɽ(0.0) hjelp/jøɽɽp(0.0) flere/fɽæire(0.0) ålreit/åɽæit(0.0) folka/fåɽɽka(0.0) klasse/kɽasse(0.0) flytte/fɽøtta(0.0) sjølve/ʂøɽɽve(0.0) mål/måɽ(0.0) flytte/fɽøtte(0.0) flytta/fɽøtt(0.0) flytta/fɽøtte(0.0) fly/fɽy(0.0) elg/æɽɽg(0.0) folk/fæɽɽk(0.0) fleste/fɽeste(0.0) samla/sammɽa(0.0) hjelp/jæɽɽp(0.0) folkehøyskole/fåɽɽkehøyskoɽe(0.0) glatt/gɽatt(0.0) følge/føɽɽje(0.0) blant/bɽannt(0.0) golvet/gåɽɽve(0.0) fler/fɽer(0.0) blantannet/bɽanntaant(0.0) spørsmål/spøʂʂmåɽ(0.0) vel/vøɽɽ(0.0) pleier/pɽæier(0.0) vel/veɽɽ(0.0) sjøl/ʂøɽɽve(0.0) ordentlig/åŋŋkɽi(0.0) golvet/gøɽɽve(0.0) barneskole/barneskoɽe(0.0) jordet/joɽe(0.0) mjølka/mjøɽɽka(0.0) nord/noɽ(0.0) nordover/noɽåver(0.0) folketallet/fåɽɽketaɽe(0.0) melk/mjæɽɽk(0.0) velge/væɽɽja(0.0) ålreit/åɽeit(0.0) flytter/fɽøtt(0.0) jorda/joɽa(0.0) skolen/skoɽa(0.0) pluss/pɽuss(0.0) elgen/æɽɽjen(0.0) fler/fɽæir(0.0) plasser/pɽasser(0.0) flytte/fɽytte(0.0) vel/vøɽ(0.0) kjæledyr/çæɽedyr(0.0) klassa/kɽassa(0.0) problem/probbɽem(0.0) skoler/skoɽer(0.0) mjølkeproduksjon/mjøɽɽkeprodukʂon(0.0) plassen/pɽassn̩(0.0) allikevel/alikkavæɽ(0.0) sjøl/ʂæɽ(0.0) følger/føɽɽje(0.0) slik/ʂɽik(0.0) folkeskolen/fåɽɽkeskoorn(0.0) fjerde/fjæɽe(0.0) betale/betaɽe(0.0) jord/joɽ(0.0) plasser/pɽassa(0.0) avgårde/agåɽe(0.0) flytta/fɽytta(0.0) jordbruk/joɽbruk(0.0) sekstitallet/sekkstitaɽe(0.0) hull/høɽ(0.0) elgjakt/æɽɽjakkt(0.0) mjølke/mjøɽɽke(0.0) kvinnfolk/kvinnfåɽɽk(0.0) ålreit/åɽræit(0.0) hjalp/jaɽɽp(0.0) glemt/gɽømmt(0.0) tolv/tåɽɽv(0.0) halv/hæɽɽv(0.0) ble/bɽei(0.0) helgene/hæɽɽjene(0.0) plukka/pɽokka(0.0) jula/juɽa(0.0) plukke/pɽokke(0.0) sol/soɽ(0.0) blantanna/bɽanntanna(0.0) flytter/fɽytter(0.0) fæl/fæɽ(0.0) sola/soɽa(0.0) ungdomsskole/oŋŋdåmskoɽe(0.0) nordi/noɽi(0.0) ble/bɽæ(0.0) flytter/fɽøtter(0.0) galt/gaɽe(0.0) taler/taɽa(0.0) flott/fɽått(0.0) pleier/pɽæie(0.0) riksmål/rikksmåɽ(0.0) problem/probɽem(0.0) bord/boɽ(0.0) fæle/fæɽe(0.0) fløy/fɽøy(0.0) ulv/uɽɽv(0.0) byfolk/byfåɽɽk(0.0) blå/bɽå(0.0) jordbær/joɽɽbær(0.0) tolv/tøɽɽv(0.0) mjølk/mjæɽɽk(0.0) glass/gɽass(0.0) fløtinga/fɽøtiŋa(0.0) elver/æɽɽver(0.0) below_threshold(0.4)
+57	<SEP>åpp	0.06	2	35	opp/åpp(0.7) oppi/åppi(0.1) oppe/åppe(0.0) oppå/åppå(0.0) oppvokst/åppvåkkst(0.0) oppover/åppåver(0.0) below_threshold(0.1)
+58	fe<SEP>	0.06	1	24	for/fe(0.7) får/fe(0.1) vel/fe(0.1) kaffe/kaffe(0.0) treffe/treffe(0.0) tøffe/tøffe(0.0) below_threshold(0.1)
+59	æu<SEP>	0.06	2	21	au/æu(0.8) jo/jæu(0.1) sau/sæu(0.0) below_threshold(0.0)
+60	<SEP>kke	0.06	4	29	ikke/kke(1.0) below_threshold(0.0)
+61	<SOS>du/ru<EOS>	0.06	2	91	
+62	ʂʂ<SEP>	0.06	0	18	spørs/spøʂʂ(0.3) oss/våʂʂ(0.1) æsj/uʂʂ(0.1) tvers/tvæʂʂ(0.1) mars/maʂʂ(0.1) below_threshold(0.3)
+63	<SEP>juɽ	0.06	0	44	jul/juɽ(0.6) jula/juɽa(0.0) below_threshold(0.4)
+64	<SEP>nok	0.06	1	52	noe/nokko(0.4) noe/noko(0.2) noen/nokkon(0.1) nok/nokk(0.1) noen/nokon(0.1) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
+65	kæ	0.06	2	43	kan/kænn(0.2) kanskje/kænnʂe(0.1) skauen/skævven(0.1) skal/skæ(0.1) kan/kæinn(0.1) snakker/snakkær(0.0) skøyt/skæut(0.0) liker/likær(0.0) bruker/brukær(0.0) onkelen/oŋŋkærn(0.0) hva/kæ(0.0) skauen/skæuen(0.0) skal/skær(0.0) below_threshold(0.4)
+66	ikkt<SEP>	0.06	1	28	slikt/ʂlikkt(0.3) likt/likkt(0.3) utsikt/utsikkt(0.1) artig/arrtikkt(0.1) below_threshold(0.2)
+67	ukk	0.06	1	16	husker/hukksa(0.2) brukt/brukkt(0.2) brukte/brukkte(0.2) nok/nukk(0.1) husker/hukkse(0.0) husker/hukksar(0.0) huske/hukkse(0.0) below_threshold(0.3)
+68	åmmå	0.06	1	33	sommeren/såmmårn(0.3) sommer/såmmår(0.2) komme/kåmmå(0.2) samme/såmmå(0.1) below_threshold(0.2)
+69	leg	0.06	1	11	legge/legge(0.1) tillegg/tillegg(0.1) legger/legg(0.1) legger/legger(0.0) egentlig/egentleg(0.0) anlegg/annlegg(0.0) legge/legga(0.0) below_threshold(0.6)
+70	rer<SEP>	0.06	1	51	lærer/lærer(0.1) kjører/çører(0.1) hører/hører(0.1) turer/turer(0.1) klarer/klarer(0.1) varer/varer(0.0) below_threshold(0.5)
+71	prøve	0.06	1	26	prøve/prøve(0.6) prøver/prøver(0.2) prøver/prøve(0.1) below_threshold(0.1)
+72	aa	0.06	1	37	annet/aant(0.3) annen/aan(0.2) faren/faarn(0.1) ja/jaa(0.1) garden/gaarn(0.0) blantannet/bɽanntaant(0.0) faen/faan(0.0) dager/daar(0.0) below_threshold(0.3)
+73	<SOS>jeg/jæi<EOS>	0.06	2	95	
+74	dan<SEP>	0.06	1	20	dagen/dan(0.2) hvordan/vorrdan(0.1) lørdag/lørdan(0.1) lørdagen/lørdan(0.1) fredagen/fredan(0.1) søndagen/sønndan(0.1) below_threshold(0.4)
+75	<SOS>nesten/nesstn̩<EOS>	0.06	1	43	
+76	<SEP>rå	0.06	1	15	da/rå(0.6) råd/rå(0.1) rådyr/rådyr(0.0) below_threshold(0.2)
+77	ssom	0.06	1	47	lissom/lissom(0.4) lissom/lissomm(0.2) messom/mæssomm(0.2) messom/messomm(0.1) below_threshold(0.1)
+78	<SOS>du/u<EOS>	0.06	1	23	
+79	<SOS>lenge/leŋŋe<EOS>	0.06	0	27	
+80	upp	0.06	1	59	oppi/uppi(0.3) opp/upp(0.2) oppå/uppå(0.1) oppe/uppe(0.0) oppover/uppåver(0.0) oppatt/uppatt(0.0) gruppe/gruppe(0.0) below_threshold(0.3)
+81	somm<SEP>	0.06	3	28	som/somm(0.8) liksom/likksomm(0.1) lissom/lissomm(0.1) messom/mæssomm(0.0) messom/messomm(0.0) below_threshold(0.0)
+82	ykkt	0.06	1	21	fryktelig/frykktli(0.3) fryktelig/frykktle(0.2) trygt/trykkt(0.2) bygd/bykkt(0.1) tykte/tykkte(0.1) below_threshold(0.2)
+83	<SOS>like/like<EOS>	0.06	1	25	
+84	<SOS>veit/væit<SEP>du/du<EOS>	0.06	1	43	
+85	lik<SEP>	0.06	2	37	slik/ʂlik(0.8) slik/slik(0.1) slik/lik(0.0) like/lik(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
+86	domm<SEP>	0.06	2	72	de/domm(0.7) dem/domm(0.3) below_threshold(0.0)
+87	<SOS>si/si<EOS>	0.05	1	25	
+88	<SOS>av/ta<EOS>	0.05	1	36	
+89	<SEP>væra	0.05	1	50	være/væra(0.8) hverandre/væranndre(0.1) below_threshold(0.0)
+90	drive	0.05	1	58	drive/drive(0.4) driver/drive(0.2) driver/driver(0.2) drevet/drive(0.1) below_threshold(0.0)
+91	rem	0.05	1	41	de/remm(0.6) dem/remm(0.1) below_threshold(0.3)
+92	<SEP>bɽ	0.05	7	55	blir/bɽi(0.3) blir/bɽir(0.2) blei/bɽæi(0.1) bli/bɽi(0.1) blitt/bɽitt(0.1) ble/bɽe(0.1) blei/bɽei(0.0) blant/bɽannt(0.0) blantannet/bɽanntaant(0.0) ble/bɽei(0.0) blantanna/bɽanntanna(0.0) ble/bɽæ(0.0) blå/bɽå(0.0) below_threshold(0.1)
+93	æitt	0.05	1	23	veit/væitt(0.3) greit/græitt(0.2) ett/æitt(0.2) vet/væitt(0.1) et/æitt(0.1) het/hæitte(0.1) heter/hæitte(0.0) below_threshold(0.1)
+94	<SOS>ja/ja<SEP>da/då<EOS>	0.05	0	-15	
+95	ug	0.05	1	20	tjue/çuge(0.1) ihug/ihug(0.1) ihug/ihæug(0.1) dugnad/dugnad(0.0) below_threshold(0.7)
+96	<SEP>åt	0.05	1	14	åt/åt(0.8) åtte/åtte(0.1) åtti/åtti(0.0) åt/ått(0.0) åttende/åttn̩e(0.0) below_threshold(0.1)
+97	<SEP>jæu	0.05	0	12	jo/jæu(0.9) below_threshold(0.1)
+98	<SOS>de/domm<EOS>	0.05	1	76	
+99	feri	0.05	0	-1	ferie/ferie(0.3) ferie/feri(0.1) below_threshold(0.6)
+100	ŋer<SEP>	0.05	2	39	lenger/leŋŋer(0.2) ganger/gaŋŋer(0.1) unger/oŋŋer(0.1) lenger/læŋŋer(0.1) penger/peŋŋer(0.1) trenger/treŋŋer(0.0) ganger/gåŋŋer(0.0) ganger/goŋŋer(0.0) below_threshold(0.3)
+101	ru<SEP>	0.05	5	25	du/ru(0.5) trur/tru(0.4) tru/tru(0.0) bru/bru(0.0) below_threshold(0.0)
+102	<SEP>æit	0.05	0	26	et/æit(0.8) ett/æitt(0.1) ett/æit(0.1) et/æitt(0.0) below_threshold(0.0)
+103	ʂʂe	0.05	1	7	forskjell/fåʂʂell(0.2) fiska/fiʂʂe(0.1) forskjell/fåʂʂel(0.1) prosjekt/proʂʂekt(0.0) below_threshold(0.6)
+104	rde<SEP>	0.05	1	29	gjorde/jorde(0.2) kjørte/çørrde(0.1) fordi/fårde(0.1) kjørte/çørde(0.1) hørte/hørrde(0.1) burde/burrde(0.1) hørte/hørde(0.1) fordi/fårrde(0.0) gjorde/jorrde(0.0) lærte/lærrde(0.0) below_threshold(0.3)
+105	detta	0.05	1	50	dette/detta(1.0) dette/dettan(0.0) below_threshold(0.0)
+106	ner<SEP>	0.05	3	21	ned/ner(0.1) under/unner(0.1) skjønner/ʂønner(0.1) kjenner/çenner(0.1) venner/venner(0.0) begynner/byner(0.0) begynner/bynner(0.0) kroner/kroner(0.0) høner/høner(0.0) måneder/måner(0.0) mener/mener(0.0) minner/minner(0.0) finner/finner(0.0) henne/henner(0.0) savner/savvner(0.0) hender/henner(0.0) below_threshold(0.4)
+107	<SEP>gø	0.05	1	44	godt/gøtt(0.4) gøy/gøy(0.3) gang/gøŋŋ(0.0) golvet/gøɽɽve(0.0) below_threshold(0.2)
+108	<SOS>de/dømm<EOS>	0.05	2	97	
+109	øpe	0.05	1	21	kjøpe/çøpe(0.5) løpet/løpe(0.1) kjøper/çøper(0.1) below_threshold(0.3)
+110	<SOS>så/så<SEP>var/var<EOS>	0.05	1	82	
+111	<SEP>jæ	0.05	14	53	jeg/jæ(0.9) jeg/jæi(0.0) jo/jæu(0.0) gjør/jær(0.0) gjøre/jæra(0.0) jævlig/jævli(0.0) gjerne/jærne(0.0) hjelpe/jæɽɽpe(0.0) gjør/jæ(0.0) jæklig/jækli(0.0) jækla/jækla(0.0) hjelp/jæɽɽp(0.0) gjøre/jærra(0.0) gjøre/jær(0.0) jævla/jævla(0.0) below_threshold(0.0)
+112	enna<SEP>	0.05	1	14	denne/denna(0.6) denne/enna(0.2) below_threshold(0.3)
+113	kko	0.05	1	8	noe/nokko(0.4) akkurat/akkorat(0.2) akkurat/akkoratt(0.2) noen/nokkon(0.1) noe/nåkko(0.0) noen/nokko(0.0) below_threshold(0.1)
+114	iŋŋk	0.05	1	23	flink/fɽiŋŋk(0.4) flinke/fɽiŋŋke(0.2) below_threshold(0.4)
+115	nåkk<SEP>	0.05	2	20	nok/nåkk(1.0) below_threshold(0.0)
+116	yç	0.05	2	-1	mye/myçe(0.3) mye/myççe(0.2) mye/myççy(0.2) mye/myçi(0.1) mye/myççi(0.1) stykker/styççe(0.0) mye/myçy(0.0) below_threshold(0.1)
+117	<SEP>mye	0.05	4	31	mye/mye(1.0) below_threshold(0.0)
+118	gaŋŋe	0.05	1	44	gangen/gaŋŋen(0.5) ganger/gaŋŋer(0.4) below_threshold(0.1)
+119	anne<SEP>	0.05	0	2	vannet/vanne(0.3) landet/lanne(0.2) litegrann/litteranne(0.1) below_threshold(0.4)
+120	væɽ	0.05	1	9	vel/væɽ(0.5) allikevel/alikkavæɽ(0.1) below_threshold(0.4)
+121	<SOS>sikkert/sikkert<EOS>	0.05	1	17	
+122	<SOS>det/de<SEP>er/æ<EOS>	0.05	9	66	
+123	<SEP>nø	0.05	1	19	nok/nøkk(0.2) nødt/nøtt(0.1) noen/nøørn(0.1) nøye/nøye(0.1) når/nørr(0.1) below_threshold(0.5)
+124	gø	0.05	1	40	godt/gøtt(0.4) gøy/gøy(0.3) gang/gøŋŋ(0.0) golvet/gøɽɽve(0.0) below_threshold(0.2)
+125	<SEP>dag	0.05	2	0	dag/dag(0.8) dagen/dagen(0.1) dager/dager(0.0) dager/daga(0.0) below_threshold(0.1)
+126	<SEP>ʂlik	0.05	2	60	slik/ʂlik(0.7) slikt/ʂlikkt(0.1) slike/ʂlike(0.1) slik/ʂlikk(0.1) slike/ʂlikke(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
+127	ʂlik	0.05	2	60	slik/ʂlik(0.7) slikt/ʂlikkt(0.1) slike/ʂlike(0.1) slik/ʂlikk(0.1) slike/ʂlikke(0.0) slikt/ʂlik(0.0) below_threshold(0.0)
+128	<SEP>ær	0.05	10	88	er/ær(1.0) der/ær(0.0) her/ær(0.0) arbeid/ærrbe(0.0) below_threshold(0.0)
+129	ærre<SEP>	0.05	2	-1	bare/bærre(0.3) derre/dærre(0.3) herre/hærre(0.1) der/dærre(0.1) verre/værre(0.1) dessverre/desværre(0.0) her/hærre(0.0) below_threshold(0.0)
+130	ʂl	0.05	6	32	slik/ʂlik(0.2) slik/ʂlek(0.1) slutt/ʂlutt(0.0) slik/ʂlekk(0.0) slikt/ʂlikkt(0.0) koselig/koʂli(0.0) slike/ʂlike(0.0) slik/ʂlikk(0.0) slutta/ʂlutta(0.0) slo/ʂlo(0.0) slå/ʂlå(0.0) slags/ʂlakks(0.0) rettogslett/rettåʂlett(0.0) slutten/ʂluttn̩(0.0) slike/ʂleke(0.0) slått/ʂlått(0.0) slike/ʂlikke(0.0) slapp/ʂlapp(0.0) slakta/ʂlakkta(0.0) slike/ʂlekke(0.0) slutte/ʂlutte(0.0) slag/ʂlag(0.0) slår/ʂlår(0.0) stusselig/stuʂʂli(0.0) slakting/ʂlakktiŋ(0.0) slåtten/ʂlåttn̩(0.0) slikt/ʂlekkt(0.0) annerledes/annʂless(0.0) slikt/ʂlik(0.0) below_threshold(0.3)
+131	ɽer	0.05	1	66	flere/fɽere(0.4) fler/fɽer(0.1) skoler/skoɽer(0.0) below_threshold(0.5)
+132	ʂle	0.05	1	52	slik/ʂlek(0.3) slik/ʂlekk(0.1) rettogslett/rettåʂlett(0.1) slike/ʂleke(0.0) slike/ʂlekke(0.0) slikt/ʂlekkt(0.0) annerledes/annʂless(0.0) below_threshold(0.4)
+133	<SEP>ute	0.04	1	4	ute/ute(0.9) below_threshold(0.1)
+134	etta<SEP>	0.04	1	45	dette/detta(0.8) dette/etta(0.1) sette/setta(0.0) below_threshold(0.1)
+135	<SOS>synes/synns<EOS>	0.04	2	17	
+136	mi<SEP>	0.04	1	-8	mi/mi(0.4) vi/mi(0.4) kommet/kåmmi(0.0) kommet/kømmi(0.0) heime/hæimi(0.0) below_threshold(0.1)
+137	<SEP>domm	0.04	2	62	de/domm(0.6) dem/domm(0.3) dumt/dommt(0.0) below_threshold(0.0)
+138	<SOS>nok/nåkk<EOS>	0.04	2	20	
+139	ɽi<SEP>	0.04	4	41	blir/bɽi(0.6) bli/bɽi(0.2) dårlig/dåɽi(0.1) galt/gæɽi(0.0) ordentlig/åŋŋkɽi(0.0) nordi/noɽi(0.0) below_threshold(0.0)
+140	sert<SEP>	0.04	0	8	interessert/inntresert(0.3) interessert/intresert(0.1) below_threshold(0.6)
+141	<SEP>iv	0.04	1	24	ihvertfall/iværrtfall(0.8) below_threshold(0.2)
+142	go	0.04	1	5	god/go(0.4) gode/goe(0.1) gang/goŋŋ(0.1) gangen/goŋŋen(0.0) ganger/goŋŋer(0.0) imorgen/imårrgo(0.0) below_threshold(0.3)
+143	låv	0.04	0	2	lov/låv(0.6) låven/låven(0.1) below_threshold(0.3)
+144	ær<SEP>	0.04	23	15	er/ær(0.6) der/dær(0.2) her/hær(0.1) får/fær(0.0) hver/vær(0.0) gjør/jær(0.0) husker/husær(0.0) være/vær(0.0) vær/vær(0.0) jobber/jåbbær(0.0) penger/peŋŋær(0.0) unger/oŋŋær(0.0) snakker/snakkær(0.0) sommer/såmmær(0.0) der/ær(0.0) nær/nær(0.0) svær/ʂvær(0.0) prater/pratær(0.0) gutter/guttær(0.0) hver/kvær(0.0) her/ær(0.0) liker/likær(0.0) bruker/brukær(0.0) biler/bilær(0.0) svær/svær(0.0) mer/mær(0.0) gjøre/jær(0.0) skal/skær(0.0) below_threshold(0.1)
+145	<SEP>let	0.04	1	26	lett/lett(0.4) lettvint/lettvinnt(0.1) lettere/lettere(0.1) litt/lett(0.1) below_threshold(0.3)
+146	<SOS>det/dæ<EOS>	0.04	7	18	
+147	ro<SEP>	0.04	1	26	moro/morro(0.5) moro/moro(0.1) ro/ro(0.1) dro/dro(0.1) tror/tro(0.1) below_threshold(0.1)
+148	<SOS>sett/sett<EOS>	0.04	1	11	
+149	<SEP>ette	0.04	2	39	etter/ette(0.4) etter/etter(0.3) ikke/ette(0.1) etterpå/ettepå(0.1) etterat/etteratt(0.0) etterhvert/etteværrt(0.0) below_threshold(0.1)
+150	<SEP>lett	0.04	1	27	lett/lett(0.4) lettvint/lettvinnt(0.1) lettere/lettere(0.1) litt/lett(0.1) below_threshold(0.3)
+151	mal	0.04	0	9	gammal/gammal(0.3) gammalt/gammalt(0.2) gammel/gammal(0.1) gammal/gamal(0.1) below_threshold(0.3)
+152	<SOS>vi/me<SEP>var/va<EOS>	0.04	0	5	
+153	emm	0.04	7	27	de/demm(0.3) fem/femm(0.1) de/remm(0.1) dem/demm(0.0) kommer/çemm(0.0) hjemme/jemme(0.0) hjem/jemm(0.0) foreksempel/fårreksemmpel(0.0) de/emm(0.0) hvem/vemm(0.0) stemmer/stemmer(0.0) femti/femmti(0.0) femten/femmtn̩(0.0) hjem/hemm(0.0) dem/remm(0.0) femte/femmte(0.0) stemmer/stemme(0.0) kjempefint/çemmpefint(0.0) bestemt/bestemmt(0.0) foreksempel/fårresemmpel(0.0) foreksempel/førreksemmpel(0.0) kjempebra/çemmpebra(0.0) hjemme/hemme(0.0) kjempefin/çemmpefin(0.0) below_threshold(0.2)
+154	åvi	0.04	0	11	såvidt/såvitt(0.3) forsåvidt/fårrsåvitt(0.2) påvirka/påvirrka(0.1) below_threshold(0.4)
+155	<SEP>itte	0.04	6	77	ikke/itte(1.0) below_threshold(0.0)
+156	<SEP>veit	0.04	0	-15	veit/veit(0.8) veit/veitt(0.2) below_threshold(0.0)
 157	<SOS>er/æ<SEP>det/re<EOS>	0.04	2	100	
-158	dere<SEP>	0.04	1	50	dere/dere(0.7) videre/videre(0.1) studere/studere(0.1) below_threshold(0.1)
-159	<SOS>her/hær<SEP>og/å<EOS>	0.04	0	37	
-160	<SEP>off	0.04	0	23	uff/off(0.9) below_threshold(0.1)
-161	amma	0.04	1	38	samme/samma(0.3) mamma/mamma(0.2) gammal/gammal(0.1) gammalt/gammalt(0.1) gammel/gammal(0.1) sommeren/sammarn(0.0) below_threshold(0.2)
-162	<SEP>mor	0.04	1	50	mor/mor(0.5) moro/morro(0.3) moro/moro(0.1) mora/morra(0.1) mora/mora(0.0) below_threshold(0.1)
-163	parr	0.04	0	38	sparka/sparrka(0.1) paradis/parradis(0.1) spark/sparrk(0.1) par/parr(0.1) below_threshold(0.7)
-164	øtt<SEP>	0.04	1	53	født/føtt(0.3) godt/gøtt(0.2) støtt/støtt(0.1) flytta/fɽøtt(0.1) hva/høtt(0.0) nødt/nøtt(0.0) flytter/fɽøtt(0.0) kjøtt/çøtt(0.0) below_threshold(0.2)
-165	ø<SEP>	0.04	3	36	og/ø(0.3) så/sø(0.2) gjør/jø(0.1) for/fø(0.1) snø/snø(0.1) å/ø(0.1) sjø/ʂø(0.0) før/fø(0.0) du/dø(0.0) òg/ø(0.0) skal/skø(0.0) kø/kø(0.0) ø/ø(0.0) miljø/milljø(0.0) vært/vø(0.0) miljø/miljø(0.0) vi/mø(0.0) hvor/kø(0.0) du/ø(0.0) rød/rø(0.0) dere/dø(0.0) hva/kø(0.0) hva/hø(0.0) below_threshold(0.1)
-166	rra	0.04	1	41	være/værra(0.2) gjøre/jørra(0.1) morgenen/mårran(0.1) imorgen/imårra(0.1) mora/morra(0.1) foran/fårran(0.0) være/verra(0.0) paradis/parradis(0.0) gjøre/jærra(0.0) below_threshold(0.3)
-167	<SOS>kom/kåmm<EOS>	0.04	2	30	
-168	mmer<SEP>	0.04	2	49	kommer/kåmmer(0.6) stemmer/stemmer(0.1) sommer/såmmer(0.1) tømmer/tømmer(0.0) stemmer/stæmmer(0.0) kommer/kommer(0.0) nummer/nommer(0.0) below_threshold(0.1)
-169	ess	0.04	6	36	nesten/nesstn̩(0.1) mest/messt(0.1) neste/nesste(0.0) disse/dessa(0.0) spesielt/spessielt(0.0) fleste/fɽesste(0.0) hest/hesst(0.0) best/besst(0.0) spesielt/spessiellt(0.0) messom/messomm(0.0) beste/besste(0.0) disse/essa(0.0) bestemor/besstemor(0.0) meste/messte(0.0) resten/resstn̩(0.0) nesten/nessn̩(0.0) bestefar/besstefar(0.0) spesiell/spessiell(0.0) hesten/hesstn̩(0.0) spesielle/spessielle(0.0) disse/desse(0.0) forresten/fåresstn̩(0.0) fest/fesst(0.0) reiste/resste(0.0) hester/hesster(0.0) yes/jess(0.0) nesten/nessten(0.0) annerledes/annʂless(0.0) below_threshold(0.4)
-170	triv	0.04	0	30	trives/trives(0.2) trives/trivas(0.1) trivelig/triveli(0.1) trivelig/trivele(0.1) below_threshold(0.5)
-171	<SOS>skulle/skulle<EOS>	0.04	1	54	
-172	<SEP>åi	0.04	0	38	oi/åi(1.0) below_threshold(0.0)
-173	<SEP>eŋŋ	0.04	0	42	egentlig/eŋŋkli(0.3) enkelt/eŋŋkelt(0.2) enkelte/eŋŋkelte(0.1) enkel/eŋŋkel(0.1) engelsk/eŋŋelsk(0.1) below_threshold(0.4)
-174	æff	0.04	0	31	derfor/dæffår(0.2) herfra/hæffra(0.2) derfra/dæffra(0.1) below_threshold(0.4)
-175	øl	0.04	2	24	holdt/høllt(0.1) holde/hølle(0.0) føler/føle(0.0) selvfølgelig/seføllgli(0.0) stølen/støln̩(0.0) følte/følte(0.0) føler/føler(0.0) sjøl/ʂøl(0.0) selvfølgelig/selføllgeli(0.0) selvfølgelig/selføllgli(0.0) følge/følle(0.0) holder/høll(0.0) selvfølgelig/seføllgeli(0.0) below_threshold(0.6)
-176	<SOS>var/va<SEP>det/re<EOS>	0.04	2	95	
-177	issk	0.04	1	33	fisk/fissk(0.2) fiske/fisske(0.1) fiska/fisska(0.1) below_threshold(0.6)
-178	<SEP>çæm	0.04	1	18	kommer/çæmm(0.5) kommer/çæm(0.4) below_threshold(0.1)
-179	uɽe	0.04	1	66	skole/skuɽe(0.3) below_threshold(0.7)
-180	<SEP>fɽøt	0.04	1	51	flytta/fɽøtta(0.2) flytte/fɽøtta(0.1) flytte/fɽøtte(0.1) flytta/fɽøtt(0.1) flytta/fɽøtte(0.1) flytter/fɽøtt(0.1) flytter/fɽøtter(0.0) fløtinga/fɽøtiŋa(0.0) below_threshold(0.1)
-181	asst	0.04	1	25	fast/fasst(0.2) kaste/kasste(0.1) kasta/kassta(0.1) kasta/kasste(0.1) below_threshold(0.5)
-182	æin	0.04	4	40	en/æin(0.5) men/mæinn(0.1) den/dæinn(0.0) kan/kæinn(0.0) aleine/alæine(0.0) ene/æine(0.0) stein/stæin(0.0) en/æinn(0.0) seint/sæint(0.0) eneste/æinaste(0.0) rein/ræin(0.0) seinere/sæinere(0.0) meiner/mæine(0.0) below_threshold(0.3)
-183	ʂer<SEP>	0.04	0	29	skjer/ʂer(0.6) ser/ʂer(0.1) below_threshold(0.3)
-184	utte	0.04	1	53	gutter/gutter(0.2) minutter/minutter(0.1) slutte/ʂlutte(0.1) minutter/menutter(0.1) huttetu/huttetu(0.1) below_threshold(0.5)
-185	prate	0.04	1	52	prate/prate(0.4) prater/prater(0.2) prater/prate(0.2) prata/prate(0.1) below_threshold(0.0)
-186	ger<SEP>	0.04	1	61	ligger/ligger(0.4) dager/dager(0.1) legger/legger(0.1) bygger/bygger(0.1) lager/lager(0.0) diger/diger(0.0) below_threshold(0.2)
-187	<SEP>dom	0.04	2	72	de/domm(0.6) dem/domm(0.3) dumt/dommt(0.0) below_threshold(0.0)
-188	urn<SEP>	0.04	0	47	skolen/skuurn(0.3) naturen/natturn(0.1) turen/turn(0.1) below_threshold(0.5)
-189	dræ	0.04	0	42	dreiv/dræiv(0.8) below_threshold(0.2)
-190	<SOS>er/ær<SEP>det/de<EOS>	0.04	3	99	
-191	<SEP>ræ	0.04	2	33	det/ræ(0.5) de/ræi(0.1) reise/ræise(0.1) deg/ræ(0.0) rett/rætt(0.0) reiste/ræiste(0.0) dem/ræi(0.0) reiser/ræiser(0.0) reise/ræse(0.0) rein/ræin(0.0) den/rænn(0.0) reiser/ræise(0.0) reiste/ræisste(0.0) regna/ræŋŋne(0.0) reist/ræist(0.0) below_threshold(0.2)
-192	ig<SEP>	0.04	0	31	veldig/velldig(0.2) krig/krig(0.1) below_threshold(0.8)
-193	oɽ	0.04	3	58	skole/skoɽe(0.1) gjorde/joɽe(0.1) ifjor/ifjoɽ(0.1) ord/oɽ(0.1) gjorde/joɽ(0.0) barneskole/barneskoɽe(0.0) jordet/joɽe(0.0) nord/noɽ(0.0) nordover/noɽåver(0.0) jorda/joɽa(0.0) skolen/skoɽa(0.0) skoler/skoɽer(0.0) jord/joɽ(0.0) jordbruk/joɽbruk(0.0) sol/soɽ(0.0) sola/soɽa(0.0) ungdomsskole/oŋŋdåmskoɽe(0.0) nordi/noɽi(0.0) bord/boɽ(0.0) below_threshold(0.4)
-194	ile	0.04	1	25	heile/hæile(0.5) biler/biler(0.1) tidlig/tile(0.1) heile/heile(0.0) below_threshold(0.3)
-195	renn	0.04	1	39	omtrent/omtrennt(0.2) den/renn(0.1) omtrent/åmtrennt(0.1) grensa/grennsa(0.0) langrenn/laŋŋrenn(0.0) below_threshold(0.5)
-196	ko<SEP>	0.04	1	24	noe/nokko(0.3) noe/noko(0.2) hva/ko(0.2) hvor/ko(0.1) noe/nåkko(0.0) skulle/sko(0.0) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
-197	kar<SEP>	0.04	0	32	skal/skar(0.5) kar/kar(0.1) below_threshold(0.4)
-198	råd	0.04	0	32	rådyr/rådyr(0.2) området/ommråde(0.1) grådig/grådi(0.1) område/ommråde(0.1) området/åmmråde(0.1) below_threshold(0.5)
-199	veit	0.04	0	17	veit/veit(0.8) veit/veitt(0.2) below_threshold(0.0)
+158	dere<SEP>	0.04	1	30	dere/dere(0.7) videre/videre(0.1) studere/studere(0.1) below_threshold(0.1)
+159	<SOS>her/hær<SEP>og/å<EOS>	0.04	0	11	
+160	<SEP>off	0.04	0	-7	uff/off(0.9) below_threshold(0.1)
+161	amma	0.04	1	13	samme/samma(0.3) mamma/mamma(0.2) gammal/gammal(0.1) gammalt/gammalt(0.1) gammel/gammal(0.1) sommeren/sammarn(0.0) below_threshold(0.2)
+162	<SEP>mor	0.04	1	30	mor/mor(0.5) moro/morro(0.3) moro/moro(0.1) mora/morra(0.1) mora/mora(0.0) below_threshold(0.1)
+163	parr	0.04	0	13	sparka/sparrka(0.1) paradis/parradis(0.1) spark/sparrk(0.1) par/parr(0.1) below_threshold(0.7)
+164	øtt<SEP>	0.04	1	34	født/føtt(0.3) godt/gøtt(0.2) støtt/støtt(0.1) flytta/fɽøtt(0.1) hva/høtt(0.0) nødt/nøtt(0.0) flytter/fɽøtt(0.0) kjøtt/çøtt(0.0) below_threshold(0.2)
+165	ø<SEP>	0.04	3	11	og/ø(0.3) så/sø(0.2) gjør/jø(0.1) for/fø(0.1) snø/snø(0.1) å/ø(0.1) sjø/ʂø(0.0) før/fø(0.0) du/dø(0.0) òg/ø(0.0) skal/skø(0.0) kø/kø(0.0) ø/ø(0.0) miljø/milljø(0.0) vært/vø(0.0) miljø/miljø(0.0) vi/mø(0.0) hvor/kø(0.0) du/ø(0.0) rød/rø(0.0) dere/dø(0.0) hva/kø(0.0) hva/hø(0.0) below_threshold(0.1)
+166	rra	0.04	1	17	være/værra(0.2) gjøre/jørra(0.1) morgenen/mårran(0.1) imorgen/imårra(0.1) mora/morra(0.1) foran/fårran(0.0) være/verra(0.0) paradis/parradis(0.0) gjøre/jærra(0.0) below_threshold(0.3)
+167	<SOS>kom/kåmm<EOS>	0.04	2	2	
+168	mmer<SEP>	0.04	2	29	kommer/kåmmer(0.6) stemmer/stemmer(0.1) sommer/såmmer(0.1) tømmer/tømmer(0.0) stemmer/stæmmer(0.0) kommer/kommer(0.0) nummer/nommer(0.0) below_threshold(0.1)
+169	ess	0.04	6	11	nesten/nesstn̩(0.1) mest/messt(0.1) neste/nesste(0.0) disse/dessa(0.0) spesielt/spessielt(0.0) fleste/fɽesste(0.0) hest/hesst(0.0) best/besst(0.0) spesielt/spessiellt(0.0) messom/messomm(0.0) beste/besste(0.0) disse/essa(0.0) bestemor/besstemor(0.0) meste/messte(0.0) resten/resstn̩(0.0) nesten/nessn̩(0.0) bestefar/besstefar(0.0) spesiell/spessiell(0.0) hesten/hesstn̩(0.0) spesielle/spessielle(0.0) disse/desse(0.0) forresten/fåresstn̩(0.0) fest/fesst(0.0) reiste/resste(0.0) hester/hesster(0.0) yes/jess(0.0) nesten/nessten(0.0) annerledes/annʂless(0.0) below_threshold(0.4)
+170	triv	0.04	0	3	trives/trives(0.2) trives/trivas(0.1) trivelig/triveli(0.1) trivelig/trivele(0.1) below_threshold(0.5)
+171	<SOS>skulle/skulle<EOS>	0.04	1	36	
+172	<SEP>åi	0.04	0	13	oi/åi(1.0) below_threshold(0.0)
+173	<SEP>eŋŋ	0.04	0	20	egentlig/eŋŋkli(0.3) enkelt/eŋŋkelt(0.2) enkelte/eŋŋkelte(0.1) enkel/eŋŋkel(0.1) engelsk/eŋŋelsk(0.1) below_threshold(0.4)
+174	æff	0.04	0	3	derfor/dæffår(0.2) herfra/hæffra(0.2) derfra/dæffra(0.1) below_threshold(0.4)
+175	øl	0.04	2	-6	holdt/høllt(0.1) holde/hølle(0.0) føler/føle(0.0) selvfølgelig/seføllgli(0.0) stølen/støln̩(0.0) følte/følte(0.0) føler/føler(0.0) sjøl/ʂøl(0.0) selvfølgelig/selføllgeli(0.0) selvfølgelig/selføllgli(0.0) følge/følle(0.0) holder/høll(0.0) selvfølgelig/seføllgeli(0.0) below_threshold(0.6)
+176	<SOS>var/va<SEP>det/re<EOS>	0.04	2	93	
+177	issk	0.04	1	6	fisk/fissk(0.2) fiske/fisske(0.1) fiska/fisska(0.1) below_threshold(0.6)
+178	<SEP>çæm	0.04	1	-14	kommer/çæmm(0.5) kommer/çæm(0.4) below_threshold(0.1)
+179	uɽe	0.04	1	53	skole/skuɽe(0.3) below_threshold(0.7)
+180	<SEP>fɽøt	0.04	1	32	flytta/fɽøtta(0.2) flytte/fɽøtta(0.1) flytte/fɽøtte(0.1) flytta/fɽøtt(0.1) flytta/fɽøtte(0.1) flytter/fɽøtt(0.1) flytter/fɽøtter(0.0) fløtinga/fɽøtiŋa(0.0) below_threshold(0.1)
+181	asst	0.04	1	-4	fast/fasst(0.2) kaste/kasste(0.1) kasta/kassta(0.1) kasta/kasste(0.1) below_threshold(0.5)
+182	æin	0.04	4	16	en/æin(0.5) men/mæinn(0.1) den/dæinn(0.0) kan/kæinn(0.0) aleine/alæine(0.0) ene/æine(0.0) stein/stæin(0.0) en/æinn(0.0) seint/sæint(0.0) eneste/æinaste(0.0) rein/ræin(0.0) seinere/sæinere(0.0) meiner/mæine(0.0) below_threshold(0.3)
+183	ʂer<SEP>	0.04	0	1	skjer/ʂer(0.6) ser/ʂer(0.1) below_threshold(0.3)
+184	utte	0.04	1	35	gutter/gutter(0.2) minutter/minutter(0.1) slutte/ʂlutte(0.1) minutter/menutter(0.1) huttetu/huttetu(0.1) below_threshold(0.5)
+185	prate	0.04	1	33	prate/prate(0.4) prater/prater(0.2) prater/prate(0.2) prata/prate(0.1) below_threshold(0.0)
+186	ger<SEP>	0.04	1	45	ligger/ligger(0.4) dager/dager(0.1) legger/legger(0.1) bygger/bygger(0.1) lager/lager(0.0) diger/diger(0.0) below_threshold(0.2)
+187	<SEP>dom	0.04	2	61	de/domm(0.6) dem/domm(0.3) dumt/dommt(0.0) below_threshold(0.0)
+188	urn<SEP>	0.04	0	26	skolen/skuurn(0.3) naturen/natturn(0.1) turen/turn(0.1) below_threshold(0.5)
+189	dræ	0.04	0	18	dreiv/dræiv(0.8) below_threshold(0.2)
+190	<SOS>er/ær<SEP>det/de<EOS>	0.04	3	98	
+191	<SEP>ræ	0.04	2	7	det/ræ(0.5) de/ræi(0.1) reise/ræise(0.1) deg/ræ(0.0) rett/rætt(0.0) reiste/ræiste(0.0) dem/ræi(0.0) reiser/ræiser(0.0) reise/ræse(0.0) rein/ræin(0.0) den/rænn(0.0) reiser/ræise(0.0) reiste/ræisste(0.0) regna/ræŋŋne(0.0) reist/ræist(0.0) below_threshold(0.2)
+192	ig<SEP>	0.04	0	4	veldig/velldig(0.2) krig/krig(0.1) below_threshold(0.8)
+193	oɽ	0.04	3	42	skole/skoɽe(0.1) gjorde/joɽe(0.1) ifjor/ifjoɽ(0.1) ord/oɽ(0.1) gjorde/joɽ(0.0) barneskole/barneskoɽe(0.0) jordet/joɽe(0.0) nord/noɽ(0.0) nordover/noɽåver(0.0) jorda/joɽa(0.0) skolen/skoɽa(0.0) skoler/skoɽer(0.0) jord/joɽ(0.0) jordbruk/joɽbruk(0.0) sol/soɽ(0.0) sola/soɽa(0.0) ungdomsskole/oŋŋdåmskoɽe(0.0) nordi/noɽi(0.0) bord/boɽ(0.0) below_threshold(0.4)
+194	ile	0.04	1	-4	heile/hæile(0.5) biler/biler(0.1) tidlig/tile(0.1) heile/heile(0.0) below_threshold(0.3)
+195	renn	0.04	1	15	omtrent/omtrennt(0.2) den/renn(0.1) omtrent/åmtrennt(0.1) grensa/grennsa(0.0) langrenn/laŋŋrenn(0.0) below_threshold(0.5)
+196	ko<SEP>	0.04	1	-6	noe/nokko(0.3) noe/noko(0.2) hva/ko(0.2) hvor/ko(0.1) noe/nåkko(0.0) skulle/sko(0.0) noen/nokko(0.0) noen/noko(0.0) below_threshold(0.1)
+197	kar<SEP>	0.04	0	5	skal/skar(0.5) kar/kar(0.1) below_threshold(0.4)
+198	råd	0.04	0	5	rådyr/rådyr(0.2) området/ommråde(0.1) grådig/grådi(0.1) område/ommråde(0.1) området/åmmråde(0.1) below_threshold(0.5)
+199	veit	0.04	0	-15	veit/veit(0.8) veit/veitt(0.2) below_threshold(0.0)

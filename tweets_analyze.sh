@@ -21,9 +21,17 @@ for label in 0 1; do
     done
 done
 
-screen -S ${run_name}-0 -X stuff "python3 representativeness_specificity.py models/${run_name}\n"
+screen -S ${run_name}-0 -X stuff "python3 representativeness_distinctiveness.py models/${run_name}\n"
 screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --comb mean --scores\n"
 screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --t 200 --comb mean --r\n"
 screen -S ${run_name}-0 -X stuff "python3 feature_context.py models/${run_name} tweets --t 200 --comb sqrt --r\n"
 screen -S ${run_name}-0 -X stuff "python3 plot_importance.py models/${run_name} tweets --comb mean --top 50 --topinput 200 --label\n"
-screen -S ${run_name}-0 -X stuff "python3 plot_importance.py models/${run_name} tweets --comb mean\n"
+screen -S ${run_name}-0 -X stuff "python3 plot_importance.py models/${run_name} tweets --comb mean --label\n"
+
+
+# python representativeness_distinctiveness.py models/tweets
+# python feature_context.py models/tweets tweets --comb mean --scores
+# python feature_context.py models/tweets tweets --t 200 --comb mean --r
+# python feature_context.py models/tweets tweets --t 200 --comb sqrt --r
+# python plot_importance.py models/tweets tweets --comb mean --top 50 --topinput 200 --label
+# python plot_importance.py models/tweets tweets --comb mean --label

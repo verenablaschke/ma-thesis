@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import datetime
 import pickle
+from collections import Counter
 from predict import encode, encode_embeddings, score, train, \
                     explain_lime, get_features
 from pathlib import Path
@@ -18,12 +19,13 @@ def get_data_for_fold(args, folder, n_bpe_toks):
     raw_test, ngrams_test, labels_test = get_features(
         '{}/test_data.txt'.format(folder))
     label_set = set(labels_train)
-    print(label_set)
+    print(Counter(labels_train))
+    print(Counter(labels_test))
     n_labels = len(label_set)
     bert_model, tokenizer = None, None
 
     if args.use_embeddings:
-        if not args.load_embeddings:
+        if (not args.load_embeddings) and ('word2vec' not in args.embedding_model):
             if 'flaubert' in args.embedding_model:
                 bert_model, _ = FlaubertModel.from_pretrained(
                     args.embedding_model, output_loading_info=True)
@@ -49,6 +51,7 @@ def get_data_for_fold(args, folder, n_bpe_toks):
             args.flaubert_micro_batch_size, args.flaubert_macro_batch_size,
             args.flaubert_macro_batch_start,
             folder, embedding_size, args.embedding_model,
+            'word2vec' in args.embedding_model, raw_train, raw_test,
             flatten=args.model_type == 'svm')
         vectorizer = None
     else:
@@ -210,7 +213,8 @@ if __name__ == "__main__":
                         choices=['flaubert/flaubert_base_cased',
                                  'flaubert/flaubert_small_cased',
                                  'flaubert/flaubert_large_cased',
-                                 'bert-base-multilingual-cased'],
+                                 'bert-base-multilingual-cased',
+                                 'word2vec'],
                         default='flaubert/flaubert_base_cased', type=str)
     parser.add_argument('--emblen', dest='n_bpe_toks', default=[20], type=int,
                         nargs='+')

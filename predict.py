@@ -11,11 +11,14 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from ngram_lime.lime.lime_text import LimeTextExplainer
 import datetime
 import torch
+import re
 from keras.models import Model
 from keras.layers import Bidirectional, Dense, Dropout, Input, GRU
 from keras import backend as K
 from tensorflow.keras.optimizers import Adam
 import tensorflow as tf
+from gensim.models import KeyedVectors
+from gensim.test.utils import datapath
 gpu_devices = tf.config.experimental.list_physical_devices('GPU')
 for device in gpu_devices:
     tf.config.experimental.set_visible_devices(devices=device, device_type='GPU')
@@ -96,7 +99,6 @@ def get_embeddings(utterances, seq_len, embedding_size, embedding_name,
                                   padding='max_length')
                  for utterance in utterances]
     n = len(token_ids)
-    print(n, micro_batch_size, macro_batch_size)
     with torch.no_grad():
         for j in range(macro_batch_start, n, macro_batch_size):
             tensor_len = macro_batch_size
@@ -119,13 +121,58 @@ def get_embeddings(utterances, seq_len, embedding_size, embedding_name,
     return x
 
 
+def get_word2vec(word2vec_file='embeddings/word2vec/model.bin'):
+    print("Getting word2vec model")
+    # word2vec = {}
+    # with open(word2vec_file, 'rb') as f:
+    #     next(f)  # header
+    #     for i, line in enumerate(f):
+    #         cells = line.strip().split()
+    #         word = cells[0]
+    #         if i % 100000 == 0:
+    #             print(i, word)
+    #         vec = np.array([float(x) for x in cells[-100:]])
+    #         word2vec[word] = vec
+    # return word2vec
+    with open(word2vec_file, 'rb') as f:
+        vectors = KeyedVectors.load_word2vec_format(
+            f, binary='.bin' in word2vec_file)
+    # print(vectors)
+    return vectors
+
+
+def embed_word2vec(utterances, seq_len, word2vec, embed_size=100):
+    embedded = np.zeros((len(utterances), seq_len, embed_size))
+    pattern = re.compile('[\w\']+|[.,!?;]')
+    for idx, utterance in enumerate(utterances):
+        if idx % 1000 == 0:
+            print(idx, utterance)
+        for jdx, word in enumerate(re.findall(pattern, utterance.lower())):
+            if jdx == seq_len:
+                break
+            try:
+                embedded[idx, jdx] = word2vec.get_vector(word)
+            except KeyError:
+                continue
+    return embedded
+
+
 def encode_embeddings(toks_train, toks_test, labels_train, labels_test,
                       tokenizer, bert_model, seq_len,
                       load_embeddings_from_file,
                       micro_batch_size,  macro_batch_size, macro_batch_start,
-                      folder, embedding_size, embedding_name, flatten):
+                      folder, embedding_size, embedding_name,
+                      load_word2vec, raw_train, raw_test,
+                      flatten):
     embedding_name = embedding_name.split('/')[-1]
-    if load_embeddings_from_file:
+    if load_word2vec:
+        word2vec = get_word2vec()
+        print("Encoding training data")
+        train_x = embed_word2vec(raw_train, seq_len, word2vec)
+        print("Encoding test data")
+        test_x = embed_word2vec(raw_test, seq_len, word2vec)
+        del word2vec
+    elif load_embeddings_from_file:
         train_x, test_x = load_embeddings(folder, seq_len, embedding_size,
                                           embedding_name)
     else:

@@ -20,8 +20,8 @@ parser.add_argument('--comb', dest='combination_method', choices=['sqrt', 'mean'
 parser.add_argument('--m', dest='mode',
                     help='options: all, pos, falsepos, truepos',
                     default='all', type=str)
-parser.add_argument('--scores', dest='spec_rep_all', default=False,
-                    help='extract specificity/representativeness/importance '
+parser.add_argument('--scores', dest='dist_rep_all', default=False,
+                    help='extract distinctiveness/representativeness/importance '
                     'scores for all features (regardless of the threshold)',
                     action='store_true')
 parser.add_argument('--scale', dest='scale_by_model_score',
@@ -57,17 +57,17 @@ with open(log_file, 'w+', encoding='utf8') as f_log:
                 'REPRESENTATIVITY_MEAN\tREPRESENTATIVITY_VAR\t'
                 'REPRESENTATIVITY_MIN\tREPRESENTATIVITY_MAX\t'
                 'CORRCOEF_IMPORTANCE_REP\tCOVARIANCE_IMPORTANCE_REP\t'
-                'SPECIFICITY_MEAN\tSPECIFICITY_VAR\t'
-                'SPECIFICITY_MIN\tSPECIFICITY_MAX\t'
-                'CORRCOEF_IMPORTANCE_SPEC\tCOVARIANCE_IMPORTANCE_SPEC\n')
+                'DISTINCTIVENESS_MEAN\tDISTINCTIVENESS_VAR\t'
+                'DISTINCTIVENESS_MIN\tDISTINCTIVENESS_MAX\t'
+                'CORRCOEF_IMPORTANCE_DIST\tCOVARIANCE_IMPORTANCE_DIST\n')
 
-if args.spec_rep_all:
-    all_scores_file = '{}/importance-spec-rep-{}-{}-{}scaled.tsv' \
+if args.dist_rep_all:
+    all_scores_file = '{}/importance-dist-rep-{}-{}-{}scaled.tsv' \
                       .format(args.model, args.mode, args.combination_method,
                               '' if args.scale_by_model_score else 'un')
     with open(all_scores_file, 'w+', encoding='utf8') as f_all:
         f_all.write('FEATURE\tLABEL\tIMPORTANCE\t'
-                    'REPRESENTATIVENESS\tSPECIFICITY\tCOUNT\n')
+                    'REPRESENTATIVENESS\tDISTINCTIVENESS\tCOUNT\n')
 
 with open(args.model + '/features.tsv', encoding='utf8') as f:
     next(f)  # Header
@@ -152,46 +152,46 @@ for label in labels:
                 top_results.append(details)
             idx += 1
 
-    print("Reading the representativeness/specificity features")
+    print("Reading the representativeness/distinctiveness features")
     distribution = {}
     with open(args.model + '/feature-distribution.tsv', 'r',
               encoding='utf8') as f:
         cols = next(f).strip().split('\t')
         count_col = cols.index(label)
         rep_col = cols.index(label + '-REP')
-        spec_col = cols.index(label + '-SPEC')
+        dist_col = cols.index(label + '-DIST')
         next(f)  # Summary of the entire dataset.
         for line in f:
             cells = line.strip().split('\t')
             distribution[cells[0]] = (int(float(cells[count_col])),
                                       float(cells[rep_col]),
-                                      float(cells[spec_col]))
+                                      float(cells[dist_col]))
 
     imp_scores, imp_scores_top = [], []
     n_utt_scores, n_utt_scores_top = [], []
     rep_scores, rep_scores_top = [], []
-    spec_scores, spec_scores_top = [], []
+    dist_scores, dist_scores_top = [], []
 
-    if args.spec_rep_all:
+    if args.dist_rep_all:
         with open(all_scores_file, 'a', encoding='utf8') as f_all:
             for feature, result in feature2results.items():
                 imp = result[2]
-                n_occ, rep, spec = distribution[feature]
+                n_occ, rep, dist = distribution[feature]
                 imp_scores.append(imp)
                 n_utt_scores.append(n_occ)
                 rep_scores.append(rep)
-                spec_scores.append(spec)
+                dist_scores.append(dist)
                 f_all.write('{}\t{}\t{:.4f}\t{:.4f}\t{:.4f}\t{}\n'
-                            .format(feature, label, imp, rep, spec, n_occ))
+                            .format(feature, label, imp, rep, dist, n_occ))
 
     with open('{}_{}_context.tsv' .format(filename_template, threshold),
               'w+', encoding='utf8') as f_out:
         if args.reduced:
             f_out.write('INDEX\tFEATURE\tIMPORTANCE\t'
-                        'REPRESENTATIVENESS\tSPECIFICITY\tCONTEXT\n')
+                        'REPRESENTATIVENESS\tDISTINCTIVENESS\tCONTEXT\n')
         else:
             f_out.write('INDEX\t' + header + '\tCONTEXT\tN_UTTERANCES\t'
-                        'REPRESENTATIVENESS\tSPECIFICITY\t'
+                        'REPRESENTATIVENESS\tDISTINCTIVENESS\t'
                         'N_IDENTICAL_TOP\tIDENTICAL (IDX/FEATURE/MEAN/SUM/COUNT)\t'
                         'CORRELATED (IDX/FEATURE/NPMI/MEAN/SUM/COUNT)\n')
         skip = set()
@@ -202,24 +202,24 @@ for label in labels:
                 # Already listed
                 continue
 
-            n_occ, rep, spec = distribution[feature]
+            n_occ, rep, dist = distribution[feature]
 
             if args.reduced:
                 f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}'.format(
-                    idx, feature, imp, round(100 * rep), round(100 * spec),
+                    idx, feature, imp, round(100 * rep), round(100 * dist),
                     context))
                 imp_scores_top.append(imp)
                 n_utt_scores_top.append(n_occ)
                 rep_scores_top.append(rep)
-                spec_scores_top.append(spec)
+                dist_scores_top.append(dist)
             else:
                 f_out.write('{}\t{}\t{:.2f}\t{}\t{}\t{}\t{}\t{}\t'.format(
                     idx, feature, imp, count, context,
-                    n_occ, rep, spec))
+                    n_occ, rep, dist))
                 imp_scores_top.append(imp)
                 n_utt_scores_top.append(n_occ)
                 rep_scores_top.append(rep)
-                spec_scores_top.append(spec)
+                dist_scores_top.append(dist)
 
             if not args.reduced:
                 mirror_list = []
@@ -274,11 +274,11 @@ for label in labels:
                             np.min(rep_scores_top), np.max(rep_scores_top),
                             np.corrcoef(imp_scores_top, rep_scores_top)[0, 1],
                             np.cov(imp_scores_top, rep_scores_top)[0, 1],
-                            np.mean(spec_scores_top), np.var(spec_scores_top),
-                            np.min(spec_scores_top), np.max(spec_scores_top),
-                            np.corrcoef(imp_scores_top, spec_scores_top)[0, 1],
-                            np.cov(imp_scores_top, spec_scores_top)[0, 1]))
-        if args.spec_rep_all:
+                            np.mean(dist_scores_top), np.var(dist_scores_top),
+                            np.min(dist_scores_top), np.max(dist_scores_top),
+                            np.corrcoef(imp_scores_top, dist_scores_top)[0, 1],
+                            np.cov(imp_scores_top, dist_scores_top)[0, 1]))
+        if args.dist_rep_all:
             f_log.write('{}\tall\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'
                         '\t{:.1f}\t{:.1f}\t{}\t{}'
                         '\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.2f}'
@@ -293,7 +293,7 @@ for label in labels:
                                 np.min(rep_scores), np.max(rep_scores),
                                 np.corrcoef(imp_scores, rep_scores)[0, 1],
                                 np.cov(imp_scores, rep_scores)[0, 1],
-                                np.mean(spec_scores), np.var(spec_scores),
-                                np.min(spec_scores), np.max(spec_scores),
-                                np.corrcoef(imp_scores, spec_scores)[0, 1],
-                                np.cov(imp_scores, spec_scores)[0, 1]))
+                                np.mean(dist_scores), np.var(dist_scores),
+                                np.min(dist_scores), np.max(dist_scores),
+                                np.corrcoef(imp_scores, dist_scores)[0, 1],
+                                np.cov(imp_scores, dist_scores)[0, 1]))
