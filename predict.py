@@ -142,7 +142,7 @@ def embed_word2vec(ngrams, seq_len, word2vec, embed_size):
 
 
 def word2vec_split(utterances, seq_len):
-    pattern = re.compile('[\w\']+|[.,!?;"&:><=/]+')
+    pattern = re.compile('[\w\']+|<[\w]+>|[.,!?;"&:><=/]+')
     ngrams = []
     for idx, utterance in enumerate(utterances):
         if idx % 1000 == 0:
