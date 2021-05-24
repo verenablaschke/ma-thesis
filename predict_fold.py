@@ -6,13 +6,13 @@ import datetime
 import pickle
 from collections import Counter
 from predict import encode, encode_embeddings, score, train, \
-                    explain_lime, get_features
+                    explain_lime, get_features, word2vec_split
 from pathlib import Path
 from transformers import FlaubertModel, FlaubertTokenizer, \
                          BertTokenizer, BertModel
 
 
-def get_data_for_fold(args, folder, n_bpe_toks):
+def get_data_for_fold(args, folder, seq_len):
     print("Encoding the data.")
     raw_train, ngrams_train, labels_train = get_features(
         '{}/train_data.txt'.format(folder))
@@ -25,33 +25,38 @@ def get_data_for_fold(args, folder, n_bpe_toks):
     bert_model, tokenizer = None, None
 
     if args.use_embeddings:
-        if (not args.load_embeddings) and ('word2vec' not in args.embedding_model):
-            if 'flaubert' in args.embedding_model:
-                bert_model, _ = FlaubertModel.from_pretrained(
-                    args.embedding_model, output_loading_info=True)
-                tokenizer = FlaubertTokenizer.from_pretrained(
-                    args.embedding_model,
-                    do_lowercase='uncased' in args.embedding_model)
-            else:
-                bert_model, _ = BertModel.from_pretrained(
-                    args.embedding_model, output_loading_info=True)
-                tokenizer = BertTokenizer.from_pretrained(
-                    args.embedding_model,
-                    do_lowercase='uncased' in args.embedding_model)
-            bert_model.eval()
-        embedding_size = 768
-        if '_small_' in args.embedding_model:
-            embedding_size = 512
-        elif '_large_' in args.embedding_model:
-            embedding_size = 1024
+        if 'word2vec' in args.embedding_model:
+            embedding_size = 100
+            ngrams_train = word2vec_split(raw_train, seq_len)
+            ngrams_test = word2vec_split(raw_test, seq_len)
+        else:
+            if (not args.load_embeddings):
+                if 'flaubert' in args.embedding_model:
+                    bert_model, _ = FlaubertModel.from_pretrained(
+                        args.embedding_model, output_loading_info=True)
+                    tokenizer = FlaubertTokenizer.from_pretrained(
+                        args.embedding_model,
+                        do_lowercase='uncased' in args.embedding_model)
+                else:
+                    bert_model, _ = BertModel.from_pretrained(
+                        args.embedding_model, output_loading_info=True)
+                    tokenizer = BertTokenizer.from_pretrained(
+                        args.embedding_model,
+                        do_lowercase='uncased' in args.embedding_model)
+                bert_model.eval()
+            embedding_size = 768
+            if '_small_' in args.embedding_model:
+                embedding_size = 512
+            elif '_large_' in args.embedding_model:
+                embedding_size = 1024
         train_x, test_x, train_y, test_y, label_encoder = encode_embeddings(
             ngrams_train, ngrams_test, labels_train, labels_test,
-            tokenizer, bert_model, n_bpe_toks,
+            tokenizer, bert_model, seq_len,
             args.load_embeddings,
             args.flaubert_micro_batch_size, args.flaubert_macro_batch_size,
             args.flaubert_macro_batch_start,
             folder, embedding_size, args.embedding_model,
-            'word2vec' in args.embedding_model, raw_train, raw_test,
+            'word2vec' in args.embedding_model,
             flatten=args.model_type == 'svm')
         vectorizer = None
     else:
@@ -87,11 +92,11 @@ def predict_fold(
     LOG_FILE = LIME_FOLDER + 'log.txt'
     dropout_percentage = int(100 * dropout_rate)
     lr_int = int(1000 * learning_rate)
-    n_bpe_toks = train_x.shape[-2]
+    seq_len = train_x.shape[-2]
     embedding_model_name = args.embedding_model.split('/')[-1]
     FILE_SFX = '-{}-h{}-b{}-d{}-ep{}-T{}-em{}-lr{}'.format(
         model_type, hidden, batch_size, dropout_percentage, epochs,
-        n_bpe_toks, embedding_model_name, lr_int)
+        seq_len, embedding_model_name, lr_int)
     if args.explicit_log:
         LOG_FILE = '{}log{}.txt'.format(LIME_FOLDER, FILE_SFX)
 
@@ -170,13 +175,14 @@ def predict_fold(
             with open('{}attention_scores{}.txt'.format(LIME_FOLDER, FILE_SFX),
                       'w+', encoding='utf8') as f:
                 f.write('LABEL\tPRED\tATTN{}\tTOKENS{}\n'.format(
-                    '\t' * (n_bpe_toks - 1),
-                    '\t' * (n_bpe_toks - 1)))
+                    '\t' * (seq_len - 1),
+                    '\t' * (seq_len - 1)))
                 for i, (x, y_true, y_pred, attn) in enumerate(
                         zip(ngrams_test, test_y, pred, attn_scores)):
-                    x = x.split(' ')
-                    filler = (n_bpe_toks - len(x)) * '\t<FILLER>'
-                    tokens = '\t'.join(x[:n_bpe_toks - 1] + [x[-1]]) + filler
+                    if 'word2vec' not in args.embedding_model:
+                        x = x.split(' ')
+                    filler = (seq_len - len(x)) * '\t<FILLER>'
+                    tokens = '\t'.join(x[:seq_len - 1] + [x[-1]]) + filler
                     attention_score = '\t'.join(str(a[0]) for a in attn)
                     # if i % 100 == 0:
                     #     print('{}\t{}\t{}\t{}\n'.format(
@@ -192,7 +198,7 @@ def predict_fold(
                          args.n_lime_samples, args.type == 'dialects',
                          model_type == 'nn',
                          args.recalculate_ngrams,
-                         flaubert, flaubert_tokenizer, n_bpe_toks)
+                         flaubert, flaubert_tokenizer, seq_len)
     return acc, f1, FILE_SFX
 
 
@@ -216,7 +222,7 @@ if __name__ == "__main__":
                                  'bert-base-multilingual-cased',
                                  'word2vec'],
                         default='flaubert/flaubert_base_cased', type=str)
-    parser.add_argument('--emblen', dest='n_bpe_toks', default=[20], type=int,
+    parser.add_argument('--emblen', dest='seq_len', default=[20], type=int,
                         nargs='+')
     parser.add_argument('--embbatch', dest='flaubert_micro_batch_size',
                         default=50, type=int)
@@ -257,7 +263,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for fold in args.folds:
-        for emblen in args.n_bpe_toks:
+        for emblen in args.seq_len:
             folder = '{}/fold-{}/'.format(args.model, fold)
             (raw_train, ngrams_train, labels_train,
                 raw_test, ngrams_test, labels_test,
