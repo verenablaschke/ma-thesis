@@ -78,7 +78,11 @@ if not args.per_label:
 keys = list(imp_scores.keys())
 keys.sort()
 
-label2printlabel = {'0': 'no sexist content', '1': 'sexist content'}
+label2printlabel = {'0': 'no sexist content', '1': 'sexist content',
+                    'nordnorsk': 'North Norwegian',
+                    'troendersk': 'Trønder',
+                    'vestnorsk': 'West Norwegian',
+                    'oestnorsk': 'East Norwegian'}
 
 for label in keys:
     print(label)
