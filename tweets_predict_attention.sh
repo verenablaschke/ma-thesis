@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # In the case of line ending problems (Windows vs. UNIX encodings), run:
-# sed -i 's/\r$//' tweets.sh
+# sed -i 's/\r$//' tweets_predict_attention.sh
 
 # get & clean tweets via the tweets_predict.sh script
 python3 extract_features.py tweets models/tweets-attn --bpe --i data/tweets_cleaned_websites.tsv --embmod flaubert/flaubert_large_cased --perc
