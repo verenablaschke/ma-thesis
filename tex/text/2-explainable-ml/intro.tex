@@ -1,0 +1,16 @@
+\label{chap:xml}
+
+\citet{barredo-arrieta2020explainable} present an overview of recent research on explainable machine learning.
+They distinguish between three types of methods for arriving at these explanations: using transparent models in which the feature interactions are relatively easy to understand for a human (such as decision trees or linear regression models), using model-agnostic post-hoc methods (such as creating local explanations), and using post-hoc methods that are specific to the model architecture.
+
+In this thesis, I use two types of explainable machine learning: 
+LIME, which is a model-agnostic post-hoc approach, and attention weights in neural models, which are specific to that architecture.
+In the first part of this chapter, I introduce LIME, which I use in both case studies (\autoref{sec:ml-lime}).
+In the second part (\autoref{sec:attention}), I illustrate how attention layers in neural models work and summarize the discussion on whether they can be used for explaining model decisions.
+I use attention in the sexism detection case study.
+
+
+% As \citet{belinkov2019analysis} point out, NLP model explanations are mostly concerned with correlations between linguistic features in the input data and label predictions rather than about exploring true causation.
+% \citet{rudin2019stop} argues that explanations are always unfaithful to (non-interpretable) models to some degree, otherwise they would be as complex as the models themselves.
+% Explanations should therefore always be taken with a grain of salt.
+% Furthermore, since the explanations therefore need to leave out some information, what remains might appear nonsensical to humans.

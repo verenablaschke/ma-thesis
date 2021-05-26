@@ -1,0 +1,113 @@
+% \documentclass{standalone}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
+% \usepackage[outline]{contour}
+% \begin{document}
+\tikzset{
+    base/.style = {font=\small}, % \small\sffamily
+    box/.style = {base, rectangle, rounded corners, draw=black,
+                   minimum width=0.1cm, minimum height=0.5cm, 
+                   text centered},
+    input/.style = {box},
+    lstm/.style = {box, minimum width=1.5cm},
+    feature/.style = {box,
+                   minimum height=6mm,},
+    group/.style = {box, dashed},
+    labels/.style = {box, minimum width=1.5cm},
+    description/.style = {text width=4cm},
+    >=LaTeX
+}
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    align=center % necessary for intra-node linebreaks
+    ]
+
+  \node (zT) [feature] {$z_T$};
+  \node (zdot) [left=10mm of zT] {$...$};
+  \node (z2) [feature, left=10mm of zdot] {$z_2$};
+  \node (z1) [feature, left=10mm of z2] {$z_1$};
+  \node (embed) [description, left=10mm of z1] {embeddings};
+  
+%   \node (h1fwd) [feature, above=5mm of z1] {$\overrightarrow{h}_1$};
+%   \node (h2fwd) [feature, above=5mm of z2] {$\overrightarrow{h}_2$};
+%   \node (hdotfwd) [right=9mm of h2fwd] {$...$};
+%   \node (hTfwd) [feature, above=5mm of zT] {$\overrightarrow{h}_T$};
+%   \node (lstm) [description, above=7mm of embed] {bidirectional\\RNN};
+  
+%   \node (h1bwd) [feature, above=2mm of h1fwd] {$\overleftarrow{h}_1$};
+%   \node (h2bwd) [feature, above=2mm of h2fwd] {$\overleftarrow{h}_2$};
+%   \node (hdotbwd) [right=9mm of h2bwd] {$...$};
+%   \node (hTbwd) [feature, above=2mm of hTfwd] {$\overleftarrow{h}_T$};
+
+%   \begin{scope}[on background layer]
+%       \node (h1) [group, fit={(h1fwd) (h1bwd)}] {};
+%       \node (h2) [group, fit={(h2fwd) (h2bwd)}] {};
+%       \node (hT) [group, fit={(hTfwd) (hTbwd)}] {};
+%   \end{scope}
+
+  \node (h1) [feature, above=11mm of z1] {$h_1$};
+  \node (h2) [feature, above=11mm of z2] {$h_2$};
+  \node (hdot) [above=14mm of zdot] {$...$};
+  \node (hT) [feature, above=11mm of zT] {$h_T$};
+  \node (encoder) [description, left=10mm of h1] {encoder};
+  
+%   \node (v) [feature, above right=0mm and 15mm of hTbwd] {$v$};
+    \node (v) [feature, above right=-2mm and 15mm of hT] {$v$};
+
+
+  \node (alpha1) [feature, above=10mm of h1] {$\alpha_1$};
+  \node (alpha2) [feature, above=10mm of h2] {$\alpha_2$};
+%   \node (alphadot) [above=14mm of hdotbwd] {$...$};
+  \node (alphadot) [above=13mm of hdot] {$...$};
+  \node (alphaT) [feature, above=10mm of hT] {$\alpha_T$};
+  \node [description, left=10mm of alpha1] {attention weights};
+  
+  \node (halpha1) [feature, above=5mm of alpha1] {$h_{\alpha_1}$};
+  \node (halpha2) [feature, above=5mm of alpha2] {$h_{\alpha_2}$};
+  \node (halphadot) [above=8mm of alphadot] {$...$};
+  \node (halphaT) [feature, above=5mm of alphaT] {$h_{\alpha_T}$};
+  \node (attnO) [description, left=10mm of halpha1] {attention output};
+  
+%   \node (dense) [feature, above=40mm of hdotbwd] {dense layer};
+  \node (dense) [feature, above=40mm of hdot] {dense layer};
+  \node (yhat) [above=5mm of dense] {$\hat{y}$};
+  \node [description, above=9mm of attnO] {decoder};
+
+  
+  \draw[->] (z1) -- (h1);
+  \draw[->] (z2) -- (h2);
+  \draw[->] (zT) -- (hT);
+  
+%   \draw[->] (h1fwd) -- (h2fwd);
+%   \draw[->] (h2fwd) -- (hdotfwd);
+%   \draw[->] (hdotfwd) -- (hTfwd);
+  
+%   \draw[->] (h2bwd) -- (h1bwd);
+%   \draw[->] (hdotbwd) -- (h2bwd);
+%   \draw[->] (hTbwd) -- (hdotbwd);
+  
+  \draw[->] (v) -- (alpha1.south);
+  \draw[->] (v) -- (alpha2.south);
+  \draw[->] (v) -- (alphaT.south);
+
+  \draw[->] (h1) -- (alpha1);
+  \draw[->] (h2) -- (alpha2);
+  \draw[->] (hT) -- (alphaT);
+  
+  \draw[->] (h1.north) to[out=150,in=210] (halpha1.south);
+  \draw[->] (h2.north) to[out=150,in=210] (halpha2.south);
+  \draw[->] (hT.north) to[out=150,in=210] (halphaT.south);
+  
+  \draw[->] (alpha1) -- (halpha1);
+  \draw[->] (alpha2) -- (halpha2);
+  \draw[->] (alphaT) -- (halphaT);
+
+
+  \draw[->] (halpha1) -- (dense.south);
+  \draw[->] (halpha2) -- (dense.south);
+  \draw[->] (halphaT) -- (dense.south);
+  \draw[->] (dense) -- (yhat);
+  
+  
+\end{tikzpicture}
+% \end{document}

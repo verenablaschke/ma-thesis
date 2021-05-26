@@ -1,0 +1,26 @@
+\centering
+\begin{tabular}{lrlrlrlrl}
+\toprule
+\textbf{Word} & \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}\textbf{West} (actual\\\& predicted label)\end{tabular}} & \multicolumn{2}{l}{\textbf{East}} & \multicolumn{2}{l}{\textbf{Trønder}} & \multicolumn{2}{l}{\textbf{North}} \\
+\midrule
+\textit{ja} /ja/ {\smaller``yes''}  &  & &  &  &  &  &  &  \\
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{da} /då/ \\ \phantom{~~}{\smaller``then''} \end{tabular}} & \cellcolor[HTML]{72C69D}0.17  & då\sep{}& {\cellcolor[HTML]{F5CDCA}-0.07} & då\sep{} & {\cellcolor[HTML]{F5CECB}-0.07} & \multicolumn{2}{l}{då\sep{}}  &  \\
+ & \cellcolor[HTML]{F7D6D3}-0.06 & \sep{}då &  &  &  &  &  &  \\
+\textit{vi} /me/ {\smaller``we''} & \cellcolor[HTML]{A1D9BE}0.11  & \multicolumn{2}{l}{{\ngram{\sos{}vi/me\eos{}}}}  &  &  &  & {\cellcolor[HTML]{F5CBC7}-0.08} & {\ngram{\sos{}vi/me\eos{}}}  \\
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{har} /he/\\ \phantom{~~}{\smaller``have.\textsc{pres}''} \end{tabular}} & \cellcolor[HTML]{BAE3CF}0.08 & he\sep{} & {\cellcolor[HTML]{F7D6D4}-0.06} & he\sep{} &  &  &  &  \\
+ & \cellcolor[HTML]{D2EDE0}0.05 & \multicolumn{2}{l}{\sos{}har/he\eos{}} &  &  &  &  &  \\
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{de} /di/ \\ \phantom{~~} {\smaller``the.\textsc{pl}''} \end{tabular}}& \cellcolor[HTML]{D1EDDF}0.06  & \sep{}di&  &  &  &  &  &  \\
+\\
+\multicolumn{3}{l}{\textit{siste} /sisste/ {\smaller``last.\textsc{def}''}}  & &  &  &  &  &  \\
+\multicolumn{3}{l}{\textit{årene} /åran/ {\smaller``years.\textsc{def}''}}  & &  &  &  &  &  \\
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{nå} /nå/\\ \phantom{~~}{\smaller``now''} \end{tabular}}& \cellcolor[HTML]{F1B7B3}-0.11 &  \sep{}nå & &  &  &  &  &  \\
+ & \cellcolor[HTML]{BFE5D2}0.08 & nå\sep{} &  &  &  &  &  &  \\
+\textit{så} /så/ {\smaller``so''} &  & &  &  &  &  &  &  \\
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{har} /he/\\ \phantom{~~}{\smaller``have.\textsc{pres}''} \end{tabular}} &  \cellcolor[HTML]{D2EDE0}0.05 &\multicolumn{2}{l}{\sos{}har/he\eos{}}  &  &  &  &  &  \\
+ & \cellcolor[HTML]{BAE3CF}0.08 & he\sep{} &  &  &  &  &  &  \\
+\textit{vi} /mi/ {\smaller``we''} & \cellcolor[HTML]{94D4B5}0.13 & {\smaller\ngram{\sos{}vi/mi\eos{}}} & {\cellcolor[HTML]{F7D9D7}-0.06}& \multicolumn{3}{l}{{\ngram{\sos{}vi/mi\eos{}}}}  & {\cellcolor[HTML]{F7D5D3}-0.06}& {\ngram{\sos{}vi/mi\eos{}}}  \\
+& \cellcolor[HTML]{AFDFC8}0.10  & \sep{}mi &  {\cellcolor[HTML]{F4C7C3}-0.09} &\sep{}mi &  &  &  &  \\
+\multicolumn{3}{l}{\textit{vært} /værrt/ {\smaller``been''}} &  &  &  &  &  &  \\
+\multicolumn{3}{l}{\textit{heldige} /helldi/ {\smaller``lucky.\textsc{pl}''}}  & &  &  &  &  &  \\
+\bottomrule
+\end{tabular}

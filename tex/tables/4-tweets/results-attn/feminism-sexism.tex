@@ -1,0 +1,16 @@
+\centering
+\begin{tabular}{llrrrl}
+\toprule
+\textbf{Group} & \textbf{Feature} & \multicolumn{1}{l}{\textbf{Imp.}} & \multicolumn{1}{l}{\textbf{Rep.}} & \multicolumn{1}{l}{\textbf{Dist.}} & \textbf{LIME?} \\
+\midrule
+\multirow{7}{*}{\begin{tabular}[c]{@{}l@{}}Sexist\\ content\end{tabular}} & \ngram{féminisme} `feminism' & 0.26 & 0.01 & 0.26 \\
+ & \ngram{féministe} `feminist' & 0.19 & 0.03 & 0.18 & \ngram{féministe\eow}\\
+ & \ngram{égalité} `equality' & 0.18 & 0.01 & 0.33  & \ngram{égalité\eow}\\
+ & \ngram{sexistes} `sexist.\textsc{pl}' & 0.16 & 0.01 & 0.22 \\
+ & \ngram{parité} `parity' & 0.14 & 0.00 & 0.32 \\
+ & \ngram{féministes} `feminist.\textsc{pl}'& 0.14 & 0.01 & 0.09 \\
+ & \ngram{sexiste} `sexist' & 0.13 & 0.02 & 0.25  & \ngram{sexiste\eow}\\
+ \midrule
+\begin{tabular}[c]{@{}l@{}}No sexist\\ content\end{tabular} & \ngram{sexisme} `sexism' & 0.16 & 0.04 & -0.17 & \ngram{sexisme\eow}\\
+\bottomrule
+\end{tabular}

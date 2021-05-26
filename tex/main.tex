@@ -1,0 +1,134 @@
+\documentclass[a4paper, twoside, 12pt]{report}
+% \documentclass[12pt,a4paper]{report}
+\usepackage{thesis}
+
+\usepackage[table,xcdraw]{xcolor}
+
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{standalone}
+
+% figures
+\usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
+\usepackage{calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+% math
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{bbold}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\loss}{\mathcal{L}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+% TODO: Decide whether I want matrix names in italics or in a calligraphic font
+\newcommand{\mat}[1]{\mathcal{#1}}
+
+% ling
+\usepackage{tipa}
+\usepackage{gb4e}
+\setlength{\glossglue}{8pt plus 2pt minus 1pt}
+\renewcommand{\eachwordtwo}{\rule[-10pt]{0pt}{0pt}}
+% Requires re-initializing the \eachwordtwo command before the example and then setting it to the above again afterwards. 
+\renewcommand{\eachwordthree}{\rule[-10pt]{0pt}{0pt}}
+
+% comfortable writing/editing
+\usepackage{silence}
+% \WarningFilter*...
+\usepackage{editnotes}
+
+\usepackage{relsize}
+\definecolor{mygray}{gray}{0.6}
+\newcommand{\metatoken}[1]{{\color{mygray}\smaller#1}}
+\newcommand{\sos}{\metatoken{<SOS>}}
+\newcommand{\eos}{\metatoken{<EOS>}}
+\newcommand{\sep}{\metatoken{<SEP>}}
+\newcommand{\eow}{\metatoken{</w>}}
+\newcommand{\mow}{\metatoken{-}}
+\newcommand{\username}{\ngram{\metatoken{<USER>}}}
+\newcommand{\hashtag}{\ngram{\metatoken{<HASHTAG>}}}
+\newcommand{\numberesc}{\ngram{\metatoken{<NUMBER>}}}
+\newcommand{\filler}{\metatoken{<FILLER>}}
+\newcommand{\ngram}[1]{\texttt{#1}}
+% \newcommand{\context}[1]{{\smaller#1}}
+\newcommand{\context}[1]{{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           %
+%      Document Start       %
+%                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\hyphenation{Scan-Dia-Syn}
+\hyphenation{misogy-ny}
+
+\startfrontmatter
+
+\input{text/0-pre/title}
+\pagestyle{empty}
+\input{text/0-pre/antiplag}
+\input{text/0-pre/abstract}
+\newpage
+\startindex
+\input{text/0-pre/contents}
+\newpage
+
+\startmainmatter
+
+\chapter{Introduction} 
+\label{sec:intro}
+\input{text/1-intro/intro}
+
+\chapter{Explainable machine learning} 
+\label{sec:explainable-ml}
+\input{text/2-explainable-ml/intro}
+\newpage
+\input{text/2-explainable-ml/lime}
+\input{text/2-explainable-ml/method}
+\newpage
+\input{text/2-explainable-ml/attention}
+\input{text/2-explainable-ml/attention-discussion}
+
+\chapter{Case study: Norwegian dialect disambiguation} 
+\label{sec:case-dialects}
+\input{text/3-dialects/intro}
+\input{text/3-dialects/dialectology}
+\input{text/3-dialects/data}
+\input{text/3-dialects/preprocessing}
+\input{text/3-dialects/dialectometry}
+\input{text/3-dialects/method}
+\input{text/3-dialects/results}
+\input{text/3-dialects/features-ling-major}
+\input{text/3-dialects/features-ling-other}
+\input{text/3-dialects/discussion}
+
+\chapter{Case study: Detecting sexism in French tweets}
+\label{sec:case-tweets}
+\input{text/4-tweets/intro}
+\newpage
+\input{text/4-tweets/data}
+\input{text/4-tweets/preprocessing}
+\newpage
+\input{text/4-tweets/method-lime}
+\input{text/4-tweets/results-lime}
+\newpage
+\input{text/4-tweets/method-attn}
+\input{text/4-tweets/results-attn}
+\newpage
+\input{text/4-tweets/discussion}
+
+\chapter{Conclusion} 
+\input{text/5-conclusion/conclusion}
+
+
+% \editnotesummary
+
+\bibliography{bib/dialect-data,bib/dialectology,bib/dialectometry,bib/explainable-ml,bib/tweets}
+
+\end{document}

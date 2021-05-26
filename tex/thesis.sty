@@ -1,0 +1,86 @@
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{thesis}
+\RequirePackage[english]{babel}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+
+
+\RequirePackage[paper=a4paper,left=30mm,right=30mm,top=25mm,bottom=25mm]{geometry}
+
+% typesetting details
+% http://www.khirevich.com/latex/microtype/
+\RequirePackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
+\frenchspacing
+
+\RequirePackage{parskip}
+\pagenumbering{roman}
+\RequirePackage[section]{placeins} % place figures where I want them
+
+% citations
+\RequirePackage{natbib}
+\bibliographystyle{chicago}
+\RequirePackage[nottoc]{tocbibind} % add references to Table of Contents
+
+% tables
+\RequirePackage{booktabs}
+\RequirePackage{multirow}
+\renewcommand{\arraystretch}{1.2}
+
+
+% for footer and header
+\RequirePackage{fancyhdr}
+\setlength{\headheight}{15pt}
+
+% heading tweaks
+\RequirePackage{titlesec}
+\titleformat{\section}
+{\normalfont\Large\bfseries}
+{\thesection}
+{1em}
+{}
+\titleformat{\subsection}
+{\normalfont\Large\bfseries}
+{\thesubsection}
+{1em}
+{}
+\titleformat{\subsubsection}
+{\normalfont\Large\bfseries}
+{\thesubsubsection}
+{1em}
+{}
+
+\newcommand{\titlelarge}[1]{%
+    \fontsize{20}{70}\selectfont#1%
+}
+
+\newcommand{\thesistitleline}[1]{{\titlelarge\bfseries#1}}
+
+\newcommand{\startfrontmatter}{
+\pagenumbering{gobble}
+}
+
+\newcommand{\startindex}{
+\pagenumbering{roman}
+}
+
+\newcommand{\startmainmatter}{
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LO,RE]{\textcolor{gray}{\slshape\nouppercase{\rightmark}}}
+\fancyhead[RO,LE]{\thepage}
+\fancyfoot[R]{\textcolor{gray}{Seminar für Sprachwissenschaft Universität Tübingen}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\setcounter{page}{1}
+\pagenumbering{arabic}
+}
+
+% % paragraph title
+% \RequirePackage{titlesec}
+% \titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+% \titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{0.5em}
+
+\newcommand{\subheader}[1]{{\vspace{1em}\larger\textbf{#1}}}
+
+\endinput

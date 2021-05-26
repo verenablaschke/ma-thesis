@@ -1,0 +1,101 @@
+\subsection{Major linguistic features}
+\label{sec:dialects-results-lingmajor}
+
+In this section, I introduce the linguistic characteristics that are typically discussed in Norwegian dialectology and point out which of these can be found in the ScanDiaSyn data and whether they are considered as important by LIME.
+
+Different dialectologists use somewhat different sets of linguistic features to characterize the different dialect groups.
+In this section, I present a summary of those features that are regularly brought up in the literature on Norwegian dialectology.
+
+\citet[pp.~113--115]{sandoey1991dialektkunnskap} uses the features detailed in \autoref{sec:dialects-features-inffem} to discern between twelve dialect groups (that are subgroups of the four groups I use in this thesis).
+\citet[pp.~32--42]{maehlum2012dialektlandskapet} base their classification on the features in \autoref{sec:dialects-features-inffem}, \autoref{sec:dialects-prosody}, and \autoref{sec:dialects-features-tjukkl}.
+These are also the features considered most important by \citet{kaasen2020comparing}.
+
+
+\subsubsection{Infinitive endings and endings of feminine nouns}
+\label{sec:dialects-features-inffem}
+
+One prominently discussed group of features is concerned with the different ways in which word-final vowels of infinitives or certain feminine nouns have changed.
+The following explanation summarizes the overviews by 
+\citet[pp.~33--35]{maehlum2012dialektlandskapet} and \citet[pp.~113--114]{sandoey1991dialektkunnskap}.
+
+In Old West Norse, infinitive forms of verbs with more than one syllable ended in /-a/, as did the so-called `weak' feminine nouns (that is, feminine nouns ending in a vowel sound rather than a consonant).
+The following types of dialects have emerged with regard to how this ending has (or has not) changed:
+\begin{itemize}
+    \item \textit{A-mål} `a-speech': In these dialects, all such words still end in /-a/ (or another non-schwa vowel).
+    \item \textit{E-mål} `e-speech': The endings of both infinitives and weak feminine nouns were reduced to a schwa.
+    \item Apocope: Both infinitives and weak feminine nouns have undergone apocope.
+    \item \textit{E/a-mål} `e/a-speech': Only the infinitive endings were reduced to a schwa, weak feminine nouns still end in /-a/ (or another non-schwa vowel).
+    \item \textit{Jamvektsmål} `balance-speech': Whether or not the final vowel was reduced or not depends on the length of the root of the word. Only infinitives and weak feminine nouns with short roots retained endings with full endings, whereas words with roots whose rhyme contained a long vowel and/or multiple consonants now end in /-\textschwa{}/.
+    \item \textit{Jamvekt} with apocope: These dialects behave like the previous group, but the final vowel of a word with a long root was dropped.
+\end{itemize}
+
+For classifying to which of the major dialect groups a doculect belongs, \textit{jamvekt} and apocope are often considered the most distinctive indicators \cite[pp.~32--42]{maehlum2012dialektlandskapet}.
+East Norwegian dialects fall into the \textit{jamvekt} group (with /-\textschwa{}/) \cite[p.~46]{maehlum2012dialektlandskapet}.
+Tr{\o}nder dialects exhibit \textit{jamvekt} with apocope (p.~76), and West Norwegian dialects are instances of \textit{a-mål} and \textit{e-mål} (p.~90).
+The different North Norwegian dialects fall into all of the listed groups except for either of the \textit{jamvekt} types (pp.~106--107).
+
+All of the phenomena listed in this section can be found in the data, albeit not overtly encoded.
+However, they can at least be partially found when inspecting common infinitive forms in the data:
+The by far most common (multisyllabic) infinitives in the ScanDiaSyn data are \textit{(å) være} `(to) be,' \textit{(å) gjøre} `(to) do,' and \textit{(å) komme} `(to) come.'
+All three verbs are in the group of verbs whose ending is \textit{not} reduced in \textit{jamvekt} dialects \cite[cf.][p.~84]{hanssen2010dialekter}; therefore knowing the infinitive forms of these verbs for a given dialect is \textit{not} sufficient for figuring out exactly which suffix group the dialect belongs to, although it can be used to narrow down the options, as shown in \autoref{tab:jamvekt}.
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/jamvekt}
+    \caption
+    [Infinitive forms of the most common verbs in ScanDiaSyn]
+    {The most common infinitive forms of the three most common (non-monosyllabic) verbs in the ScanDiaSyn corpus, grouped by the type of ending.
+    The examples in this table are by no means exhaustive.
+    The \textit{jamvekt} subgroup here includes both dialects with and without apocope.}
+    \label{tab:jamvekt}
+\end{table}
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/infinitives}
+    \caption
+    [Infinitive endings in the top 50 most important features per dialect group]
+    {Features encoding infinitive endings that are among the top 50 most important features per dialect group.
+    The context column contains the most common token-level context for character n-grams (numbers in parentheses indicate the proportion of context tokens a character n-gram comes from).}
+    \label{tab:results-inf}
+\end{table}
+
+Versions of \textit{være} and \textit{gjøre} are represented among the features with high importance scores for instances predicted as East Norwegian or Trønder: \ngram{\ae{}ra\sep} in East Norwegian and \ngram{rr\aa} and \ngram{rra\sep} in Tr\o{}nder; all indicating full vowel endings, as expected.
+All of these features represent both \textit{være} and \textit{gjøre} at the same time (and in one case, the verb \textit{(å) fare} `(to) drive' as well).
+None of the highest-ranking features include versions of \textit{komme} despite it also appearing frequently in the data (but there are also no other frequent verbs in the dataset whose stem ends in \textit{-mm}).
+
+No feminine nouns (or features that clearly encode the ending of a feminine noun) are among any dialect group's top 50 labels.
+However, even the most frequently appearing weak feminine nouns (\textit{klasse} `class,' \textit{uke} `week,' and \textit{hytte} `hut') occur significantly less often than the most common verbs.
+
+\subsubsection{Prosody}
+\label{sec:dialects-prosody}
+
+A second distinctive feature is the realization of the two tonemes that exist within the context of Norwegian pitch accent.
+When a word has accent~1, speakers of East Norwegian and Trønder begin with a low pitch whereas West and North Norwegian dialect speakers tend to begin with a high pitch \cite[p.~37]{maehlum2012dialektlandskapet}.
+An experiment by \citet{gooskens2005norwegians} shows that intonation information plays a significant role when Norwegians are asked to determine where a dialect speaker is from.
+This is also confirmed by \citet{ommeren2019tonefall}.
+Toneme information is \textit{not} encoded in the ScanDiaSyn dataset.
+
+However, \citet[pp.~36--37]{maehlum2012dialektlandskapet} mention another prosodic feature that correlates with the toneme patterns: word-level stress in particle verbs and in many Greek and Romance loanwords.
+Generally, the last syllable of such a loanword (and the particle in a particle verb) are stressed in North and West Norwegian, whereas the first syllable (and the verb) are stressed in East Norwegian and Trønder (\citeauthor{hanssen2010dialekter}, \citeyear{hanssen2010dialekter}, pp.~58--59; \citeauthor{maehlum2012dialektlandskapet}, \citeyear{maehlum2012dialektlandskapet}, pp.~37, 78).
+While the stress pattern in particle verbs is not always overtly represented in ScanDiaSyn,%
+\footnote{It is only transcribed when the stress lies on the verb and the stressed syllable within the verb contains a short vowel.}
+it is encoded in some loanword transcriptions, such as pronunciations of \textit{spesiel} `special,' which is transcribed as either \ngram{spessiel} (with stress on the first syllable) or \ngram{spesiell} (with stress on the second syllable).
+None of the top 50 features encode stress information.
+The highest-ranking feature to do so is \ngram{ssi} in Trønder (rank 59 with a mean importance score of 0.05), which most often appears in phonetic transcriptions of the words \textit{spesielt} `special, especially' and \textit{musikk} `music.'
+
+\subsubsection{Retroflex flap}
+\label{sec:dialects-features-tjukkl}
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/tjukk-l}
+    \caption{Features with high importance values that contain /{\textrtailr}/.}
+    \label{tab:tjukk-l}
+\end{table}
+
+Another important feature is the presence or absence of the retroflex flap.
+In many dialects, the Old Norse phoneme /l/ changed to /{\textrtailr}/ in many phonological environments, and often, Old Norse /r{\dh}/ also changed to /{\textrtailr}/ (instead of /r/) \cite[p.~185]{sandoey1991dialektkunnskap}.
+
+
+These changes are characteristic of East Norwegian and Tr{\o}nder dialects, whereas West Norwegian dialects do not have this consonant, and the North Norwegian dialect area contains dialects with and without /{\textrtailr}/ \cite[pp.~36, 184]{maehlum2012dialektlandskapet}.
+
+The East Norwegian and Trønder dialects contain several high-ranking features that include /{\textrtailr}/ (\autoref{tab:tjukk-l}).
+In most cases, these features are character-level n-grams that only appear in one or a few words in the corpus at large, although these words tend to be quite common.
+However, the unigram \ngram{\textrtailr} achieves a relatively high ranking among the East Norwegian features (despite not making it past the rank threshold): it is at rank 56 with an importance score of 0.06.

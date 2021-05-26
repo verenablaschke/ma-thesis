@@ -1,0 +1,46 @@
+\section{Discussion}
+\label{sec:tweets-discussion}
+
+% would be especially interesting with the not-yet ava ilable finegrained label annotation that distinguishes between actual sexism and reported sexism \cite{chiril2020he}
+
+\subsubsection{Recurring types of features}
+
+Both explanation approaches yield recurring types of features among the tokens with the highest importance or attention scores (although not every high-ranking feature fits into such a group).
+Despite the differences in how the importance and attention scores are obtained and despite the fact that the LIME importance scores show a high correlation with distinctiveness scores, which the global attention weights do not, the recurring types of features in both experiments' results are very similar.
+Some of these features (gendered insults) appear like very plausible indicators of sexist content in a text, whereas others (some types of punctuation marks) are very opaque (even if they mostly appear in only one class of tweets in the dataset). 
+Many of the features with high importance scores or attention weights make sense in the context of the dataset.
+It is not surprising if a tweet with sexist content contains words relating to women and/or men, if it explicitly mentions sexism or feminism or (in the case of tweets in the \textit{direct sexism} or \textit{reporting sexism} subgroups) if it contains personal pronouns.
+However, the presence of any of these features can hardly indicate that any given tweet from outside the dataset has sexist content.
+Likewise, it seems unlikely that female politicians are never the target of or mentioned in sexist tweets.
+Even so, this information can be valuable when inspecting what a model has learned, in order to know whether it should be used in real contexts, whether a training dataset ought to be enlarged or what kinds of unconvincing features with high importance values should be masked when encoding the data.
+
+\subsubsection{Tokenization}
+
+While the FlauBERT-based tokenization yields mostly easy-to-understand tokens and sometimes produces subtokens that are useful representations for several similar words (e.g. \ngram{meu\mow} for \textit{meuf} `woman (colloq.)' and \textit{meufs} `women (colloq.)'), the tokenization might be improved if it split tokens slightly more often and treated subtokens at the beginning/middle and at the end of a word identically.
+That is, representing for instance \textit{filles} as \ngram{fille} and \ngram{s} such that the first subtoken also represents the singular form \textit{fille}, might result in interesting generalizations over how related forms of a lemma are used.
+To then capture possibly relevant effects of inflection or derivation, token bigrams could additionally be used.
+
+It would be interesting to repeat the attention experiment with a similar tokenization, to make the results of both approaches more immediately comparable and inspect the correlation between LIME importance scores and global attention weights.
+
+\subsubsection{Attention}
+
+Unlike the LIME scores, the global attention weights do not show a strong correlation with distinctiveness, which means that they are a lot less reflective of what features are characteristic of each of the tweet classes.
+This fits with the discussions presented in \autoref{sec:attention-explanation} that argue that attention weights do not necessarily provide reliable explanations.
+Furthermore, this makes the results of the attention-based approach less trustworthy than LIME when considering how well this output might reflect what the model has learned.
+After all, the neural model's classifications are not that much worse than the SVM's, despite the apparent focus on not very distinctive features and lack of focus on many tokens with high distinctiveness scores. 
+
+In this experiment, I use non-contextual token embeddings and a feed-forward neural network.
+This yields classification results that are slightly worse than the results of the SVM architecture, although they are still comparable.
+I used a FFNN as neural encoder since in such an architecture, the attention weights appear to correspond more closely to the input tokens than in other encoders (see the discussion in \autoref{sec:attention-explanation}).
+Even so, contextual embeddings and recurrent neural networks are generally used more commonly and closer to the state of the art, which would make it interesting to re-run this experiment with such a set-up and compare the results.
+In that case it would be especially interesting to investigate whether switching to a recurrent encoder significantly affects the features' global attention weights.
+
+In future experiments, it would be also be interesting to compare the global attention weights to the global importance scores produced using the method by \citet{ribeiro2016lime} that I mention in \autoref{sec:ml-lime-global}.
+That method for generating global scores from the local attention weights works independently of the instance label, as do the global attention weights.
+
+I use an SVM for the LIME-based approach, since that architecture has proven to be suitable for detecting sexist tweets.
+However, it would be interesting to also extract LIME importance scores from the attention architecture and directly compare the attention and importance scores that stem from one and the same model.
+
+Lastly, it might also be insightful to examine the cases in which the attention weights were (nearly) one-hot encoded and the tweets that received (near-)uniform attention weight distributions.
+
+

@@ -6,3 +6,5 @@
 
 python3 average_model_performance.py models/tweets-attn --log log-ffnn-attn-h128-b64-d40-ep35-T60-emword2vec-lr10.txt
 python3 average_attention.py models/tweets-attn attention_scores-ffnn-attn-h128-b64-d40-ep35-T60-emword2vec-lr10.txt 60
+python3 attention_entropy.py models/tweets-attn attention_scores-ffnn-attn-h128-b64-d40-ep35-T60-emword2vec-lr10.txt
+python3 plot_attention.py models/tweets-attn models/tweets-attn/AVERAGE-attention_scores-ffnn-attn-h128-b64-d40-ep35-T60-emword2vec-lr10.tsv

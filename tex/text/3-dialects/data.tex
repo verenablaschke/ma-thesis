@@ -1,0 +1,93 @@
+\section{Data}
+\label{sec:dialects-data}
+
+I work with phonetically transcribed conversations from the Norwegian part of the ScanDiaSyn corpus \citep{johannessen2009nordic}.%
+\footnote{Available at \url{http://tekstlab.uio.no/nota/scandiasyn/} under a CC BY-NC-SA 4.0 license.}
+
+The data were obtained during interviews with informants or while recording conversations between informants.
+These interviews or conversations were transcribed both phonetically and in a written standard language.
+All utterances are instances of spontaneous speech.
+
+% When were the data collected?
+% I did not include any data from the other Scandinavian languages included in the database, as they were transcribed according to different guidelines.
+
+I use utterances from all interviews/conversations that were transcribed both orthographically and phonetically.
+This includes over 116,000 utterances from 434 informants from 109 towns.
+\autoref{fig:norway-map} shows where in Norway these towns are located.
+Approximately a quarter each of the informants consists of old women, young women, old men and young men. 
+% \todo{what does young/old mean here?} \todo{rural/urban status?}
+
+East, West and North Norwegian are each represented by between 28 and 33 locations and between 32,000 and 36,000 utterances.
+Only the Trønder dialect group is notably smaller: It is represented by 13,000 utterances from fifteen locations.
+
+\begin{table}[ht]
+\include{tables/3-dialects/scandiasyn-stats}
+\caption
+[Class distribution in the ScanDiaSyn dataset]
+{The class distribution in the ScanDiaSyn dataset.
+The mean utterance length is given in tokens per utterance.}
+\label{tab:scandiasyn}
+\end{table}
+
+
+\subsection{Transcription}
+
+The interviews were transcribed twice, once in a very broad phonetic transcription that follows a  custom transcription style and once in the written standard Bokm{\aa}l.
+
+
+\begin{table}[ht]
+\include{tables/3-dialects/vowels}
+\caption
+[Norwegian vowel transcriptions]
+{Norwegian vowels, as represented in the International Phonetic Alphabet, by the ScanDiaSyn project, and in this thesis. 
+Where my transcriptions diverge from the ScanDiaSyn standard, entries are in boldface.
+(Here, this only applies to the notation of diphthongs).
+Other non-diphthong vowel sequences than the one in the last row are represented similarly.}
+\label{tab:vowels}
+\end{table}
+
+\begin{table}[ht]
+\include{tables/3-dialects/consonants}
+\caption
+[Norwegian consonant transcriptions]
+{Norwegian consonants, as represented in the International Phonetic Alphabet, by the ScanDiaSyn project, and in this thesis. 
+Where my transcriptions diverge from the ScanDiaSyn standard, entries are in boldface.}
+\label{tab:consonants}
+\end{table}
+
+
+\autoref{tab:vowels} and \autoref{tab:consonants} show how this custom transcription corresponds to IPA symbols for vowels and consonants, respectively.
+The tables are based on the ScanDiaSyn transcription manual \citep[pp.~10--13]{johannessen2009transkripsjonsrettleiing} and further information on Norwegian phonology \citep[pp.~13, 19--20, 22--25]{kristoffersen2000phonology}.
+These tables also contain the symbols I used for preprocessing the data. This is explained in more detail in \autoref{sec:dialects-preprocessing}. 
+
+To make it possible to directly align both transcriptions, both are carried out on a word level.
+The phonetic transcription does not show regular phonetic assimilation across word boundaries.
+\citet{johannessen2009transkripsjonsrettleiing} refer to \citet[p.~21]{papazian2005norsk} to argue that this makes it easier for humans to parse the transcription and that the phonological processes that occur across word boundaries in some dialects are so regular that seeing them occur \textit{within} a word should be a clear sign for readers to predict that they also occur across word boundaries.
+\textit{Irregular} assimilation across word boundaries is transcribed, however (p.~13).
+
+Several letter sequences can either encode a single sound or a sequence of several sounds, e.g. \textlangle{}rn\textrangle{} for either /{\textrtailn}/ or /{\textinvscr}n/, /{\textfishhookr}n/.
+This is intended for ease of transcription and reading \cite[p.~11]{johannessen2009transkripsjonsrettleiing}, although it entails the loss of information that is frequently used in descriptions of Norwegian dialects.
+Similarly, palatalization is not marked either.
+
+
+Vowel length is only indicated in stressed syllables and monosyllabic words \cite[pp.~11--12]{johannessen2009transkripsjonsrettleiing}: the (first consonant of the) coda is doubled if the stressed syllable is short.
+Tonemes are not marked.
+
+Each utterance is also transcribed into Bokm{\aa}l.
+This is done on a word level; the syntax was not changed to match Bokm{\aa}l syntax \cite[p.~2]{laake2009oversettelse}.
+Bokm{\aa}l allows some degree of freedom regarding word choice and several morphological details.
+The transcribers were free to use any of the valid lexical and morphological variants as they saw fit, but did not have to pick the ones closest to the dialect they were transcribing \cite[p.~2]{laake2009oversettelse}.
+Correspondingly, there are some inconsistencies in the transcription.
+For instance, the question word /ko\textrtails\textrtails\textsyllabic{n}/ `how' is sometimes transcribed as the Bokm\aa{}l word \textit{hvordan} and sometimes as the synonymous term \textit{\aa{}ssen}.
+
+The following excerpt from an interview recorded in an East Norwegian municipality (interview ID: \textit{vang\_02uk-sl.txt}) gives an impression of the different transcriptions:
+
+\begin{exe}
+\ex
+\gll
+\textbf{Bokmål} når jeg har blitt eldre så prøver jeg lissom å holde mer på \# d- dialekta mi enn hva jeg gjorde før\\
+\textbf{Phonetic} når e ha vørrte elldre så prøve e lissåm å hallde mæir på \# d- dialekto mi enn kå e joLe før\\
+\trans `Having gotten older, I, like, try to insist more on using my dialect than I used to.'
+\end{exe}
+
+\FloatBarrier

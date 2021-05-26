@@ -1,0 +1,68 @@
+% \documentclass{standalone}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,fit,calc,arrows.meta,backgrounds}
+% \usepackage[outline]{contour}
+% \begin{document}
+\tikzset{
+    base/.style = {font=\small}, % \small\sffamily
+    box/.style = {base, rectangle, rounded corners, draw=black,
+                   minimum width=0.1cm, minimum height=0.5cm, 
+                   text centered},
+    input/.style = {box},
+    lstm/.style = {box, minimum width=1.5cm},
+    feature/.style = {box,
+                   minimum height=6mm,},
+    group/.style = {box, dashed},
+    labels/.style = {box, minimum width=1.5cm},
+    description/.style = {text width=4cm},
+    >=LaTeX
+}
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    align=center % necessary for intra-node linebreaks
+    ]
+%   \selectcolormodel{gray} % for checking readability in grayscale
+
+  \node (zT) [feature] {$z_T$};
+  \node (edot) [left=3mm of zT] {$...$};
+  \node (z2) [feature, left=3mm of edot] {$z_2$};
+  \node (z1) [feature, left=5mm of z2] {$z_1$};
+  
+  \node (h1) [feature, above=11mm of z1] {$h_1$};
+  \node (h2) [feature, above=11mm of z2] {$h_2$};
+  \node (hdot) [above=14mm of edot] {$...$};
+  \node (hT) [feature, above=11mm of zT] {$h_T$};
+  
+  \node (alpha1) [feature, above=23mm of h1] {$\alpha_1$};
+  \node (alpha2) [feature, above=23mm of h2] {$\alpha_2$};
+  \node (alphadot) [above=25mm of hdot] {$...$};
+  \node (alphaT) [feature, above=23mm of hT] {$\alpha_T$};
+  
+  \node (halpha1) [feature, above=8mm of alpha1] {$h_{\alpha_1}$};
+  \node (halpha2) [feature, above=8mm of alpha2] {$h_{\alpha_2}$};
+  \node (halphadot) [above=11mm of alphadot] {$...$};
+  \node (halphaT) [feature, above=8mm of alphaT] {$h_{\alpha_T}$};
+  
+  \node (dense) [feature, above=10mm of halphadot] {dense layer};
+  \node (yhat) [above=5mm of dense] {$\hat{y}$};
+  
+  \draw[->] (z1) -- (h1);
+  \draw[->] (z2) -- (h2);
+  \draw[->] (zT) -- (hT);
+  
+  \draw[->] (h1.north) to[out=120,in=235] (halpha1.south);
+  \draw[->] (h2.north) to[out=120,in=235] (halpha2.south);
+  \draw[->] (hT.north) to[out=120,in=235] (halphaT.south);
+  
+  \draw[->] (alpha1) -- (halpha1);
+  \draw[->] (alpha2) -- (halpha2);
+  \draw[->] (alphaT) -- (halphaT);
+
+  \draw[->] (halpha1) -- (dense.south);
+  \draw[->] (halpha2) -- (dense.south);
+  \draw[->] (halphaT) -- (dense.south);
+  \draw[->] (dense) -- (yhat);
+  
+  
+\end{tikzpicture}
+% \end{document}

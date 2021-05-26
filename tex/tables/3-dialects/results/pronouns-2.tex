@@ -1,0 +1,15 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+\textbf{Pron.} & \textbf{Group} & \textbf{Feature}  & \textbf{Imp.} & \textbf{Rep.} & \textbf{Dist.} &  \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\\midrule
+\multirow{5}{*}{\begin{tabular}[c]{@{}l@{}}\textsc{2.sg}\\\textsc{nom}\end{tabular}} & \multirow{2}{*}{East} & {\smaller\ngram{\sos{}vet/vett\sep{}du/du\eos{}}} & 0.08 & 0.01 & 0.38 &  \\
+ &  & \ngram{\sep{}ru} & 0.08 & 0.03 & 0.41 & du/ru(0.8) \\
+ \cmidrule{2-7}
+ & \multirow{2}{*}{Trø.} & {\smaller\ngram{\sos{}vet/vet\sep{}du/du\eos{}}} & 0.09 & 0.03 & 0.34 &  \\
+ && \ngram{\sos{}du/u\eos} &	0.06 &	0.01&0.22 \\\cmidrule{2-7}
+ & West & \ngram{do\sep{}} & 0.13 & 0.01 & 0.70 & du/do(0.9) \\\midrule
+\begin{tabular}[c]{@{}l@{}}\textsc{2.sg}\\\textsc{acc}\end{tabular} & Trø. & \ngram{\sos{}deg/dæ\eos{}} & 0.06 & 0.01 & 0.12 &  \\
+\midrule
+\textsc{2.pl} & {North} & \ngram{dåkke} & 0.07 & 0.01 & 0.50 & dere/dåkker(0.7) \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,39 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+\textbf{} & \textbf{Group} & \textbf{Feature} & {\textbf{Imp.}} & {\textbf{Rep.}} & {\textbf{Dist}} & \begin{tabular}[c]{@{}l@{}}\textbf{Context (bok-}\\\textbf{mål/pron.)}\end{tabular} \\
+\midrule
+\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}\textit{ble(i)}\\`be-\\came'\end{tabular}} & North & \ngram{\sep{}bei} & 0.08 & 0.01 & 0.79 & blei/bei(0.8)\\
+\cmidrule{2-7}
+ & \multirow{2}{*}{East} & \ngram{\sep{}b\textrtailr{}e} & 0.11 & 0.01 & 0.84 & ble/b\textrtailr{}e(0.8) \\
+ &  & \ngram{\textrtailr{}æi} & 0.08 & 0.01 & 0.87 & blei/b\textrtailr{}æi(0.7) \\
+ \cmidrule{2-7}
+ & Tr\o. & \ngram{\sos{}ble/varrt\eos{}} & 0.06 & 0.03 & 0.26 &  \\
+ \midrule
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{gjør}\\`do.\\\textsc{\smaller{pres}}'\end{tabular}} & Tr\o. & \ngram{\sos{}gjør/jær\eos{}} & 0.12 & 0.01 & 0.35 &  \\
+\cmidrule{2-7}
+ & {West} & \ngram{\sep{}jer} & 0.09 & 0.01 & 0.45 & gjør/jer(0.6) \\[2mm]
+ \midrule
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textit{har}\\`have.\\\textsc{\smaller{pres}}'\end{tabular}} & Tr\o. & \ngram{hi\sep{}} & 0.23 & 0.01 & 0.84 & har/hi(1.0) \\
+\cmidrule{2-7}
+ & West & \ngram{he\sep{}} & 0.09 & 0.05 & 0.65 & har/he(1.0) \\[2mm]
+ \midrule
+ \multirow{6}{*}{\begin{tabular}[c]{@{}l@{}}\textit{er}\\`am,\\are,\\is'\end{tabular}} & \multirow{5}{*}{East} & \ngram{\sos{}er/ær\eos{}} & 0.15 & 0.10 & 0.97 &  \\
+ &  & \ngram{\sos{}er/æ\eos{}} & 0.13 & 0.17 & 0.61 &  \\
+ &  & \ngram{\sep{}er} & 0.10 & 0.01 & 0.71 & er/er(1.0) \\
+ &  & \ngram{\sos{}er/er\eos{}} & 0.09 & 0.01 & 0.83 &  \\
+ &  & {\smaller\ngram{\sos{}så/så\sep{}er/ær\eos{}}} & 0.07 & 0.01 & 0.99 &  \\
+ \cmidrule{2-7}
+ & West & {\smaller\ngram{\sos{}er/æ\sep{}det/de\eos{}}} & 0.09 & 0.01 & 0.24 &  \\
+ \midrule
+\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}\textit{var}\\`was'\end{tabular}} & \multirow{2}{*}{East} & \ngram{\sos{}var/var\eos{}} & 0.16 & 0.08 & 0.79 &  \\
+ &  & \ngram{\sep{}var} & 0.07 & 0.10 & 0.45 & var/var(0.9) \\
+ \cmidrule{2-7}
+ & Tr\o. & {\smaller\ngram{\sos{}var/va\sep{}nå/nå\eos{}}} & 0.10 & 0.02 & 0.41 & \\
+  \midrule
+\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}\textit{v\ae{}rt}\\`been'\end{tabular}} & \multirow{2}{*}{East} & \ngram{vør} & 0.08 & 0.02 & 0.37 & {\begin{tabular}[c]{@{}l@{}}vært/vøre(0.2)\\vært/vøri(0.2)\end{tabular}} \\[2mm]
+ &  & \ngram{øri} & 0.07 & 0.01 & 0.44 & vært/vøri(0.6)\\
+ \cmidrule{2-7}
+ & Tr\o. & \ngram{rri\sep{}} & 0.05 & 0.01 & 0.46 & vært/vørri(0.4) \\
+\bottomrule
+\end{tabular}

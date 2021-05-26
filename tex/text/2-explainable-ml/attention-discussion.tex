@@ -1,0 +1,128 @@
+\subsection{Attention and explanation}
+\label{sec:attention-explanation}
+
+% \todo{Maybe re-order some of these paragraphs/arguments.}
+
+In the past few years, there has been much discussion around whether attention weights are suitable for explaining model predictions.
+The initial rationale for using attention as a proxy of explanation is easy to see: after all, the attention layer produces a representation of the model input that is weighted in such a way that some input tokens may have a larger influence on the output prediction than others.
+Whether or under what conditions this can be used for explaining model decisions has been the topic of much discussion.
+In this section, I summarize the major arguments against and for interpreting attention as explanation and common caveats.
+
+\citet{jain2019attentionNotExplanation} examine the merit of analyzing attention weights by carrying out a series of experiments with a neural model containing a bidirectional LSTM (bi-LSTM) followed by an attention layer for different sequence classification tasks.%
+\footnote{The authors also try out different similarity functions for calculating the attention weights (\autoref{eq:phi} in \autoref{sec:attention-what}), but find that the choice of similarity function does not make any significant difference.}
+They argue that attention weights fail to be useful as explanations in two ways: they do not consistently correlate with other measures of feature importance and it can be possible to change the learned attention weights with only minor impact on the model predictions.
+
+\subsubsection{Correlation with other measures}
+
+\citet{jain2019attentionNotExplanation} reason that attention weights should be correlated with other measures of feature importance, such as gradient-based measures or leave-one-out scores.
+They find that the correlation between gradient-based measures or leave-one-out importance measures and attention weights in bi-LSTMs depends on the choice of dataset and is only in some cases statistically significant.
+By contrast, the correlation between leave-one-out scores and gradients in the bi-LSTM model is stronger than between attention weights and either of the two other importance measures.
+However, when training a model whose encoder is a feed-forward neural network instead of a bi-LSTM (\autoref{fig:attn-ffnn}), the authors find that there is a strong correlation between attention weights and gradients.
+
+\subsubsection{Comparison to gradient-based importance rankings}
+
+\citet{serrano2019attention} also use gradient-based importance measures as a point of comparison.
+They base their experiments on different neural models that contain a recurrent or convolutional layer and whose last layer before the decoder is an attention layer.
+The authors compare at importance rankings produced (1) randomly, (2) by attention weight magnitude, (3) based on the decision function's gradient with respect to the attention weight, and (4) a product of the gradient and the attention weight.
+They then remove one input token after the other, in order of descending importance, until the predicted class for the instance changes.
+The authors find that while removing inputs on the basis of the attention-based ranking produces label changes quicker than when removing inputs randomly, both gradient-based rankings require removing fewer inputs for a label change than the attention-based ranking, indicating that attention alone is not sufficient for uncovering minimal sets of inputs that are the most relevant for the final label prediction.
+
+\citeauthor{serrano2019attention} repeat this with models that use feed-forward layers instead of recurrent or convolutional layers.
+They find that, independently of the ranking approach used, it is sufficient to remove much smaller sets of inputs in order to change the model's predicted class for a given instance.%
+\footnote{In general, using a feed-forward layer yields smaller minimal input sets than using a convolutional layer, which in turn results in smaller minimal input sets than when using a recurrent layer.}
+The more context is shared between input representations before the attention layer, the less clearly do the rows in $h$ represent the input tokens with the same indices.
+
+\subsubsection{Modifying attention weights on a per-instance basis}
+
+\citet{jain2019attentionNotExplanation} argue that changing a model's attention weights for a given input%
+\footnote{\citet{wallace2019thoughts} reasons that focusing on instance-level attention weights rather than the model-wide context vector from which the attention weights are calculated makes sense as attention is often used when seeking to explain the prediction for individual instances.
+However, this is a moot point in the context of this thesis, as I consider aggregated attention weights.}
+should lead to predicting a different label distribution.
+They explore this in two experiments:
+
+In the first, they calculate the attention weights for a given input as usual, but then randomly permute the entries in the attention weight vector before calculating the attention-weighted decoder input (\autoref{eq:halpha} in  \autoref{sec:attention-what}).
+The authors find that, while the results also change somewhat from dataset to dataset, there are many cases where permuting an attention weight vector with low entropy (i.e. a distribution that implies that only few input tokens are relevant) does not result in a markedly different prediction.
+
+In the second experiment, Jain and Wallace modify the attention weights such that their distribution is as different as possible from the original attention weight distribution while still yielding very similar label predictions.
+They observe that in many cases, it is indeed possible to find such \textit{adversarial attention weights} that imply different importance assignments to the input tokens.
+
+Jain and Wallace also find that in some tasks, whether the prediction changes or not depends on the (originally) predicted label: shuffling the attention weights matters very little (or finding adversarial attention weights is not possible) when the originally predicted label belongs to one class, but permuting the weights leads to very different predictions (or adversarial attention exists) when the unmodified model predicts a different class.
+
+\citet{serrano2019attention} also carry out an experiment on instance-level attention weights, although they stress that they focus on ``the importance of intermediate quantities, which may themselves already have changed uninterpretably from the model’s inputs'' after having already been modified by other model layers.
+In their experiment, they investigate how the predictions change when one of the weights within the attention vector is set to zero and the remaining weights are re-normalized (such that they also sum up to 1). 
+For a given instance, they (separately) remove the highest of the attention weights and a randomly chosen weight in this way and compare how the output distribution over labels changes.
+The authors find that the larger the difference in the attention weight magnitude between the two removed attention weights is, the more the output distributions tend to diverge, showing that in cases where the attention weight vector is nearly one-hot encoded (i.e. only one entry in $h$ receives nearly all of the attention), removing the input associated with the highest attention weight has a clear impact on the prediction.
+% It should be noted however that this pattern is less strong when the the attention weights are not \rephrase{concentrated on} a single \rephrase{entry}.
+
+\begin{figure}[tb]
+\centering
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \include{figures/2-explainable-ml/attention-lstm}
+  \caption{Bidirectional LSTM with learned attention.}
+  \label{fig:attn-lstm}
+\end{subfigure}\hfill%
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \include{figures/2-explainable-ml/attention-mlp}
+  \caption{FFNN with learned attention.}
+  \label{fig:attn-ffnn}
+\end{subfigure}\hspace{4mm}%
+\begin{subfigure}{.3\textwidth}
+  \centering
+  \include{figures/2-explainable-ml/attention-imposed}
+  \caption{FFNN with imposed attention.}
+  \label{fig:attn-imposed}
+\end{subfigure}
+\caption
+[Attention architectures examined in experiments on attention and explanation]
+{Three model architectures used in experiments by \citet{jain2019attentionNotExplanation} (subfigures~\ref{fig:attn-lstm} and~\ref{fig:attn-ffnn}) and \citet{wiegreffe2019attentionNotNot} (all subfigures).
+The set-up in \ref{fig:attn-ffnn} is identical to \autoref{fig:attention}.
+The architecture in \ref{fig:attn-imposed} differs from the first two in that its attention weights are frozen and not trained with the model.
+}
+\label{fig:attention-experiments}
+\end{figure}
+
+
+\subsubsection{Modifying attention weights on a per-model basis}
+% \todo{Edit and shorten the following summary of the W~\&~P paper.}
+
+\citet{wiegreffe2019attentionNotNot} criticize that experiments involving manipulations of the attention weights treat the attention weights as independent of the model (when the context vector on which the original attention weights are based is a product of the model training as a whole) and that the adversarial weights were created on a per-instance rather than per-model basis.
+
+% \citeauthor{wiegreffe2019attentionNotNot} argue that it only makes sense to examine attention weights in model set-ups and tasks where using attention makes a difference: if training a model with frozen uniformly distributed attention weights ($\alpha = (\frac{1}{T}, \frac{1}{T}, ..., \frac{1}{T})$) yields predictions that are just as good as when training a model including its attention weights, it is preferable to not use attention in this task.
+
+In a series of experiments, \citeauthor{wiegreffe2019attentionNotNot} compare the performance of different model architectures with attention layers:
+\begin{enumerate}
+    \item \textit{Trained multi-layer perceptron (MLP)}: A feed-forward neural network with attention weights that are learned during training, similar to the architecture described in \autoref{sec:attention-what} but with an FFNN instead of the bi-RNN (\autoref{fig:attn-ffnn}).
+    \item \textit{Uniform}: This architecture is similar to the trained MLP, but instead of training attention weights, they are fixed to a uniform distribution ($\alpha = (\frac{1}{T}, \frac{1}{T}, ..., \frac{1}{T})$) (\autoref{fig:attn-imposed}).
+    \item \textit{Base LSTM}: This model also uses frozen weights (\autoref{fig:attn-imposed}), but rather than being uniform, they are extracted for each input instance from a bi-LSTM with attention (\autoref{fig:attn-lstm}) trained on the same data.
+    \item \textit{Adversary}: This architecture resembles the trained MLP, but it is trained to make the same predictions as a different attention-based model while creating a context vector that produces maximally different attention weights for each instance. 
+\end{enumerate}
+
+For all of the tested datasets, the trained MLP outperforms the uniform model, and the model with the pretrained bi-LSTM's attention weights outperforms the trained MLP.
+For all datasets save one, the adversary model performs much worse than the trained MLP.
+\citeauthor{wiegreffe2019attentionNotNot} conclude that ``adversarial distributions,
+even those obtained consistently for a
+dataset, deprive the underlying model from some
+form of understanding it gained over the data, one
+that it was able to leverage by tuning the attention
+mechanism towards preferring `useful' tokens.''
+However, while there is a trade-off between the similarity of the predictions and the difference of the attention weights, it is less strong than it would have to be for the original attention to clearly not be manipulable.
+
+% Find that while local imitations of the base model are possible, on a global level, the alternative models tend to underperform.
+% Notes on notions of explainability/transparency/etc.
+
+% \subsubsection{Other}
+
+% \todo{rework / integrate in the above sections / decide if these are relevant here / mention in the ''possible future steps'' section at the end of the thesis}
+
+% \citet{grimsley2020attentionNot} states attention cannot be interpreted as (causal) explanation since tracing a causal chain through a neural network is infeasible.
+
+% \citet{wallace2019thoughts} \repetition{states that} ``{}`Attention is not explanation' in the same way that `correlation is not causation.'{}''
+
+% \citet{mohankumar2020towards}: unhappy with high attention weights for punctuation, modify LSTM to make the token-wise hidden states more different from one another. more robust in some of the experiments described in this section
+
+% \citet{tutek2020staying}: add constraints that tie the RNN hidden states more closely to the respective token embeddings
+
+% \citet{clark2019bert-attention} examine attention as it is used in BERT and \repetition{argue that} there is value to understanding what a model has learned ... ``if a particular attention head learns a syntactic relation, we consider that an important finding from an analysis perspective even if that head is not always used when making predictions for some downstream task."
+

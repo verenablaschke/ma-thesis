@@ -1,0 +1,75 @@
+\section{Attention}
+\label{sec:attention}
+
+
+\subsection{Attention layers in neural networks}
+\label{sec:attention-what}
+
+\begin{figure}[tb]
+    \centering
+    \include{figures/2-explainable-ml/attention-model}
+    \caption
+    [Neural network with attention layer]
+    {The neural classification model encodes token embeddings $z$ with a neural network.
+    Multiplying the resulting matrix $h$ with the context vector $v$ creates token-wise attention weights $\alpha$, based on which the weighted token representations $h$\textsubscript{$\alpha$} are generated.}
+    \label{fig:attention}
+\end{figure}
+
+I use a neural network with an attention layer as an additional classifier for the tweet classification task.
+The architecture is based on the ones by \citet{yang2016hierarchical} and \citet{sun2020understanding}.
+Similar architectures have been used for offensive language detection by \citet{chakrabarty2019pay} and \citet{risch2020offensive}, and by \citet{jain2019attentionNotExplanation} in their discussion of attention and explanation.
+The main difference between my neural model architecture and the others mentioned here, is that I use a feed-forward neural network (FFNN) rather than a recurrent one (RNN).
+This decision is motivated by the discussion in \autoref{sec:attention-explanation}.
+
+Each model input instance is represented as a sequence of $T$ tokens in an embedding matrix $z \in \R^{T \times e}$.
+The encoder (in this case a feed-forward neural network) uses this embedding matrix to produce an encoded representation $h \in \R^{T \times m}$.
+
+This representation can be compared to a \textit{context vector} $v \in \R^m$ via a similarity function $\phi$ to get a distribution of attention weights $\alpha \in \R^T$, one per input token representation:%
+\footnote{\citet{yang2016hierarchical} introduce an intermediary layer between the encoder and the attention: $u = tanh(W h + b)$, and compare $u$ (rather than $h$) to $v$ in \autoref{eq:alpha}. \citet{sun2020understanding} and \citet{jain2019attentionNotExplanation} omit this additional step and proceed as outlined above.}
+
+\begin{equation}
+    \alpha = softmax(\phi(h, v))
+    \label{eq:alpha}
+\end{equation}
+
+These attention weights are what I analyze in \autoref{sec:tweets-method-attn}.
+
+The context vector is randomly initialized and not connected to the encoder or decoder output.
+However, it plays a similar role to the \textit{query} in sequence-to-sequence models with attention or in self-attention%
+\footnote{\citet{chakrabarty2019pay} found that attention based on context vectors generally yields better results for offensive language detection tasks than self-attention.}
+layers, where that is a representation of the previous timestep by the decoder or encoder, respectively \citep{bahdanau2014jointly,vaswani2017attention-all}.%
+\footnote{\citet{bahdanau2014jointly} base the query for the first timestep of a sequence on part of the hidden encoder representation for that same timestep.}
+
+There are several different similarity functions that are widely used for attention architectures.
+I use the similarity function for \textit{scaled}%
+\footnote{Normalizing the matrix product based on the hidden layer size before applying the softmax function yields less extreme softmax values.
+The closer the output of the softmax function is to 0 or 1, the smaller the gradients get, making it harder to efficiently update the model weights during training.}
+\textit{dot-product attention}, as introduced by \citet{vaswani2017attention-all}:
+\begin{equation}
+    \phi(h, v) = \frac{h v}{\sqrt{m}}
+    \label{eq:phi}
+\end{equation}
+
+The attention weights are used to produce a representation of the input sequence wherein the individual token representations are weighted by the attention distribution:
+
+\begin{equation}
+    h_\alpha = \sum_{t=1}^T \alpha_t \cdot h_t
+    \label{eq:halpha}
+\end{equation}
+
+This attention output $h_\alpha$ is then passed to a final network layer (decoder) that generates the predicted label distribution.
+
+
+\subsection{Attention weight entropy}
+
+Where LIME's loss function limits the number of features per utterance that receive non-zero importance scores, there is no such restriction when the attention weights are calculated.
+I calculate the \textit{entropy} of each utterance's attention weight vector to determine how informative this attention distribution is:
+
+\begin{equation}
+    \text{H}(\alpha{}) = - \sum_{t=1}^T \alpha_t \text{log}(\alpha_t)
+\end{equation}
+
+In the most uninformative case, where adding the attention layer does not have an impact on the decoder input, each entry within $\alpha$ is $\frac{1}{T}$. 
+This gives the upper bound for the entropy: $-\text{log}(T)$.
+
+If an utterance contains only one relevant token (per the attention distribution), the attention weight vector is one-hot encoded and the corresponding entropy is $\text{log}(1) = 0$, which is the lower bound for the potential entropy scores.

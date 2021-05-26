@@ -1,0 +1,38 @@
+\label{chap:tweets}
+
+This chapter is structured as follows:
+first, I introduce the topic of automatic sexism detection and previous approaches to this task (\autoref{sec:sexism-detection}).
+I then describe the dataset I work with (\autoref{sec:tweets-data}).
+In \autoref{sec:tweets-svm}, I present the set-up of the LIME-based experiment (\autoref{sec:tweets-svm-method}) and its results (\autoref{sec:tweets-svm-results}).
+I then describe the specifics of the architecture for the attention-based approach (\autoref{sec:tweets-method-attn}) and present the results in \autoref{sec:tweets-attn-results}.
+I discuss the results from both approaches in \autoref{sec:tweets-discussion}.
+
+\section{Sexism detection}
+\label{sec:sexism-detection}
+
+The increased popularity of systems that can automatically detect abusive speech has led to a recent focus on more specific breakdowns by, e.g., specific groups targeted by hate speech or offensive languages.
+\citet{poletto2020resources} present an overview of corpora for hate speech detection, distinguishing between different types of hate speech, languages and annotation styles.
+
+In the last few years, several datasets and automatic classifiers for sexism detection have been published for English \citep{jha2017compliment,anzovino2018automatic,fersini2018overview,frenda2019online},
+Spanish \citep{fersini2018overview,rodriguez2020automatic},
+Italian \citep{fersini2020ami} and 
+French \citep{chiril2020annotated} data.
+
+\citet{anzovino2018automatic} experiment with different features and machine learning models for identifying misogynistic tweets written in English and further assigning them to more specific subcategories.
+The features they try out are n-grams of characters, tokens and part-of-speech tags, the tweet length, the presence of URLs and the number of usernames mentioned, the number of adjectives, and token embeddings.
+The authors compare SVMs, random forests, naive Bayes classifiers and feed-forward neural networks.
+They find that both for detecting misogynistic tweets in general and for identifying what kind of misogyny is present in a given tweet, SVMs with token-level 1-3grams perform best.
+
+\citet{chiril2020annotated} introduce the French twitter dataset that I also work with, which is described in \autoref{sec:tweets-data}.
+They compare the performance of different classifiers, including an SVM with token 1-3grams, a bidirectional LSTM with attention and a multilingual BERT model with an additional classification layer.
+The authors find that the BERT model produces by far the best results.
+When the input data to the SVM are preprocessed such that URLs are replaced by the title of the website they link to and emoji are replaced with custom descriptions, the SVM clearly outperforms the bi-LSTM with attention.
+\citeauthor{chiril2020annotated} point out that many prediction errors occur when a tweet includes ironic statements, when additional reasoning or knowledge of the world is required to understand the tweet, or when tweets contain stereotyping statements but do not include swear words or insulting vocabulary.
+
+\citet{frenda2019online} analyzed several English-language corpora of sexist tweets and find that sexist tweets tend to have a lower type-token ratio and contain more swear words and more feminine pronouns than non-sexist tweets.
+The authors train SVMs to automatically detect sexist tweets and experiment with different ways of encoding the tweets.
+They find that using character-level 1-7grams or token-level 1-3grams yields good results when only using one kind of feature encoding, but they obtain their best results when combining the two and additionally adding features that encode whether a tweet contains words that are part of different lexicons relating to vulgarity, femininity, sexuality, the human body, and sexist hashtags.
+
+\citet{pamungkas2020misogyny} tested misogyny detection in English, Italian and Spanish tweets.
+When comparing different classifiers including SVMs, a BERT-based model, and different types of RNNs with and without pretrained embeddings and with and without attention layers, they find that depending on the dataset, SVMs or BERT perform best.
+The authors also find that the best way of encoding the data for the SVMs depends on the dataset, although encoding the presence of words relating to women and of sexist slurs tends to be useful in general.

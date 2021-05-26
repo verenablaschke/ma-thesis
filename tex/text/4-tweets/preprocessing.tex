@@ -1,0 +1,7 @@
+\subsection{General preprocessing}
+
+I preprocess the Twitter data by replacing usernames, numbers and hashtags with \username, \numberesc{} and \hashtag, respectively.
+I replace URLs with the title of the linked website when available, and remove them otherwise.
+\citet{chiril2020annotated} found that replacing URLs led to better classification results.
+I also normalize the punctuation by mapping different kinds of apostrophes and quotation marks to standard versions thereof.
+

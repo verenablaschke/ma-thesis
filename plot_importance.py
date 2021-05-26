@@ -78,11 +78,16 @@ if not args.per_label:
 keys = list(imp_scores.keys())
 keys.sort()
 
-label2printlabel = {'0': 'no sexist content', '1': 'sexist content',
+label2printlabel = {'0': 'No sexist content', '1': 'Sexist content',
                     'nordnorsk': 'North Norwegian',
                     'troendersk': 'Trønder',
                     'vestnorsk': 'West Norwegian',
                     'oestnorsk': 'East Norwegian'}
+label2marker = {'0': 'o', '1': 'v',
+                'nordnorsk': ',',
+                'troendersk': 'o',
+                'vestnorsk': 'v',
+                'oestnorsk': '^'}
 
 for label in keys:
     print(label)
@@ -93,17 +98,18 @@ for label in keys:
         rep = rep[:args.top_n_features]
 
     plt.scatter(imp, rep, color=label2col[label],
-                s=5 if args.top_n_features else 3,  # size of dot
-                label=label2printlabel.get(label, label)
-                if args.per_label else None)
+                s=6 if args.top_n_features else 4,  # size of dot
+                label=label2printlabel[label] if args.per_label else None,
+                marker=label2marker[label] if args.per_label else 'o')
 
-importance_label = "Importance ({}, {}, {}scaled by model error)".format(
-    args.combination_method, args.mode,
-    '' if args.scale_by_model_score else 'un')
+# importance_label = "Importance ({}, {}, {}scaled by model error)".format(
+#     args.combination_method, args.mode,
+#     '' if args.scale_by_model_score else 'un')
+importance_label = "Importance"
 plt.xlabel(importance_label)
 plt.ylabel("Representativeness")
 if args.per_label:
-    plt.legend(loc="upper right")
+    plt.legend(loc="upper left")
 plt.savefig(out_file.format('rep'))
 plt.show()
 
@@ -114,9 +120,9 @@ for label in keys:
         imp = imp[:args.top_n_features]
         dist = dist[:args.top_n_features]
     plt.scatter(imp, dist, color=label2col[label],
-                s=5 if args.top_n_features else 3,
-                label=label2printlabel.get(label, label)
-                if args.per_label else None)
+                s=6 if args.top_n_features else 4,
+                label=label2printlabel[label] if args.per_label else None,
+                marker=label2marker[label] if args.per_label else 'o')
 
 plt.xlabel(importance_label)
 plt.ylabel("Distinctiveness")
@@ -125,13 +131,20 @@ if args.per_label:
 plt.savefig(out_file.format('dist'))
 plt.show()
 
+label2linestyle = {'0': 'dashed', '1': 'solid',
+                   'nordnorsk': 'solid',
+                   'troendersk': 'dashed',
+                   'vestnorsk': 'dashdot',
+                   'oestnorsk': 'dotted'}
+
 if args.top_n_features:
     plt.axvline(x=args.top_n_features, color='gray', linewidth=1)
     for label in keys:
         imp = np.array(imp_scores[label])
         plt.plot(range(1, len(imp) + 1), imp, color=label2col[label],
-                 label=label2printlabel.get(label, label)
-                 if args.per_label else None)
+                 label=label2printlabel[label] if args.per_label else None,
+                 linestyle=label2linestyle[label]
+                 if args.per_label else 'solid')
     plt.xlabel("Rank")
     plt.ylabel("Importance")
     if args.per_label:

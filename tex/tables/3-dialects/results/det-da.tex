@@ -1,0 +1,26 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+ & \textbf{Group} & \textbf{Feature} & {\textbf{Imp.}} & {\textbf{Dist.}} & {\textbf{Rep.}} & \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\
+ \midrule
+\multirow{11}{*}{det} & \multirow{4}{*}{West} & \ngram{\sos{}det/dær\eos{}} & 0.19 & 0.01 & 0.84 &  \\
+ &  & \ngram{\sos{}det/da\eos{}} & 0.18 & 0.10 & 0.96 &  \\
+ &  & dår & 0.13 & 0.01 & 0.85 & det/dårr(0.4) \\
+ &  & \ngram{\sos{}det/di\eos{}} & 0.11 & 0.01 & 0.54 &  \\
+ \cmidrule{2-7}
+ & Tr\o. & \ngram{\sos{}det/e\eos{}} & 0.12 & 0.03 & 0.39 &  \\
+ \cmidrule{2-7}
+ & \multirow{4}{*}{East} & \ngram{ræ\sep{}} & 0.13 & 0.01 & 0.60 & det/ræ(0.9) \\
+ &  & \ngram{\sep{}re} & 0.12 & 0.10 & 0.46 & det/re(0.9)\\
+ &  & \ngram{\sos{}det/re\eos{}} & 0.10 & 0.07 & 0.93 &  \\
+ &  & {\smaller\ngram{\sos{}det/de\sep{}er/ær\eos{}}} & 0.08 & 0.05 & 0.98 &  \\
+ \cmidrule{2-7}
+ & \multirow{2}{*}{North} & {\smaller\ngram{\sos{}det/d\sep{}er/e\eos{}}} & 0.08 & 0.04 & 0.44 &  \\
+ &  & {\smaller\ngram{\sos{}det/de\sep{}der/dær\eos{}}} & 0.09 & 0.01 & 0.49 &  \\
+ \midrule
+\multirow{3}{*}{da} & West & \ngram{då\sep{}} & 0.14 & 0.16 & 0.53 & da/då(1.0) \\
+\cmidrule{2-7}
+& \multirow{2}{*}{East} & \ngram{\sos{}da/ra\eos{}} & 0.27 & 0.02 & 0.95 &  \\
+ & & \ngram{\sos{}da/a\eos{}} & 0.09 & 0.03 & 0.42 & \\
+ \bottomrule
+\end{tabular}

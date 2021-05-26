@@ -1,0 +1,14 @@
+\subsection{Discussion}
+\label{sec:dialects-discussion}
+
+Many of the features that got assigned high importance scores by LIME serve as examples for the linguistic patterns described by dialectologists.
+However, not all features that are important for the label prediction are easy to understand for humans or fall into easily recognizable feature categories.
+Additionally, many of the features with high-importance scores showcase linguistic traits that are not often discussed in Norwegian dialectology, such as the different variants of \textit{noe(n)} `some, somebody, something' or the past participle endings in North Norwegian.
+
+The features that have high importance scores for a dialect group are not always very representative of the entire group (although these exist, such as the West Norwegian /(r)rs/), but sometimes only represent characteristic traits of the dialects spoken in one subregion (e.g. the diphthongs /ao, \aa{}o/ in some parts of West Norway).
+This also results in there sometimes being several seemingly contradictory features that have high importance scores for the same label, such as the West Norwegian first person singular variants /i/, /ei/ and /eg/ that are all among the 50 highest-ranking features for that dialect group.
+It would be interesting to explore how this might change if the number of input features is restricted further and relatively infrequent features are excluded.
+
+It might also be insightful to examine the importance scores for features that are encoded differently, for instance as sound correspondences between the dialects and a reference doculect.
+
+Furthermore, it would me worthwhile to explore which features have high importance scores and are common in false positives/negatives: are there patterns as to which linguistic features lead the classifier astray?

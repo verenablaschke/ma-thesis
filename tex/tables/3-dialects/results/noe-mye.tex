@@ -1,0 +1,22 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+ & \textbf{Group} & \textbf{Feature} & {\textbf{Imp.}} & {\textbf{Dist.}} & {\textbf{Rec.}} & \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\
+ \midrule
+\multirow{6}{*}{\textit{noe(n)}} & West & \ngram{nåkke} & 0.12 & 0.01 & 0.71 &   \begin{tabular}[c]{@{}l@{}}noe/nåkke(0.6)\\noen/nåkken(0.3)\end{tabular}\\
+ \cmidrule{2-7}
+ & Tr\o. & \ngram{\sos{}noe/nå\eos{}} & 0.08 & 0.05 & 0.42 &  \\
+  \cmidrule{2-7}
+ & \multirow{2}{*}{East} & \ngram{nok} & 0.10 & 0.01 & 0.52 & noe/nokko(0.4) \\
+ &  & \ngram{\sos{}noe/no\eos{}} & 0.09 & 0.04 & 0.51 &  \\
+  \cmidrule{2-7}
+ & \multirow{2}{*}{North} & \ngram{\sos{}noe/nåkka\eos{}} & 0.09 & 0.02 & 0.84 &  \\
+ &  & \ngram{\sep{}nån} & 0.07 & 0.02 & 0.48 & noen/nån(0.7)\\
+\midrule
+\multirow{4}{*}{\textit{mye}} & \multirow{3}{*}{Tr\o.} & \ngram{myt} & 0.08 & 0.01 & 0.34 & mye/mytti(0.7) \\
+ &  & \ngram{\sep{}myt} & 0.08 & 0.01 & 0.34 & mye/mytti(0.7) \\
+ &  & \ngram{my\sep{}} & 0.06 & 0.02 & 0.57 & mye/my(1.0) \\
+ \cmidrule{2-7}
+ & East & \ngram{çy} & 0.09 & 0.01 & 0.39 & mye/myççy(0.4)\\
+ \bottomrule
+\end{tabular}

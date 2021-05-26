@@ -1,0 +1,72 @@
+% Ratio bars based on: https://tex.stackexchange.com/a/445291
+\def\bwbar#1{{\color{black!100}\rule{#1cm}{8pt}}{\color{black!30}\rule{1cm - #1cm}{8pt}}}%
+
+\def\one{{\color{black!50}\rule{3mm}{8pt}}}%
+\def\zero{{\color{black!10}\rule{3mm}{8pt}}}%
+
+\def\vsep{3cm}%
+\def\hsep{1cm}%
+
+\begin{tikzpicture}[
+        -{Stealth[scale=1.3,angle'=45]}, % arrow heads
+        draw=black!50
+        ]
+    \tikzstyle{annot} = [text width=8em, text centered, node distance=1cm]
+    \tikzstyle{box} = [draw, rectangle, dashed, rounded corners, inner sep=0pt,minimum height=3.7cm, minimum width=1.17cm]
+    \tikzstyle{model} = [rectangle, fill=black!35, minimum height=4.6cm, minimum width=2.5cm, inner sep=0pt, rounded corners=1mm]
+    \tikzstyle{corner-arrow} = [rounded corners=5mm]
+    \tikzstyle{close-tip} = [shorten >=-1mm]
+    \tikzstyle{far-tips} = [shorten <=2mm,shorten >=2mm]
+
+    \node (input) at (-2cm,-\hsep) {\texttt{Lorem ipsum...}};
+    
+    \node (x-prime) at (0.7 * \vsep,-\hsep) {$x'$ \one\zero\zero\one\one\zero$\cdots$};
+    \node (z1-prime) at (0.7 * \vsep,-2 * \hsep) {$z_1'$ \one\zero\zero\zero\one\zero$\cdots$};
+    \node (z2-prime) at (0.7 * \vsep,-3 * \hsep) {$z_2'$ \zero\zero\zero\zero\one\zero$\cdots$};
+    \node (z3-prime) at (0.7 * \vsep,-4 * \hsep) {$z_3'$ \one\zero\zero\one\zero\zero$\cdots$};
+    \node (etc-prime) at (0.67 * \vsep,-5 * \hsep) {$...$};
+
+    \node (z1) at (2 * \vsep,-2 * \hsep) {$z_1$};
+    \node (z2) at (2 * \vsep,-3 * \hsep) {$z_2$};
+    \node (z3) at (2 * \vsep,-4 * \hsep) {$z_3$};
+    \node (etc) at (2 * \vsep,-5 * \hsep) {$...$};
+        
+    \node[model] (f-model) at (2.64 * \vsep, -3 * \hsep) {};
+    \node[model, fill=black!20] (g-model) at (2.64 * \vsep, -10 * \hsep) {};
+    
+    \node (z1-pred) at (4.3 * \vsep,-2 * \hsep) {$f(z_1) =c_1$ \bwbar{0.5} $c_2$ \bwbar{0.4} $c_3$ \bwbar{0.1}};
+    \node (z2-pred) at (4.3 * \vsep,-3 * \hsep) {$f(z_2) =c_1$ \bwbar{0.3} $c_2$ \bwbar{0.4} $c_3$ \bwbar{0.3}};
+    \node (z3-pred) at (4.3 * \vsep,-4 * \hsep) {$f(z_3) =c_1$ \bwbar{0.7} $c_2$ \bwbar{0.15} $c_3$ \bwbar{0.15}};
+    \node (etc-pred) at (4 * \vsep,-5 * \hsep) {$...$};
+    \node (etc-pred2) at (4.5 * \vsep,-5 * \hsep) {$...$};
+    \node (etc-pred3) at (5 * \vsep,-5 * \hsep) {$...$};
+
+    \node (g-z1-pred) at (3.8 * \vsep,-9 * \hsep) {$g_{c_1}(z_1) =$ \bwbar{0.5}};
+    \node (g-z2-pred) at (3.8 * \vsep,-10 * \hsep) {$g_{c_1}(z_2) =$ \bwbar{0.2}};
+    \node (g-z3-pred) at (3.8 * \vsep,-11 * \hsep) {$g_{c_1}(z_3) =$ \bwbar{0.9}};
+    \node (g-etc-pred) at (4 * \vsep,-12 * \hsep) {$...$};
+    
+    \node[box] (f-pred) at (4.09 * \vsep,-3.4* \hsep) {};
+    \node[box] (g-pred) at (4.09 * \vsep,-10.4* \hsep) {};
+    
+    \path (input) edge (x-prime);
+    \path (z1-prime) edge (z1) (z1) edge (z1-pred);
+    \path (z2-prime) edge (z2) (z2) edge (z2-pred);
+    \path (z3-prime) edge (z3) (z3) edge (z3-pred);
+
+    \draw[shorten >=-2mm] (x-prime.192) -- (z1-prime.166);
+    \path[close-tip] (x-prime.192) edge[bend right] (z2-prime.175) (x-prime.192) edge[bend right] (z3-prime.175);
+    
+    \draw[corner-arrow] (z1-prime.east) -- ++(0.5 * \vsep,0) node [midway] {} |- (g-z1-pred.west);
+    \draw[corner-arrow] (z2-prime.east) -- ++(0.35 * \vsep,0) node [midway] {} |- (g-z2-pred.west);
+    \draw[corner-arrow] (z3-prime.east) -- ++(0.2 * \vsep,0) node [midway] {} |- (g-z3-pred.west);
+    
+    \draw[{Stealth[scale=1.3,angle'=45]}-{Stealth[scale=1.3,angle'=45]}, far-tips] (f-pred) edge node[midway, right,align=left] {Weighted mismatch\\measured by $\loss$} (g-pred);
+
+    \node[annot,above of=input] {Input instance};
+    \node[annot,above of=x-prime] (binary) {Interpretable representation};
+    \node[annot,right of=binary, node distance=3cm] {Model input};
+    \node[annot,above of=f-model, node distance=3cm] (f-model-lab) {Original model};
+    \node[annot,right of=f-model-lab, node distance=5.8cm,text width=14em] {Prediction distribution};
+    \node[annot,above of=g-model, node distance=3cm] (g-model-lab) {Explanation model for class $c_1$};
+\end{tikzpicture}

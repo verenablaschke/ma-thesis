@@ -98,7 +98,7 @@ with open('{}/AVERAGE-{}'.format(args.model,
         rep_1 = feature2count_pos.get(token, 0) / size_1
         rel_occ = feature2count_pos.get(token, 0) / feature2count_all[token]
         dist_1 = (rel_occ - rel_size_1) / (1 - rel_size_1)
-        f.write('{}\t{:.2f}\t{:.2f}\t{:.2f}\t'
+        f.write('{}\t{:.6f}\t{:.6f}\t{:.6f}\t'
                 '{}\t{}\t{}\t{}\t{}\n'.format(
                     token, avg, rep_1, dist_1,
                     length,

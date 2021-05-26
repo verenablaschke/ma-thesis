@@ -1,0 +1,248 @@
+\subsection{Other linguistic features}
+\label{sec:dialects-results-lingother}
+
+The previously mentioned features are by far not the only features included in classifications and descriptions of Norwegian dialects.
+This section presents some of the other linguistic features with high importance scores that are often discussed in Norwegian dialectology, despite not always being considered the most essential for deciding where the borders between the dialect areas should be drawn.
+
+\subsubsection{Personal pronouns}
+\label{sec:dialects-results-pronouns}
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/pronouns-1}
+    \caption
+    [First person pronouns in the top 50 most important features per dialect group]
+    {First person pronouns in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:pronouns-1}
+\end{table}
+
+There is also ample variation in the variants of personal pronouns. 
+The first person singular pronoun \textit{jeg} is pronounced /e(g)/ or /{\ae}g/ in large parts of the country, but with an initial /j-/ (/je/ or /j{\ae}(i)/) in much of the East Norwegian area
+\cite[pp.~22--23]{jahr1990dialekter}.
+In parts of West Norway and Trøndelag, the variant /i/ is also in use \cite[pp.~22--23]{jahr1990dialekter}.
+Apart from the geographic distribution of /i/, the literature generally does not show such a subdivision and tends to lump together the forms without /j-/ in the remaining regions.
+\autoref{tab:pronouns-1} shows the first personal singular forms that rank among each dialect group's 50 highest-scoring LIME features.
+These results clearly show the presence of an initial glide in East Norwegian \textsc{1.sg} forms.
+The North Norwegian form with the highest importance score is /\ae/. 
+While it is not the only form used in that dialect group, \citet[p.~36]{jahr1996nordnorske} already remarked upon its spreading popularity several decades ago.
+Additionally, the results highlight several West Norwegian pronoun variants: \ngram{\sos{}jeg/i\eos{}}, \ngram{\sos{}jeg/ei\eos{}} and \ngram{eg\sep{}}.
+While these are generally not used to characterize the entire West Nowegian dialect group, they are characteristic for several dialects within that group \citet[pp.~71, 74, 76, 79]{sandoey1996vestlandet}.
+Despite being a lot less commonly discussed by dialectologists than the first person singular nominative pronoun, two versions of the accusative form also receive high importance scores: Trønder /mæ/ and East Norwegian /mæi/.
+
+\textit{Vi}, the first person plural pronoun, is replaced by /me/ or /mi/ in many West Norwegian and some East Norwegian dialects, and by /{\aa}ss/ in some other East, West and Trønder Norwegian dialects \cite[p.~183]{maehlum2012dialektlandskapet}.
+\autoref{tab:pronouns-1} also shows the first person plural forms that are among the most important features, as determined by LIME.
+These clearly reflect the West Norwegian tendency to use /me/ or /mi/.
+The results also include Tr\o{}nder /åss/, which---while also attested in other dialect groups---is more characteristic of Tr\o{}nder in the ScanDiaSyn data (about half of the occurrences of \ngram{\sos{}vi/\aa{}ss\eos{}} appear in just 14~\% of the data).
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/pronouns-2}
+    \caption[Second person pronouns in the top 50 most important features per dialect group]
+    {Second person pronouns in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:pronouns-2}
+\end{table}
+
+
+The second person singular (nominative) pronoun is not commonly presented as a particularly important feature for distinguishing between dialect groups.
+In most dialects, it is /du/, although (when unstressed) it is reduced to /ru/ in some East Norwegian dialects (\citeauthor{haarstad2013spraak}, \citeyear{haarstad2013spraak}, p.~88; \citeauthor{endresen1990vikvaersk}, \citeyear{endresen1990vikvaersk}, p.~97; \citeauthor{wiggen1990oslo}, \citeyear{wiggen1990oslo}, p.~184).
+The high-ranking features include East Norwegian /ru/ as well as a West Norwegian form /do/.
+The latter does in fact most commonly appear in West Norway in the ScanDiaSyn data (although /du/ is nevertheless the most frequent pronunciation in that part of the country) but it is not remarked upon in the descriptions of West Norwegian dialects by \citet{sandoey1996vestlandet}, \citet[pp.~168, 176, 185]{hanssen2010dialekter} or \citet[p.~91]{maehlum2012dialektlandskapet}.
+Two word bigrams with different variations of \textit{vet du} `you know; do you know' also have high importance scores among the East Norwegian and Tr\o{}nder features, but both include the common form /du/ and only differ in the vowel length of /vet(t)/.
+Tr\o{}nder also has the high-importance variant /u/, which is not commonly pointed out in descriptions of the dialect group.
+The accusative form \textit{deg} usually also goes unremarked in dialectologist literature, but the Trønder pronunciation /d\ae/ has a relatively high importance score (similarly to the Trønder \textsc{1.sg.acc} form /m\ae/).
+
+Different dialects use different lexemes for second person plural pronouns.
+In East and West Norwegian areas, variants of /di, de/ (\textsc{nom}) and /dere/ or /dVkk, dVkkV(r/n)/ (\textsc{acc} or regardless of case) prevail \citep[pp.~80--86]{papazian2008dedykkdere}.
+Speakers of Trønder dialects use /di, de/ (\textsc{nom}) and /dåkk/ (\textsc{acc} or regardless of case) \citep[p.~86]{papazian2008dedykkdere}, whereas North Norwegian dialects do not make any case distinction and use forms resembling /dåkk(er)/ \citep[p.~87]{papazian2008dedykkdere}.
+Of these forms, only the North Norwegian /d\aa{}kker/ appears in the top 50 features per dialect group (see \autoref{tab:pronouns-2}).
+
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/pronouns-3}
+    \caption[Third person pronouns in the top 50 most important features per dialect group]
+    {Third person pronouns in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:pronouns-3}
+\end{table}
+
+The most common variant of the third person feminine singular pronoun is /ho/, although /hu(n)/ is also common in East Norwegian and /hon/ in parts of West Norway \citep[p.~110]{hanssen2010dialekter}.
+Only the North Norwegian dialect group contains features encoding this pronoun in its top 50 list, and in this case this is the prevailing form /ho/ as well as a reduced variant /o/.
+
+There are two common variants of the \textsc{3.pl} pronoun: /di, de(i)/ and /dVmm/.
+West Norwegian dialects use the former variant, Trønder dialects the latter (/dæmm/ or /dåmm/), and both are found in East Norway (/demm, domm, dømm/, /di/) and North Norway (/di/, /dæmm/) \citep[pp.~52, 78, 91, 109]{maehlum2012dialektlandskapet}.
+\autoref{tab:pronouns-3} shows the third person pronouns that are among each dialect group's highest-ranking 50 LIME features.
+The East Norwegian dialect group includes /dømm/ as well as a form with the /d-/--/r-/ correspondence that is also present in the \textsc{2.sg} pronouns.
+As expected from the literature, the top LIME features for the West Norwegian dialects contain forms without -m (/dei, d\ae{}i/).
+The high ranking Trønder form is /\ae{}mm/, which resembles but is not identical to the form /d\ae{}mm/ that is expected from the literature.
+The dropped initial /d-/ is also repeated in the previously mentioned Trønder second person singular pronoun form /u/.
+
+\subsubsection{Negation}
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/negation}
+    \caption
+    [Variants of the negation \textit{ikke} in the top 50 most important features per dialect group]
+    {Variants of the negation \textit{ikke} in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:negation}
+\end{table}
+
+
+The negation word \textit{ikke} is pronounced in many different ways across the country.
+The most common variant is /i\c{c}\c{c}e/, but /itt/\footnote{%
+Technically, the palatalized version is typical for Trønder (/\i{}cc/ in IPA), but the ScanDiaSyn transcription system does not differentiate between palatal and alveolar stops.
+}
+is characteristic of Trønder, /itte/ is used in many East Norwegian dialects, and /ikke/ is used in some parts of North and East Norway \cite[pp.~20--21]{jahr1990dialekter}.
+In West Norway, /i\c{c}\c{c}e/ also appears alongside /it\texttoptiebar{t\textesh{}}e/ and (in the city of Bergen) /i\textesh\textesh{}e/ \citep[pp.~91, 50]{maehlum2012dialektlandskapet}.
+All of this is partially reflected in the results (\autoref{tab:negation}).
+As in the literature, /(i)tte/%
+\footnote{In spoken Norwegian, the initial /i-/ in \textit{ikke} is often dropped.}
+is the most commonly used form in East Norway, although /(i\c{c})\c{c}i/ also ranks high.
+In the West Norwegian group, /\c{c}\c{c}e/, /(it)\texttoptiebar{t\textesh{}}e/ and especially the Bergen variant /i\textesh\textesh{}e/ have high importance scores.
+The North Norwegian group only has one high-ranking feature representing the negation: /ikk(e)/.
+In the Trønder area, several n-gram representations of /(i)tt/ are ranked as important, as expected from the literature.
+
+
+\subsubsection{Question words}
+
+Most Norwegian question words begin with \textit{(h)v-}.
+This initial sound is realized as /k-/ or /kv-/ in most dialects, with the exception of some of the dialects spoken in East or North Norway, where it is instead pronounced /v-/ \cite[pp.~79--80]{sandoey1991dialektkunnskap}.
+Two question words make it into the top 50 lists, namely to variants of \textit{hva} `what': East Norwegian \ngram{\sos{}hva/va\eos{}} and West Norwegian \ngram{k\aa\sep{}} (which is most commonly a subtoken of the \ngram{\sos{}hva/k\aa\eos{}}).
+While these represent typical variants of some East or West Norwegian question words, this brief list is very far from exhaustive when it comes to the full set of question words and local variations thereof.
+
+\subsubsection{Lexical variation}
+
+Works on Norwegian dialectology tend to briefly reference lexical variation but not go into detail
+(cf. \citet[p.~104]{sandoey1991dialektkunnskap} and \citet[pp.~114--115]{hanssen2010dialekter}).
+\citet{gooskens2006relative} find that lexical variation correlates significantly less strongly with dialect speakers' perceptual distances than differences in pronunciation (albeit with the caveat that their methodology might not encourage naturalistic lexical variation).
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/lexical-variation}
+    \caption
+    [Numerals in the top 50 most important features per dialect group]
+    {Numerals in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word(s) in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:lexical-variasjon}
+\end{table}
+
+In Norwegian, some numerals have both older and more recently introduced forms that exist in parallel:
+\textit{syv} and \textit{sju} `seven,' \textit{tyve} and \textit{tjue} `twenty,' and \textit{tredve} and \textit{tretti} `thirty.'\footnote{%
+The forms \textit{tyve} and \textit{tredve} are currently not part of written Bokmål, but I use them here to differentiate between the different lexical forms without having to specify phonetic details.
+}
+\citet{kvale1997counting} found that there are some geographic patterns as to which forms are used:
+\textit{sju} is especially common in the North and Tr\o{}ndelag (grouped together in that article), and \textit{tjue} is especially common in West Norway. 
+According to the authors, there are smaller differences in the usage of word forms for `thirty,' although \textit{tretti} is most common in the West.
+The top 50 lists contain three features that correspond to numerals (\autoref{tab:lexical-variasjon}), none of which match \citeauthor{kvale1997counting}'s observations very closely.
+These features are the East Norwegian \textit{tjue} and \textit{tredve}, as well as the North Norwegian bigram \ngram{yv} that usually appears in \textit{syv} and \textit{tyve}.
+Unlike East Norwegian \textit{tredve} which only appears slightly more often in that dialect group than you would expect if the occurrences were randomly distributed (30~\% of the occurrences appear in a group that constitutes 28~\% of the data), the other two features have fairly high specificity scores, indicating that the usage pattern of numerals may have changed in the past few decades or that the ScanDiaSyn data and \citeauthor{kvale1997counting}'s data contain different patterns for other reasons.
+
+\subsubsection{\textit{Noe(n)} and \textit{mye}}
+
+\begin{table}[htbp]
+\include{tables/3-dialects/results/noe-mye}
+    \caption
+    [Variants of \textit{noe(n)} and \textit{mye} in the top 50 most important features per dialect group]
+    {Variants of \textit{noe(n)} `some, someone, something' and \textit{mye} `much' in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:noe-mye}
+\end{table}
+
+Several features with high importance scores represent variants of the words \textit{noe(n)} `some, something, someone' and \textit{mye} `much.'
+Both are high-frequency words that come in two main versions: with and without a /k/ (or other consonant) in the middle.
+This variation is even represented in the two different orthographies (compare Bokm\aa{}l \textit{noe(n)} and \textit{mye} and Nynorsk \textit{noko/nokon/nokre} and \textit{mykje}), but it is not commonly remarked upon in traditional Norwegian literature as an identifying trait for any of the dialect groups (see for instance the summaries of important identifying traits by dialect group by \citet[pp.~125, 155, 163--164, 187--188]{hanssen2010dialekter} and \citet[pp.~45--54, 76--80, 89--94, 106--111]{maehlum2012dialektlandskapet}).
+The LIME results also do not show a clear separation here: East and North Norwegian both have high-ranking versions of \textit{noe(n)} with and without /k/, but West Norwegian and Tr\o{}nder both have only one high-ranking variant: /n\aa{}kke/ and /n\aa/, respectively.
+Tr\o{}nder also has several versions of \textit{mye} in its top 50 features: two with a medial /-t-/ and one without.
+The only other variant of this word that made it into a top 50 selection is the East Norwegian /my\c{c}\c{c}y/.
+
+
+\subsubsection{\textit{Det} and \textit{da}}
+
+\begin{table}[htbp]
+\include{tables/3-dialects/results/det-da}
+    \caption
+    [Variants of \textit{det} and \textit{da} in the top 50 most important features per dialect group]
+    {Variants of \textit{det} `it, that, the, there' and \textit{da} `then' in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:det-da}
+\end{table}
+
+Two other very high-frequency words that are frequently represented by features with high importance scores but usually not discussed as characteristic dialect features are \textit{det} `it, that, the, there' and \textit{da} `then' (\autoref{tab:det-da}).
+The results show some vowel variations in different dialect groups---including notable intra-group variation for West Norwegian, which includes four variants of \textit{det}, each with a different vowel. 
+For both \textit{det} and \textit{da}, the important East Norwegian features include (but are not limited to) variants with an initial /r-/ that replaces the /d-/.
+While this is generally not described as a typical East Norwegian feature, this resembles the (documented) reduction of /d-/ to /r-/ in second person pronouns in some East Norwegian dialects (\citeauthor{haarstad2013spraak}, \citeyear{haarstad2013spraak}, p.~88; \citeauthor{endresen1990vikvaersk}, \citeyear{endresen1990vikvaersk}, p.~97; \citeauthor{wiggen1990oslo}, \citeyear{wiggen1990oslo}, p.~184; see also \autoref{sec:dialects-results-pronouns}).
+The lenition of \textit{det} to /e/ in Tr\o{}nder is also not generally documented in descriptions of the Tr\o{}nder dialect area \citep[cf.][pp.~75--85]{maehlum2012dialektlandskapet}, but this is also similar to a high-ranking pronoun feature where \textsc{3.pl} \textit{de(m)} is reduced to /æmm/ (see \autoref{sec:dialects-results-pronouns}).
+
+\subsubsection{Retroflexes}
+
+In most parts of Norway, a phonological sequence of /r/ followed by a different alveolar consonant undergoes assimilation, resulting in a retroflex consonant.
+The exception to this is (by and large) West Norway, where no such assimilation happens and where /r/ often is realized as a uvular consonant rather than an alveolar \citep[pp.~90, 185]{maehlum2012dialektlandskapet}.
+The ScanDiaSyn transcription system does not distinguish between different realizations of /r/ and the only retroflexes it explicitly encodes are /\textrtailr/ (which is not the result of assimilation, but see \autoref{sec:dialects-features-tjukkl} for more on this sound) and /\textrtails/.
+Two features encoding the non-assimilation of /rs/ are among the fifty input features with the highest importance scores for West Norwegian: \ngram{rs} and \ngram{rrs}.
+The former denotes the sequence of /rs/ in any syllable and the latter more specifically in short, stressed syllables.
+
+\subsubsection{Vowels}
+
+\begin{table}[htbp]
+\include{tables/3-dialects/results/vowels}
+    \caption
+    [Vowel patterns in the top 50 most important features per dialect group]
+    {Vowel patterns in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:results-vowels}
+\end{table}
+
+As shown in \autoref{tab:results-vowels}, several of the high-ranking North Norwegian features encode a sound change that is common to many dialects of that group: the lowering of /i/ to /e/ \citep[p.~189]{hanssen2010dialekter}.
+This sound change is demonstrated in features for the words \textit{hvis} `if,' \textit{fisk} `fish,' and \textit{til} `to,' although the latter is also represented by a high-importance feature with /i/.
+This sound change is also typical for Tr\o{}nder dialects \citep[p.~157]{hanssen2010dialekter}, although only one feature representing this made it into that group's top 50 LIME features.
+
+One diphthong that is characteristic of a few West Norwegian dialects is /ao$\sim$\aa{}o/ (\citeauthor{sandoey1996vestlandet}, \citeyear{sandoey1996vestlandet}, p.~76; \citeauthor{hanssen2010dialekter}, \citeyear{hanssen2010dialekter}, p.~172).
+Unlike many other dialect traits that are represented by entire words or longer character n-grams in the highest-ranking LIME results, these features only encode the diphthong itself: \ngram{ao} and \ngram{\aa{}o}.
+
+
+\subsubsection{Inflected verb forms}
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/verbs}
+    \caption
+    [Inflected high-frequency verbs in the top 50 most important features per dialect group]
+    {Inflected forms of high-frequency verbs in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:verbs}
+\end{table}
+
+Many of the features with high importance scores represent conjugated forms of common verbs, as shown in \autoref{tab:verbs}.
+These are often not specifically discussed by dialectologists, but some of them exemplify other dialect traits.
+For instance, the final /-r/ in unstressed syllables (such as in the present tense forms of many verbs) is dropped in many Norwegian dialects, with the exception of the East Norwegian group \citet[pp.~53, 79, 92, 110]{maehlum2012dialektlandskapet}.
+% \citep[pp.~92--93]{sandoey1991dialektkunnskap}
+This tendency is also reflected by the entries for \textit{har} `have.\textsc{pres},' \textit{er} `am, are, is,' and \textit{var} `was' in \autoref{tab:verbs}.
+
+The variants of \textit{v\ae{}rt} showcase a typical ending of past participle forms in many Tr\o{}nder and East Norwegian dialects: /-i/ (\citeauthor{dalen1990troendersk}, \citeyear{dalen1990troendersk}, p.~134; \citeauthor{endresen1990vikvaersk}, \citeyear{endresen1990vikvaersk}, p.~96).
+
+
+\subsubsection{Past participles ending in /-dd/}
+
+\begin{table}[htbp]
+    \include{tables/3-dialects/results/participle-dd}
+    \caption
+    [Past participles with /-dd/ in the top 50 most important features per dialect group]
+    {Past participles ending with /-dd/ in the top 50 most important features per dialect group.
+    The middle columns contain importance, representativeness and distinctiveness scores.
+    The context column lists the most frequent word(s) in which each character n-gram appears (along with the relative frequency of this word being the origin).}
+    \label{tab:participle-dd}
+\end{table}
+
+Four of the North Norwegian features with the highest LIME scores represent past participles ending in /-dd/ instead of the more prevalent /-tt/.
+(The examples in the context column of \autoref{tab:participle-dd} are far from exhaustive.
+Most of the words in which \ngram{dd\sep} appears are past participle forms of a broad range of verbs, such as \textit{g\aa{}tt} /g\aa{}dd/ `gone,' \textit{f\aa{}tt} /f\aa{}dd/ `gotten,' \textit{sett} /sedd/ `seen,' \textit{hatt} /hadd/ `had (\textsc{pst-pcp}),' and many others).
+
+In the ScanDiaSyn data, these forms mostly appear in the North Norwegian samples (note the high distinctiveness scores) and most of the North Norwegian utterances include the /-dd/ versions and not the /-tt/ versions (for instance, 87~\% of the appearances of \textit{g\aa{}tt} `gone' are pronounced /g\aa{}dd/ in the North Norwegian ScanDiaSyn data).
+Nevertheless, this is not discussed as a characteristic trait of North Norwegian by, e.g., \citet[pp.~109--110]{maehlum2012dialektlandskapet}.

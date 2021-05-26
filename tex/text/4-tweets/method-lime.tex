@@ -1,0 +1,37 @@
+
+\section{LIME}
+\label{sec:tweets-svm}
+
+\subsection{Preprocessing and method}
+\label{sec:tweets-svm-method}
+
+Instead of encoding the tweets as character- and word-level n-grams as with the dialect data, I use the sub-word tokenization produced by the tokenizer of the (cased, large) FlauBERT model \citep{le2020flaubert}, a pre-trained BERT model for text written in French.
+This method encodes frequent words as word unigrams and less frequent words as subword units, based on byte pair encoding (BPE).
+Unlike the encoding based on n-grams of different lengths, there is no overlap between tokens.
+Tokenizing the input like this led to an improvement in the model accuracy and F$_1$-score in preliminary experiments, and it produces features that are more easily interpretable for humans.
+% The tokenization is case-sensitive, as non-standard use of capital and lower-case letters \rephrase*{may be relevant for label prediction}.
+The example below gives an impression of what the features encoding a tweet after preprocessing look like.
+Each (non-escaped) token ends with a hyphen or with \eow:
+
+\begin{exe}
+\ex 
+\gll
+\textbf{Tweet} \#griveaux \#hulot ou le retour des ``pater familias'' autant dire la négation radicale du féminisme par ces spécialistes de l'égalité femme-homme, qu'en pense Marlène Schiappa ?\\
+\textbf{Encoded} \hashtag{} \hashtag{} \ngram{ou\eow} \ngram{le\eow} \ngram{retour\eow} \ngram{des\eow} {\ngram{"\eow} \ngram{pa\mow} \ngram{ter\eow}} {\ngram{famili\mow} \ngram{as\eow} \ngram{"\eow}} \ngram{autant\eow} \ngram{dire\eow} \ngram{la\eow} \ngram{négation\eow} \ngram{radicale\eow} \ngram{du\eow} \ngram{féminisme\eow} \ngram{par\eow} \ngram{ces\eow} \ngram{spécialistes\eow} \ngram{de\eow} {\ngram{l'\eow} \ngram{égalité\eow}} {\ngram{femme\eow} \ngram{-\eow} \ngram{homme\eow} \ngram{,\eow}} {\ngram{qu'\eow} \ngram{en\eow}} \ngram{pense\eow} {\ngram{Marl\mow} \ngram{ène\eow}} {\ngram{Schi\mow} \ngram{appa\eow}} \ngram{?\eow} \\
+\trans `\#Griveaux, \#Hulot,\footnote{%
+Benjamin Griveaux and Nicolas Hulot areFrench politicians.}
+or the return of the ``pater familias,'' which is to say the radical negation of feminism by these gender equality specialists---what does Marlène Schiappa\footnote{%
+Marlène Schiappa was the French Secretary of State for Gender Equality from 2017 to 2020.}
+think about this?'
+\label{gloss:tweet-preprocessing}
+\end{exe}
+
+In a preliminary experiment, I tried out encoding the data as word- and character-level n-grams (similarly to my approach to the dialect classification task and to the approaches listed in the first section of this chapter).
+However, the BPE-based tokenization yielded slightly better classification results (all other settings being equal) as well as features that are much easier to understand for humans.
+
+The machine learning model I use is an SVM, since this kind of model has proven to perform well in many of the experiments mention in \autoref{sec:sexism-detection}.
+As in the dialect experiment, I create ten different train-test splits of the data, train an SVM on each of them, and average the accuracy and F$_1$ metrics as well as the LIME scores across these ten set-ups.
+I also use TF-IDF weighting for numerically representing the input tokens, including the 5000 most common tokens.
+Because the label distribution is clearly imbalanced, I use class weights (giving twice the weight to tweets with sexist content while training).
+
+

@@ -1,0 +1,16 @@
+Many frequently used machine learning (ML) models for text classification are black-box models that are often very good at identifying relevant patterns in their input data, allowing them to be highly accurate classifiers.
+However, using these models, we can easily test how good they are at classifying some given input data, but extracting what information they learned is less trivial.
+
+Exploring which patterns a classifier has learned and how they affect its predictions is inherently interesting, even (or especially) in two very different scenarios.
+In more traditional linguistic contexts, explainable machine learning allows us to explore which properties of a dataset for a given task black-box machine learning models find significant, and to what extent they overlap (or do not overlap) with what experts in that field have found with the help of traditional, non-ML methods.
+I examine this with in a case study of Norwegian dialect classification.
+
+In applied cases, exploring on what basis an ML model makes its decisions allows us to find out if the model is learning patterns that are desired and plausible to humans, rather than spurious or even unwanted correlations that might not generalize well to new data or be actively harmful.
+In my second case study, I explore this in the context of detecting sexist content in French tweets.
+
+This thesis is structured as follows:
+I first introduce the explainable machine learning techniques that I use (\autoref{chap:xml}).
+In \autoref{chap:dialects}, I describe the dialectometric case study, and in \autoref{chap:tweets}, I present the case study involving tweets.
+I conclude the thesis in \autoref{chap:conclusion}.
+
+The code for all experiments can be found at \url{https://github.com/verenablaschke/ma-thesis/releases/tag/ma-thesis}.

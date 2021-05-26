@@ -21,17 +21,9 @@ done
 screen -S nordnorsk -X stuff "python3 representativeness_distinctiveness.py models/dialects\n"
 screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --comb mean --scores\n"
 screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 200 --comb mean --r\n"
+screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 50 --comb mean --r\n"
+screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 181400 --comb mean --r\n"
 screen -S nordnorsk -X stuff "python3 feature_context.py models/dialects dialects --t 200 --comb sqrt --r\n"
 screen -S nordnorsk -X stuff "python3 plot_importance.py models/dialects dialects --comb mean --top 50 --topinput 200 --label\n"
 screen -S nordnorsk -X stuff "python3 plot_importance.py models/dialects dialects --comb mean --label\n"
 screen -S nordnorsk -X stuff "python3 plot_importance.py models/dialects dialects --comb mean\n"
-
-
-python representativeness_distinctiveness.py models/dialects
-python feature_context.py models/dialects dialects --comb mean --scores
-python feature_context.py models/dialects dialects --t 200 --comb mean --r
-python feature_context.py models/dialects dialects --t 200 --comb sqrt --r
-python plot_importance.py models/dialects dialects --comb mean --top 50 --topinput 200 --label
-python plot_importance.py models/dialects dialects --comb mean --label
-python plot_importance.py models/dialects dialects --comb mean
-

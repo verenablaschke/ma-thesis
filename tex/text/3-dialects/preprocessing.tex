@@ -1,0 +1,31 @@
+\subsection{Preprocessing}
+\label{sec:dialects-preprocessing}
+
+
+I normalize the data by removing all punctuation symbols, including characters like \textit{\#} that represent pauses within an utterance.
+I also remove all place names and names of people.
+Additionally, I remove stuttering, aborted articulations and interjections (such as ``mhm'').
+(The ScanDiaSyn documentation includes a list of dialect-neutral interjections \cite[p.~30]{johannessen2009transkripsjonsrettleiing}.)
+If an utterance contains less than three tokens after these steps have been applied, I skip the utterance.
+
+Furthermore, I apply some changes to the phonetic transcription, as documented in \autoref{tab:vowels} and \autoref{tab:consonants}.
+When possible, I replace symbol sequences that encode a single sound by a single (IPA) symbol.
+I also replace \textit{L} with \textit{\textrtailr} so that the data become case-independent.
+% This is done in order to simplify the feature extraction for the machine learning model later on (\autoref{sec:dialects-method}).
+
+This is how the previous utterance is encoded after these preprocessing steps:
+
+
+\renewcommand{\eachwordtwo}{}
+\begin{exe}
+\ex 
+\glll
+\textbf{Bokmål} når jeg har blitt eldre så prøver jeg lissom å holde mer på \# d- dialekta mi enn hva jeg gjorde før\\
+\textbf{ScanDiaSyn} når e ha vørrte elldre så prøve e lissåm å hallde mæir på \# d- dialekto mi enn kå e joLe før\\
+\textbf{Mine} når e ha vørrte elldre så prøve e lissåm å hallde mæir på {} {} dialekto mi enn kå e jo{\textrtailr}e før\\
+\trans `Having gotten older, I, like, try to insist more on using my dialect than I used to.'
+\label{gloss:preprocessing}
+\end{exe}
+\renewcommand{\eachwordtwo}{\rule[-10pt]{0pt}{0pt}}
+
+In the rest of the chapter, all sounds and words between slashes are written in my adapted version of the ScanDiaSyn transcription style.

@@ -1,0 +1,99 @@
+\section{Data}
+\label{sec:tweets-data}
+
+I work with a dataset of French tweets collected by \citet{chiril2020annotated}.%
+\footnote{Available at \href{https://github.com/patriChiril/An-Annotated-Corpus-for-Sexism-Detection-in-French-Tweets}{\texttt{https://github.com/patriChiril/An-Annotated-Corpus-for-Sexism-Detection- in-French-Tweets}}.}
+The data consist of French tweets that were collected in 2017 and 2018 using a list of keywords.
+Such keywords include terms referring to gender or traditionally associated with one gender, gendered insults, public figures who are potential victims or perpetrators of sexism and hashtags used when recounting sexist experiences.
+
+The tweets are annotated based on whether or not they contain sexist content.
+Tweets with sexist content fall into three categories.
+By far the smallest subgroup consists of \textit{directly} sexist tweets that are addressed to one or more women:
+
+\begin{exe}
+\ex Les filles qui affichent leurs corps partout et qui se disent fière, féministe ou jsp encore quelle connerie; sachez qu'on peut en être fière sans le montrer au monde entier, donc vous plaignez pas de l'image que vous renvoyez\\
+`Girls who display their bodies everywhere and call themselves proud or feminist or I don't know what other nonsense; know that you can be proud of your body without showing it to the entire world, so don't complain about the image you're giving off.'
+
+% \ex c'est vous les femmes qui sont les auteures des harcèlement par vos habilement ultra-sexy après vous dites harcèlement non ce pas juste.   \#BalanceTonPorc\\
+% `It's you women who are responsible for harassment with your ultra sexy clothes and then you cry `harassment' no that's not fair. \#MeToo'
+
+\ex Assume!  Tu fais tout pour faire le buzz et après tu pleures [EMOJI] quand on vient à moitié à poil chez Ardisson , on sait à quoi s attendre , j en ai marre de ces nanas qui n assument pas et font des histoires au nom de leur féminisme à 2 francs !\\
+`Accept it! You do everything to generate buzz and then you cry [EMOJI] If you go to Ardisson['s talk show] while half-naked, you know what to expect, I'm fed up with chicks who don't stand by what they do and make a fuss in the name of their cheapo feminism!'
+\end{exe}
+
+Tweets with \textit{descriptive} sexist content are not directly addressed to anybody who would be the target of the sexist content, but describe one or more women:
+
+\begin{exe}
+\ex La cuisine pour une femme EST UN DEVOIR NATUREL comme on parlerai de droit naturel. Déjà moi je le dis tout haut: Je n'épouserais pas une femme qui ne sait pas faire la cuisine même si elle est hyper belle ou riche ou encore possède de dizaines de diplômes, juskà ce k'el l'apren\\
+`For a woman, the kitchen IS A NATURAL TASK, like a law of nature. I say this loudly: I'm not gonna marry a woman who cannot cook even if she's super beautiful or rich or has dozens of diplomas until she learns to cook.'
+
+\ex Les femmes elles sont pas crédibles dans la démarche égalité homme/femme parce qu’elles se respectent déjà pas entre elle\\
+`Women aren't credible in their undertaking for equality between men and women because they don't even respect each other.'
+\end{exe}
+
+Lastly, there are tweets that \textit{report} experiences with sexism.
+About 80~\% of the tweets with sexist content fall into this category; for instance:
+
+\begin{exe}
+\ex Il y a des gens (hommes) qui mettent leur numéro de tél dans leur bio pour des raisons pro Moi j'ai dû enlever mon numéro de téléphone d'un de mes CV en ligne parce qu'un élève m'a dragué par sms, et un autre mec s'en est servi alors q j'avais refusé de lui donner mon numéro\\
+`There are people (men) who put their phone numbers into their bio for job reasons. I had to remove my phone number from one of my online CVs because a student tried to pick me up via SMS, and another guy used it when I had refused to give him my number.'
+
+\ex La bonne réponse est la réponse D - 1 femme sur 5 sera victime d’un viol ou d’une tentative de viol au cours de sa vie (Source : @USAID). \#Ilesttemps de mettre fin aux \#VFS \#MoiAussi [URL]\\
+`The correct answer is number D---one out of five women becomes a victim of rape or attempted rape in the course of her life (source: @USAID). \#TimesUp for putting an end to \#GenderBasedViolence \#MeToo [URL]
+
+\ex «Si tu veux pas m'offrir ton corps, je peux le louer ?» Bordeaux — place de la Victoire \#payetashnek\\
+`{``}If you don't want to offer your body to me, can I rent it?'' Bordeaux---Place de la Victoire \#payetashnek\footnote{A hashtag used for reporting sexual harassment in public spaces.}'
+\end{exe}
+
+In the version of the corpus that is available, no fine-grained distinction is made between these three subtypes of the class of tweets with \textit{sexist content} (as of writing this thesis).
+The remaining tweets are labelled as \textit{non-sexist}.
+
+The publicly available corpus does not contain the full tweets but the list of tweet IDs which can be used to retrieve the posts from Twitter.
+I retrieved the tweets on December~5, 2020. 
+A portion of the tweets had already been deleted, leaving about 9.700 tweets, about a third of which contain sexist content.
+\autoref{tab:tweets} shows the class distribution of the original dataset and the tweets I was able to retrieve.
+
+
+\begin{table}[tb]
+\begin{center}
+\include{tables/4-tweets/corpus}
+\end{center}
+\caption{Class distribution in the Twitter corpus by \citet{chiril2020annotated} and my subset thereof.}
+\label{tab:tweets}
+\end{table}
+
+It should be noted that many of the tweets are written in colloquial French and include texting abbreviations and/or spelling mistakes:
+
+
+\begin{exe}
+\ex 
+\gll
+\textbf{Tweet} Mtn y'a du sexisme envers les hommes {laissez moi} rire <URL>\\
+\textbf{Standard French} \underline{Maintenant} \underline{il y a} du sexisme envers les hommes, laissez\underline{-}moi rire <URL> \\
+\trans `Now there's sexism against men, I got to laugh <URL>'
+\end{exe}
+
+\begin{exe}
+\ex 
+\gll
+\textbf{Tweet} 
+Mskn tjr je m’excuse, tjr je pardonne tlm, tjr j’fais le premier pas jsuis trop conne <URL>
+\\
+\textbf{Standard French} 
+\underline{Meskine,} \underline{toujours} je m’excuse, \underline{toujours} je pardonne \underline{tout le monde}, \underline{toujours} {\underline{je} fais} le premier pas, {\underline{je} suis} trop conne <URL>
+ \\
+\trans `Poor me, I always say sorry, I always forgive everybody, I always take the first stop, I'm too stupid'
+\end{exe}
+
+\begin{exe}
+\ex 
+\gll
+\textbf{Tweet} 
+Jentends un mec qui dit cest les risques du metier que natalie portman ait recu des lettres la menaçant de viol A 13 ANS et que lui il a reçu des lettres dinsultes jui MOR quel rappor
+\\
+\textbf{Standard French} 
+J\underline{'}entends un mec qui dit c\underline{'}est les risques du m\underline{é}tier que Natalie Portman ait re\underline{ç}u des lettres la menaçant de viol A 13 ANS et que lui, il a reçu des lettres d\underline{'}insultes, \underline{je suis} MOR\underline{T(E)}, quel rappor\underline{t}
+ \\
+\trans `I can hear a guy who is saying that Natalie Portman receiving rape threats as a THIRTEEN YEAR OLD is a job hazard, and he's also received letters with insults, I'm DEAD, what a comparison'
+\end{exe}
+

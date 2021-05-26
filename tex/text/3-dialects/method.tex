@@ -1,0 +1,20 @@
+\section{Method}
+\label{sec:dialects-method}
+
+I represent each preprocessed utterance as a bag of n-grams: word-level uni- and bigrams, and character-level \{1, 2, 3, 4, 5\}-grams.
+All word-level n-grams are represented as a combination of their orthographic and phonetic representation.
+That is, the word-level unigrams corresponding to the beginning of \hyperref[gloss:preprocessing]{Example~\ref*{gloss:preprocessing}} are: \ngram{\sos{}når/når\eos{}}, \ngram{\sos{}jeg/e\eos{}}, \ngram{\sos{}har/ha\eos{}}, and the corresponding word-level bigrams are \ngram{\sos{}når/når\sep{}jeg/e\eos{}}, \ngram{\sos{}jeg/e\sep{}har/ha\eos{}}, and so on.
+The meta-tokens \ngram{\sos{}}, \ngram{\eos{}}, and \ngram{\sep{}} stand for ``start of sequence,'' ``end of sequence,'' and ``separator,'' respectively.
+I also use \ngram{\sep{}} to represent the word boundary in character-level n-grams.
+The word \textit{når} `when' for instance consists thus of the character bigrams \ngram{\sep{}n}, \ngram{nå}, \ngram{år}, and \ngram{r\sep{}}.
+
+These n-grams are numerically encoded using TF-IDF (term frequency, inverse document frequency) weighting.
+Only the top 5000 features (in the training data) are considered in the TF-IDF encoding step, features that appear more rarely are ignored when training and testing the model.
+This encoding is done using the scikit-learn library for Python \citep{scikit-learn}.
+
+The classifier is a support vector machine (SVM) with a linear kernel, also as implemented in scikit-learn.
+The four-way classification is performed by training one one-versus-rest classifier per dialect group.
+
+Each of these classifiers produces a prediction for a given input instance.
+The confidence score for a classifier's prediction is proportional to the distance between the input instance's representation in vector space and the classifier's decision hyperplane.
+The prediction probability distribution that LIME works with, $f(x)$, is the result of applying the softmax function to the classifiers' confidence scores.

@@ -1,0 +1,24 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+\textbf{Pron.} & \textbf{Group} & \textbf{Feature} & \textbf{Imp.} & \textbf{Rep.} & \textbf{Dist.} & \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\\midrule
+\multirow{8}{*}{\begin{tabular}[c]{@{}l@{}}\textsc{1.sg}\\\textsc{nom}\end{tabular}}
+& {North} & \ngram{\sos{}jeg/æ\eos{}} & 0.07 & 0.16 & 0.43 &  \\
+\cmidrule{2-7}
+ & \multirow{4}{*}{East} & \ngram{\sos{}jeg/je\eos{}} & 0.19 & 0.07 & 0.85 &  \\
+ &  & \ngram{\sos{}jeg/jæ\eos{}} & 0.17 & 0.12 & 0.97 &  \\
+ &  & \ngram{\sep{}jæi} & 0.15 & 0.02 & 0.91 & \context{jeg/jæi(1.0)} \\
+ &  & \ngram{jæ\sep{}} & 0.11 & 0.12 & 0.94 & \context{jeg/jæ(1.0)} \\
+\cmidrule{2-7}
+ & \multirow{3}{*}{West} & \ngram{\sos{}jeg/i\eos{}} & 0.30 & 0.02 & 0.59 &  \\
+ &  & \ngram{\sos{}jeg/ei\eos{}} & 0.17 & 0.01 & 0.82 &  \\
+ &  & \ngram{eg\sep{}} & 0.09 & 0.16 & 0.68 & \context{jeg/eg(0.9)} \\ 
+\midrule
+ \multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}\textsc{1.sg}\\\textsc{acc}\end{tabular}} & Tr\o. & \ngram{\sos{}meg/mæ\eos{}}  & 0.06 & 0.02 & 0.11 &  \\\cmidrule{2-7}
+ & East & \ngram{mæi\sep{}}  & 0.08 & 0.01 & 0.67 & \context{meg/mæi(0.9)} \\\midrule
+\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}\textsc{1.pl}\\\textsc{nom}\end{tabular}} 
+ & Tr\o. & \ngram{\sos{}vi/åss\eos{}} & 0.10 & 0.02 & 0.43 &  \\\cmidrule{2-7}
+ & \multirow{2}{*}{West} & \ngram{\sos{}vi/mi\eos{}} & 0.12 & 0.02 & 0.66 &  \\
+ &  & \ngram{\sos{}vi/me\eos{}}  & 0.10 & 0.08 & 0.57 &  \\
+\bottomrule
+\end{tabular}

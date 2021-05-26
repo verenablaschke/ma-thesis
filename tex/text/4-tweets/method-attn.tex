@@ -1,0 +1,18 @@
+\section{Attention}
+\label{sec:tweets-method-attn}
+
+\subsection{Preprocessing and method}
+
+I lowercase the tweets and embed them using pretrained word2vec \citep{mikolov2013distributed} embeddings for French, as provided by \citet{fares2017word}.\footnote{%
+They can be downloaded via \url{http://vectors.nlpl.eu/repository/20/43.zip}.}
+These embeddings work on a word (and punctuation) level rather than a sub-token level.
+I truncate all tweets that are longer than sixty tokens (that is, words or (clusters of) punctuation marks) and pad all shorter tweets with dummy tokens (\ngram\filler).
+
+
+I use a feed-forward neural network with an attention layer, as illustrated in \autoref{sec:attention-what}.
+In preliminary experiments, the choice between an FFNN and a recurrent neural network did not lead to significant differences in the classification accuracy.
+I therefore use the FFNN since the hidden representations produced by a recurrent model might be less directly reflective of the individual input tokens.
+I use a hidden layer size of 128 for the FFNN, a dropout rate of 0.4 between the FFNN and the attention layer, and train the model with a batch size of 64 and a learning rate of 0.01 with an Adam optimizer.
+To build and train the model, I use the Python library Keras\footnote{\url{https://keras.io}} 2.4.3 with a Tensorflow\footnote{\url{https://www.tensorflow.org/}} 2.4.1 backend.
+
+As with the other experiments, all metrics and scores are averaged across ten initializations and train-test splits.

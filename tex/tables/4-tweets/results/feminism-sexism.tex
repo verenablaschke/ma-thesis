@@ -1,0 +1,13 @@
+\centering
+\begin{tabular}{llrrrl}
+\toprule
+\textbf{Label} & \textbf{Feature} & {\textbf{Imp.}} & {\textbf{Rep.}} & {\textbf{Dist.}} & \textbf{Context} \\
+\midrule
+\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}Sexist\\ content\end{tabular}} & \ngram{féminisme\eow} & 0.11 & 0.01 & 0.30 & féminisme(1.0) `feminism' \\
+ & \ngram{égalité\eow} & 0.08 & 0.03 & 0.40 & égalité(1.0) `equality'\\
+ & \ngram{sexiste\eow} & 0.06 & 0.02 & 0.25 & sexiste(1.0) `sexist' \\
+ & \ngram{féministe\eow} & 0.06 & 0.03 & 0.21 & féministe(1.0) `feminist'\\
+ \midrule
+\begin{tabular}[c]{@{}l@{}}No sexist\\ content\end{tabular} & \ngram{sexisme\eow} & 0.03 & 0.06 & 0.35 & sexisme(1.0) `sexism'\\
+\bottomrule
+\end{tabular}

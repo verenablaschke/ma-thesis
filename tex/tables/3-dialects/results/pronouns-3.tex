@@ -1,0 +1,19 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+\textbf{Pron.} & \textbf{Group} & \textbf{Feature} & \textbf{Imp.} & \textbf{Rep.} & \textbf{Spec.} & \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\\midrule
+\multirow{2}{*}{\textsc{3.sg}} & \multirow{2}{*}{North} & \ngram{\sos{}hun/o\eos{}} & 0.09 & 0.01 & 0.28 &  \\
+ &  & \ngram{ho\sep{}} & 0.08 & 0.04 & 0.21 & hun/ho(0.9) \\
+ \midrule
+\multirow{7}{*}{\textsc{3.pl}} 
+ & \multirow{3}{*}{East} & \ngram{\sep{}ræi} & 0.10 & 0.01 & 0.17 & de/ræi(0.4) \\
+ &  & \ngram{dømm\sep{}} & 0.07 & 0.02 & 0.97 & de/dømm(0.8)\\
+ &  & \ngram{ømm\sep{}} & 0.07 & 0.02 & 0.83 & de/dømm(0.6) \\
+\cmidrule{2-7}
+ & {Tr\o.} & \ngram{\sep{}æmm} & 0.16 & 0.02 & 0.74 & de/æmm(0.9) \\
+\cmidrule{2-7}
+ & \multirow{4}{*}{West} & \ngram{\sos{}de/dei\eos{}} & 0.09 & 0.01 & 0.85 &  \\
+ &  & \ngram{\sos{}de/dæi\eos{}} & 0.08 & 0.06 & 0.69 &  \\
+ &  & \ngram{\sep{}dei} & 0.08 & 0.01 & 0.70 & de/dei(0.9)\\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,50 @@
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{editnotes}
+% \RequirePackage{xcolor}
+\RequirePackage{soulutf8}
+
+\newcounter{todocount}
+\newcounter{rephrasecount}
+\newcounter{repetitioncount}
+
+\definecolor{lightteal}{RGB}{145, 219, 219}
+\definecolor{lightyellow}{RGB}{240, 240, 137}
+
+\newcommand{\editnotewithlabel}[4]{%
+    \sethlcolor{#1}%
+    \stepcounter{#2}%
+    \hl{\textsc{\footnotesize #3:} #4}%
+}
+\newcommand{\editnotewithoutlabel}[3]{%
+    \sethlcolor{#1}%
+    \stepcounter{#2}%
+    \hl{#3}%
+}
+
+\newcommand{\todo}{\@ifstar{\@todowithoutlabel}{\@todowithlabel}}
+\newcommand{\@todowithlabel}[1]{\editnotewithlabel{pink}{todocount}{(todo}{#1)}}
+\newcommand{\@todowithoutlabel}[1]{\editnotewithoutlabel{pink}{todocount}{(#1)}}
+
+\newcommand{\rephrase}{\@ifstar{\@rephrasewithoutlabel}{\@rephrasewithlabel}}
+\newcommand{\@rephrasewithlabel}[1]{\editnotewithlabel{lightteal}{rephrasecount}{rephrase}{#1}}
+\newcommand{\@rephrasewithoutlabel}[1]{\editnotewithoutlabel{lightteal}{rephrasecount}{#1}}
+
+\newcommand{\repetition}{\@ifstar{\@repetitionwithoutlabel}{\@repetitionwithlabel}}
+\newcommand{\@repetitionwithlabel}[1]{\editnotewithlabel{lightyellow}{repetitioncount}{repetition}{#1}}
+\newcommand{\@repetitionwithoutlabel}[1]{\editnotewithoutlabel{lightyellow}{repetitioncount}{#1}}
+
+\newcommand{\editnotesummary}{
+\vspace{1em}
+\par\noindent\rule{\textwidth}{0.4pt}
+\par
+\vspace{0.7em}
+{\large \textbf{Remaining editing notes}}
+\begin{itemize}
+    \item \sethlcolor{pink} \hl{\textsc{todo}} notes: \thetodocount
+    \item \sethlcolor{lightteal} \hl{\textsc{rephrase}} notes: \therephrasecount
+    \item \sethlcolor{lightyellow} \hl{\textsc{repetition}} notes: \therepetitioncount
+\end{itemize}
+\par\noindent\rule{\textwidth}{0.4pt}
+}
+
+\endinput

@@ -1,0 +1,103 @@
+\section{Local Interpretable Model-agnostic Explanations}
+\label{sec:lime}
+
+\subsection{Local explanations with LIME}
+\label{sec:ml-lime}
+
+\begin{figure}
+    \centering
+    \includestandalone[width=\textwidth]{figures/2-explainable-ml/lime-graphic}
+    \caption
+    [Local Interpretable Model-agnostic Explanations]
+    {LIME generates samples in the neighbourhood of a given instance and compares the predictions of the model to be explained to that of a potential explanatory model.}
+    \label{fig:lime}
+\end{figure}
+
+One popular explanation technique is LIME (Local Interpretable Model-agnostic Explanations) \citep{ribeiro2016lime}.
+This technique works on an instance level.
+Given an input instance and a trained classifier, LIME fits an interpretable model that makes similar predictions on a level local to this specific input.
+% assesses how much the presence of each of the instance's features contributes to the model's prediction.
+% This is achieved by sampling other input vectors in the neighbourhood of the given instance 
+
+The following explains how LIME works, based on the description by \citeauthor{ribeiro2016lime} and their implementation of the algorithm.%
+\footnote{The code is available at \url{https://github.com/marcotcr/lime}; last accessed March 10th, 2021 (commit \texttt{a2c7a6f}).}
+Where details differ for text classification tasks and other applications, I describe what applies to text classification models.
+Moreover, where the authors' implementation differs from the description in their article, I describe the implemented version, as this is what my approach is directly based on.
+The exact version of the code that I use can be found at \url{https://github.com/verenablaschke/ngram_lime/releases/tag/ma-thesis}.
+\autoref{fig:lime} illustrates the approach.
+
+Any given input to a model $f$ is transformed into an input representation $x \in \R^d$, e.g. a matrix containing word embeddings.
+The model can use this input to produce a probability distribution over labels, $f(x)$.
+An interpretable version of this is a binary vector $x' \in \{0,1\}^{d'}$ that indicates the presence or absence of discrete, human-understandable features on which $x$ is based; for instance, which words of the vocabulary in the training data are present in this sample.
+The function $m$ denotes converting the explainable feature vector $x'$ into the input representation $x$ for the machine learning model: $m(x') = x$.
+
+To explore the contribution of each of the non-zero features in $x'$, LIME samples instances from this vector's neighbourhood.
+Randomly changing some of the ones in $x'$ to zeroes produces a perturbed sample $z' \in \{0,1\}^{d'}$, from which the model input $z \in \R^d$ can be inferred.
+The model's predicted label distribution for $z$ is $f(z)$,
+and the probability associated with each class $c \in C$ is indicated by $f_c(z)$. 
+
+Explanations are derived at a class level, rather than encompassing the entire label distribution at once.
+An explanation $g_c \in G_c$ is an interpretable model, where $G_c$ is a set of potential sparse linear models such that $g_c(z') = w_{g_c} \cdot z'$.
+These models are Ridge regression models that attempt to predict $f_c(z)$.
+An explanation model's complexity $\Omega(g_c)$ is its number of non-zero feature weights.
+Minimizing the complexity thus favours models that only focus on a small set of features and are therefore easier to understand for humans.
+Additionally, it is possible to explicitly set the upper bound of $\Omega(g_c)$.
+The final choice of the explanation is determined by solving the following:
+
+\begin{equation}
+\label{eq:optimize-expl}
+    \xi(x) = \argmin_{g_c \in G_c} \loss(f, g_c, \pi_{x'}) + \Omega(g_c)
+\end{equation}
+
+where $\loss$ measures how dissimilar the original model's predictions are from the output of $g_c$.
+The difference between the prediction distributions is weighted by the proximity between $x'$ and $z'$, $\pi_{x'}(z')$, to ensure that $g$ is locally faithful to $f$:
+
+\begin{equation}
+    \loss(f,g_c,\pi_{x'}) = \sum_{z,z' \in Z} \pi_{x'}(z') (f_c(z) - g_c(z'))^2
+\end{equation}
+
+The proximity between $x'$ and $z'$ is based on the cosine distance between these binary vectors:
+
+\begin{equation}
+    \pi_{x'}(z') = \text{exp}(\frac{-(1 - \frac{x'z'}{\norm{x'}\norm{z'}})^2}{\sigma^2})
+\end{equation}
+% NOTE: According to the article, it's based on x and z, but the implementation uses the binary vectors.
+
+where the kernel width $\sigma$ is set to 25 in the case of text classification models.
+Experiments by \citet{garreau2020explaining} show that a poor choice of the kernel width $\sigma$ can lead to important features being ignored by the explanation model, but they are not aware of a good heuristic for picking $\sigma$.
+
+Extracting the weight matrix from the model chosen in \autoref{eq:optimize-expl} produces importance values for the interpretable features encoded by $x'$.
+
+\citet{garreau2020explaining} provide a theoretical analysis of LIME and find that these importance scores are proportional to the original model's partial derivatives at $x$.
+Such local gradients have also been proposed as an approach of explaining machine learning decisions at an instance level, as in work by \citet{baehrens2010explain}.
+
+\subsection{Global explanations with LIME}
+\label{sec:ml-lime-global}
+
+In addition to introducing LIME as a means to generate explanations for individual input instances, \citet{ribeiro2016lime} also propose a way of gaining global insights into the feature importance scores.
+Assuming $X$ is a set of instances that represents the data on which the original model~$f$ is to be used,
+then for each $x \in X$, it is possible to fit an interpretable model according to \autoref{eq:optimize-expl} and retrieve the local explanation.
+The explanations can then be stored in an explanation matrix $\mat{W}_{\lvert{}X\rvert \times d'}$, such that each row corresponds to an input instance and each column contains the weights associated with one of the interpretable feature representations.
+A global importance score for a feature in column~$j$ is then
+\begin{equation}
+\label{eq:global-sqrt}
+    \text{importance}_{\text{Ribeiro}}(j) = \sqrt{\sum_{i=1}^{\lvert{}X\rvert} \lvert{}\mat{W}_{ij}\rvert}
+\end{equation}
+Note that this is based on the absolute values of the individual importance scores.
+Accordingly, a high global importance score can mean that the given feature is a strong positive predictor for a given class, or that it is a strong negative predictor.
+
+Since I am specifically interested in the predictors per label, I instead define the global importance score of a feature as the mean of all of its local importance scores:
+\begin{equation}
+\label{eq:global-mean}
+    \text{importance}_{\text{mean}}(j) = \frac{\sum_{i=1}^{\lvert{}X\rvert}\mat{W}_{ij}}{\lvert{}X\rvert}
+\end{equation}
+This latter method is also used by \citet{garreau2020explaining} in their analyses of LIME.
+
+\citeauthor{garreau2020explaining} point out that the error of the local explanation can be viewed as an indicator of the explanation's quality.
+In an additional experiment, I scale each individual local importance score in $\mat{W}$ by how close the local model's predictions are to the original model's predictions, before plugging it into \autoref{eq:global-sqrt} and \autoref{eq:global-mean}.
+This gives more weight to coefficients from reliable local models and less weight to scores from models that do not fit the data well.
+I use the coefficient of determination of the prediction ($R^2$) as the weight for scaling if it is positive, and a weight of 0 otherwise.
+This gives an upper bound of 1.0 to the weight (if the interpretable model perfectly emulates the original model's predictions locally) and a lower bound of 0.0 (if the local model's predictions are not better than always guessing the expected value of $f(z)$). 
+However, in preliminary experiments for both the dialect labelling task and the tweet classification task, scaling the scores in this way does not affect the outcome much (neither the ranking of the features with the highest global importance scores, nor the relationship between importance scores and representativeness and distinctiveness, which are introduced in \autoref{sec:rep-dist}).
+In the case of the dialect data, the average $R^2$ score of the local models is 0.87, with a standard deviation of 0.09.
+The $R^2$ score for the tweet classification is 0.89, with a standard deviation of 0.07.

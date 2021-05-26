@@ -1,0 +1,25 @@
+\section{Automatic dialect disambiguation}
+\label{sec:dialects-dialectometry}
+
+A fair amount of research on \textit{dialect disambiguation}---automatically discerning between different related dialects---has been made in recent years.
+Many of the results come from a range of tasks organized by the Workshop on NLP for Similar Languages, Varieties and Dialects (VarDial)  \citep{zampieri2017vardial1,zampieri2018vardial2,zampieri2019vardial3,gaman2020vardial4,chakravarthi2021vardial5}.
+Participants in these tasks have used many different machine learning techniques, including recurrent or convolutional neural networks, support vector machines (SVMs), BERT, naive Bayes classifiers and ensembles thereof.
+
+In many (though not all) of these tasks, the winning systems encode the features as bags of character- and word-level n-grams and use SVMs as the classifier (e.g. the systems by \citet{malmasi2017vardial}, \citet{bestgen2017vardial}, \citet{coltekin2018vardial} or \citet{coltekin2020vardial}).
+I base my dialect classification model on this; the details are described in \autoref{sec:dialects-method}.
+
+\section{Norwegian dialectometry}
+\label{sec:norwegian-dialectometry}
+
+While none of the VarDial tasks have focused on classifying Norwegian dialects, research in that area has been conducted.
+
+\citet{heeringa2003norwegian} and \citet{heeringa2009measuring} cluster Norwegian dialects based on phonetic transcriptions and acoustic features and find that their results largely correspond to the findings of traditional dialectology and to speaker perceptions.
+\citet[pp.~199--211]{heeringa2004measuring} clusters Norwegian dialects into groups based on acoustic differences.
+
+\citet{gooskens2006relative} investigate to what extent prosodic, phonetic and lexical distances between Norwegian dialects correlate with perceptual distances.
+\citet{beijering2008predicting} explore the correlation between phonetic distances and intelligibility ratings between Scandinavian dialects.
+
+More recently, \cite{kaasen2020comparing} present a comparison of two different methods for quantifying dialect similarity, using a dataset that is similar to the dataset used in this thesis, in terms of how they were collected and the relatively coarse phonetic transcription style.
+They show that clustering based on edit distance works well for these data and produces results that agree with the traditional dialectology, and the same applies for clusters created using neural autoencoders if the training dataset is sufficiently large.
+\citeauthor{kaasen2020comparing} conclude that ``a coarse-grained transcription of
+speech is sufficient to replicate known dialectal boundaries.''

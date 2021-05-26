@@ -1,0 +1,17 @@
+\centering
+\begin{tabular}{lllrrrl}
+\toprule
+\textbf{} & \textbf{Group} & \textbf{Feature} & {\textbf{Imp.}} & {\textbf{Rep.}} & {\textbf{Dist.}} & \begin{tabular}[c]{@{}l@{}}\textbf{Context}\\\textbf{(bokmål/pron.)}\end{tabular} \\
+\midrule
+\multirow{6}{*}{/i/ > /e/} & \multirow{5}{*}{North} & \ngram{vess} & 0.11 & 0.01 & 0.54 & hvis/vess(0.6) `if'  \\
+ &  & {\smaller\ngram{\sos{}til/ti\eos{}}} & 0.09 & 0.02 & 0.22 & `to'   \\
+ &  & \ngram{fessk} & 0.09 & 0.01 & 0.60 & fisk/fessk(0.2) `fish' \\
+ &  & \ngram{vess\sep{}} & 0.07 & 0.01 & 0.70 & hvis/vess(1.0) `if'\\
+ &  & \ngram{\sep{}tell} & 0.07 & 0.01 & 0.43 & til/tell(0.8) `to'\\
+ \cmidrule{2-7}
+ & Tr\o. & \ngram{ekker} & 0.05 & 0.01 & 0.35 & \begin{tabular}[c]{@{}l@{}}sikkert/sekkert(0.8)\\ ~~`sure(ly)'\end{tabular} \\
+ \midrule
+\multirow{2}{*}{/ao$\sim$åo/} & \multirow{2}{*}{West} & \ngram{åo} & 0.12 & 0.01 & 0.72 & da/dåo(0.1) `there' \\[2mm]
+&  & \ngram{ao} & 0.08 & 0.02 & 0.83 & \begin{tabular}[c]{@{}l@{}}au/ao(0.2)\\~~`also; ouch'\end{tabular}\\
+ \bottomrule
+\end{tabular}
