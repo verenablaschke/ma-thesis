@@ -32,7 +32,7 @@ Positive distinctiveness scores indicate that a feature appears especially often
 Unlike in the LIME experiments, there is no significant correlation between the attention(/importance) score a feature has and how distinctive it is: many features that are very characteristic of one class of tweets have low attention weights, and some of the features with high global attention scores have distinctiveness values close to zero.
 For instance, the feature with the highest attention score, \ngram{pourrait} `could,' has a distinctiveness score of only 0.04.
 
-In the following section, I consider the 100 tokens with the highest global attention weights (this represents a range of attention scores from 0.08 to 0.27) and compare recurrent types of tokens present in that group to those present in the LIME results (\autoref{sec:tweets-svm-results}).
+In the rest of this section, I consider the 100 tokens with the highest global attention weights (this represents a range of attention scores from 0.08 to 0.27) and compare recurrent types of tokens present in that group to those present in the LIME results (\autoref{sec:tweets-svm-results}).
 The full list of attention weights is available at \url{https://github.com/verenablaschke/ma-thesis/tree/main/models/tweets-attn}.
 
 The attention weights are not label-specific---a high attention weight only means that the FFNN-encoded representation of a token receives a greater weight when making the final classification decision.

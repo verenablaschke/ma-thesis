@@ -6,7 +6,7 @@
 In the past few years, there has been much discussion around whether attention weights are suitable for explaining model predictions.
 The initial rationale for using attention as a proxy of explanation is easy to see: after all, the attention layer produces a representation of the model input that is weighted in such a way that some input tokens may have a larger influence on the output prediction than others.
 Whether or under what conditions this can be used for explaining model decisions has been the topic of much discussion.
-In this section, I summarize the major arguments against and for interpreting attention as explanation and common caveats.
+In this section, I summarize the major arguments against and for interpreting attention as explanation as well as common caveats.
 
 \citet{jain2019attentionNotExplanation} examine the merit of analyzing attention weights by carrying out a series of experiments with a neural model containing a bidirectional LSTM (bi-LSTM) followed by an attention layer for different sequence classification tasks.%
 \footnote{The authors also try out different similarity functions for calculating the attention weights (\autoref{eq:phi} in \autoref{sec:attention-what}), but find that the choice of similarity function does not make any significant difference.}
@@ -23,7 +23,7 @@ However, when training a model whose encoder is a feed-forward neural network in
 
 \citet{serrano2019attention} also use gradient-based importance measures as a point of comparison.
 They base their experiments on different neural models that contain a recurrent or convolutional layer and whose last layer before the decoder is an attention layer.
-The authors compare at importance rankings produced (1) randomly, (2) by attention weight magnitude, (3) based on the decision function's gradient with respect to the attention weight, and (4) a product of the gradient and the attention weight.
+The authors compare importance rankings produced (1) randomly, (2) by attention weight magnitude, (3) based on the decision function's gradient with respect to the attention weight, and (4) by multiplying the gradient with the attention weight.
 They then remove one input token after the other, in order of descending importance, until the predicted class for the instance changes.
 The authors find that while removing inputs on the basis of the attention-based ranking produces label changes quicker than when removing inputs randomly, both gradient-based rankings require removing fewer inputs for a label change than the attention-based ranking, indicating that attention alone is not sufficient for uncovering minimal sets of inputs that are the most relevant for the final label prediction.
 
@@ -65,13 +65,13 @@ The authors find that the larger the difference in the attention weight magnitud
 \begin{subfigure}{.3\textwidth}
   \centering
   \include{figures/2-explainable-ml/attention-mlp}
-  \caption{FFNN with learned attention.}
+  \caption{FFNN with learned\\attention.}
   \label{fig:attn-ffnn}
 \end{subfigure}\hspace{4mm}%
 \begin{subfigure}{.3\textwidth}
   \centering
   \include{figures/2-explainable-ml/attention-imposed}
-  \caption{FFNN with imposed attention.}
+  \caption{FFNN with imposed\\attention.}
   \label{fig:attn-imposed}
 \end{subfigure}
 \caption

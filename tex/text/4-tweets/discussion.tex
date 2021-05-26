@@ -7,12 +7,13 @@
 
 Both explanation approaches yield recurring types of features among the tokens with the highest importance or attention scores (although not every high-ranking feature fits into such a group).
 Despite the differences in how the importance and attention scores are obtained and despite the fact that the LIME importance scores show a high correlation with distinctiveness scores, which the global attention weights do not, the recurring types of features in both experiments' results are very similar.
+
 Some of these features (gendered insults) appear like very plausible indicators of sexist content in a text, whereas others (some types of punctuation marks) are very opaque (even if they mostly appear in only one class of tweets in the dataset). 
 Many of the features with high importance scores or attention weights make sense in the context of the dataset.
 It is not surprising if a tweet with sexist content contains words relating to women and/or men, if it explicitly mentions sexism or feminism or (in the case of tweets in the \textit{direct sexism} or \textit{reporting sexism} subgroups) if it contains personal pronouns.
 However, the presence of any of these features can hardly indicate that any given tweet from outside the dataset has sexist content.
 Likewise, it seems unlikely that female politicians are never the target of or mentioned in sexist tweets.
-Even so, this information can be valuable when inspecting what a model has learned, in order to know whether it should be used in real contexts, whether a training dataset ought to be enlarged or what kinds of unconvincing features with high importance values should be masked when encoding the data.
+Even so these kinds of features have high distinctiveness scores and therefore reflect actual patterns in the training and test data and therefore, this information can be valuable when inspecting what a model has learned, in order to know whether it should be used in real contexts, whether a training dataset ought to be enlarged or what kinds of unconvincing features with high importance values should be masked when encoding the data.
 
 \subsubsection{Tokenization}
 
